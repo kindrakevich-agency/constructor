@@ -35,3 +35,12 @@ Thumbs.db
 # Ignore build artifacts
 node_modules/
 /dist/
+
+# Ignore reference/design files
+/images_for_theme/
+/form.html
+/form.jpg
+/index.html
+/todo.md
+/CLAUDE.md
+/recipes/
