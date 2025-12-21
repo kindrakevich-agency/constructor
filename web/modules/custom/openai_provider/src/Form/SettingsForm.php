@@ -92,12 +92,18 @@ class SettingsForm extends ConfigFormBase {
     ];
 
     $form['text_settings']['max_tokens'] = [
-      '#type' => 'number',
+      '#type' => 'select',
       '#title' => $this->t('Max Tokens'),
       '#description' => $this->t('Maximum number of tokens in the response.'),
-      '#default_value' => $config->get('max_tokens') ?? 4096,
-      '#min' => 100,
-      '#max' => 128000,
+      '#options' => [
+        '500' => $this->t('Short responses (500 tokens)'),
+        '1000' => $this->t('Medium responses (1,000 tokens)'),
+        '2000' => $this->t('Standard articles (2,000 tokens)'),
+        '4000' => $this->t('Long articles (4,000 tokens)'),
+        '8000' => $this->t('Extended content (8,000 tokens)'),
+        '16000' => $this->t('Maximum (16,000 tokens)'),
+      ],
+      '#default_value' => $config->get('max_tokens') ?? '2000',
     ];
 
     $form['image_settings'] = [

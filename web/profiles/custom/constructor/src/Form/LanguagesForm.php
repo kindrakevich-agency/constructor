@@ -6,7 +6,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManager;
 
 /**
- * Step 1: Languages form - Configure additional languages for your site.
+ * Step 2: Languages form - Configure additional languages for your site.
  */
 class LanguagesForm extends InstallerFormBase {
 
@@ -21,7 +21,7 @@ class LanguagesForm extends InstallerFormBase {
    * {@inheritdoc}
    */
   protected function getStepNumber(): int {
-    return 1;
+    return 2;
   }
 
   /**
@@ -51,72 +51,58 @@ class LanguagesForm extends InstallerFormBase {
       $this->t('Select the primary language for your site.')
     );
 
+    $is_multilingual = $saved_values['enable_multilingual'] ?? FALSE;
+    $hidden_style = $is_multilingual ? '' : 'display: none;';
+
     $form['enable_multilingual'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable multilingual support'),
-      '#default_value' => $saved_values['enable_multilingual'] ?? FALSE,
+      '#default_value' => $is_multilingual,
       '#description' => $this->t('Enable this to add support for multiple languages.'),
-      '#wrapper_attributes' => ['class' => ['mb-6', 'flex', 'items-start', 'gap-3']],
-    ];
-
-    // Additional Languages Section
-    $form['additional_section'] = [
-      '#markup' => '<div class="mb-6 mt-8 pt-6 border-t border-gray-200"><h2 class="text-xl font-semibold text-gray-900 mb-2">' . $this->t('Additional Languages') . '</h2></div>',
-      '#states' => [
-        'visible' => [
-          ':input[name="enable_multilingual"]' => ['checked' => TRUE],
-        ],
+      '#attributes' => [
+        'data-multilingual-toggle' => 'true',
       ],
     ];
 
-    $form['languages'] = [
+    // Wrapper for all multilingual settings - hidden by default via inline style.
+    $form['multilingual_settings'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'multilingual-settings-wrapper',
+        'style' => $hidden_style,
+      ],
+    ];
+
+    // Additional Languages Section
+    $form['multilingual_settings']['additional_section'] = [
+      '#markup' => '<div class="mb-6 mt-8 pt-6 border-t border-gray-200"><h2 class="text-xl font-semibold text-gray-900 mb-2">' . $this->t('Additional Languages') . '</h2></div>',
+    ];
+
+    $form['multilingual_settings']['languages'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Select additional languages'),
       '#options' => $language_options,
       '#default_value' => $saved_values['additional_languages'] ?? [],
       '#description' => $this->t('Select the additional languages you want to enable.'),
-      '#wrapper_attributes' => ['class' => ['mb-6']],
-      '#states' => [
-        'visible' => [
-          ':input[name="enable_multilingual"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
     // Translation Settings Section
-    $form['translation_section'] = [
+    $form['multilingual_settings']['translation_section'] = [
       '#markup' => '<div class="mb-6 mt-8 pt-6 border-t border-gray-200"><h2 class="text-xl font-semibold text-gray-900 mb-2">' . $this->t('Translation Settings') . '</h2></div>',
-      '#states' => [
-        'visible' => [
-          ':input[name="enable_multilingual"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
-    $form['enable_content_translation'] = [
+    $form['multilingual_settings']['enable_content_translation'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable content translation'),
       '#default_value' => $saved_values['enable_content_translation'] ?? TRUE,
       '#description' => $this->t('Allow translating content into multiple languages.'),
-      '#wrapper_attributes' => ['class' => ['mb-4']],
-      '#states' => [
-        'visible' => [
-          ':input[name="enable_multilingual"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
-    $form['enable_interface_translation'] = [
+    $form['multilingual_settings']['enable_interface_translation'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable interface translation'),
       '#default_value' => $saved_values['enable_interface_translation'] ?? TRUE,
       '#description' => $this->t('Allow translating the user interface.'),
-      '#wrapper_attributes' => ['class' => ['mb-4']],
-      '#states' => [
-        'visible' => [
-          ':input[name="enable_multilingual"]' => ['checked' => TRUE],
-        ],
-      ],
     ];
 
     return $form;
@@ -126,44 +112,20 @@ class LanguagesForm extends InstallerFormBase {
    * {@inheritdoc}
    */
   protected function submitStepForm(array &$form, FormStateInterface $form_state): void {
-    $additional_languages = array_filter($form_state->getValue('languages') ?? []);
+    // Get values from the nested multilingual_settings container.
+    $multilingual_settings = $form_state->getValue('multilingual_settings') ?? [];
+    $additional_languages = array_filter($multilingual_settings['languages'] ?? []);
 
     $values = [
       'default_language' => $form_state->getValue('default_language'),
       'enable_multilingual' => $form_state->getValue('enable_multilingual'),
       'additional_languages' => $additional_languages,
-      'enable_content_translation' => $form_state->getValue('enable_content_translation'),
-      'enable_interface_translation' => $form_state->getValue('enable_interface_translation'),
+      'enable_content_translation' => $multilingual_settings['enable_content_translation'] ?? FALSE,
+      'enable_interface_translation' => $multilingual_settings['enable_interface_translation'] ?? FALSE,
     ];
 
+    // Save to state - actual language installation happens in finalize step.
     $this->saveToState('languages', $values);
-
-    // Enable language modules if multilingual is enabled.
-    if ($values['enable_multilingual']) {
-      $modules_to_enable = ['language'];
-
-      if ($values['enable_content_translation']) {
-        $modules_to_enable[] = 'content_translation';
-      }
-
-      if ($values['enable_interface_translation']) {
-        $modules_to_enable[] = 'locale';
-      }
-
-      /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */
-      $module_installer = \Drupal::service('module_installer');
-      $module_installer->install($modules_to_enable);
-
-      // Add additional languages.
-      if (!empty($additional_languages)) {
-        foreach ($additional_languages as $langcode) {
-          if ($langcode !== $values['default_language']) {
-            $language = \Drupal\language\Entity\ConfigurableLanguage::createFromLangcode($langcode);
-            $language->save();
-          }
-        }
-      }
-    }
   }
 
 }

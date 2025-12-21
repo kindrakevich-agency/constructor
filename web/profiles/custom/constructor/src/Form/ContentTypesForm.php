@@ -185,7 +185,7 @@ class ContentTypesForm extends InstallerFormBase {
             <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <strong class="text-gray-900">Tags</strong> — Taxonomy reference for categorization
+            <strong class="text-gray-900">Tags</strong> — Taxonomy reference for categorization <span class="text-gray-400">(Article only)</span>
           </li>
         </ul>
         <p class="text-sm text-gray-500 mt-3">' . $this->t('You can customize fields for each content type after installation.') . '</p>',
@@ -210,7 +210,7 @@ class ContentTypesForm extends InstallerFormBase {
     $types = $form_state->getValue('types') ?? [];
     $content_types = [];
 
-    // Default field configuration.
+    // Default field configuration (without Tags - Tags is Article only).
     $default_fields = [
       'body' => [
         'field_name' => 'body',
@@ -229,19 +229,21 @@ class ContentTypesForm extends InstallerFormBase {
         'formatter' => 'image',
         'required' => FALSE,
       ],
-      'field_tags' => [
-        'field_name' => 'field_tags',
-        'type' => 'entity_reference',
-        'label' => 'Tags',
-        'cardinality' => -1,
-        'widget' => 'entity_reference_autocomplete_tags',
-        'formatter' => 'entity_reference_label',
-        'required' => FALSE,
-        'settings' => [
-          'target_type' => 'taxonomy_term',
-          'handler_settings' => [
-            'target_bundles' => ['tags'],
-          ],
+    ];
+
+    // Tags field - only for Article content type.
+    $tags_field = [
+      'field_name' => 'field_tags',
+      'type' => 'entity_reference',
+      'label' => 'Tags',
+      'cardinality' => -1,
+      'widget' => 'entity_reference_autocomplete_tags',
+      'formatter' => 'entity_reference_label',
+      'required' => FALSE,
+      'settings' => [
+        'target_type' => 'taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => ['tags'],
         ],
       ],
     ];
@@ -340,6 +342,11 @@ class ContentTypesForm extends InstallerFormBase {
       if (!empty($type_data['enabled'])) {
         $config = $type_configs[$type_id] ?? [];
         $fields = $default_fields;
+
+        // Add Tags field only for Article content type.
+        if ($type_id === 'article') {
+          $fields['field_tags'] = $tags_field;
+        }
 
         // Add extra fields if defined.
         if (!empty($config['extra_fields'])) {

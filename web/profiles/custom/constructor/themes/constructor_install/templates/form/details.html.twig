@@ -16,8 +16,9 @@
         {{ errors }}
       </div>
     {% endif %}
-    {{ description }}
+    {% if description %}
+      <div class="text-sm text-gray-500 mb-4">{{ description }}</div>
+    {% endif %}
     {{ children }}
-    {{ value }}
   </div>
 </details>

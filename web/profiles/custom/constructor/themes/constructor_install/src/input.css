@@ -273,3 +273,9 @@
     display: none;
   }
 }
+
+/* ===== DRUPAL STATES ===== */
+/* Hide h2 headings that have js-hide class */
+h2.js-hide {
+  display: none;
+}

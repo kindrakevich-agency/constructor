@@ -66,21 +66,26 @@ class ModulesForm extends InstallerFormBase {
         'description' => 'Quick links for administrators.',
         'default' => FALSE,
       ],
-      'book' => [
-        'name' => 'Book',
-        'description' => 'Create hierarchical content like documentation.',
-        'default' => FALSE,
-      ],
-      'statistics' => [
-        'name' => 'Statistics',
-        'description' => 'Track page views and popular content.',
-        'default' => FALSE,
-      ],
     ];
 
     // Custom modules (bundled with the profile).
-    // TODO: Add custom modules when they are created.
-    $custom_modules = [];
+    $custom_modules = [
+      'openai_provider' => [
+        'name' => 'OpenAI Provider',
+        'description' => 'AI-powered content generation using OpenAI API.',
+        'default' => TRUE,
+      ],
+      'simple_metatag' => [
+        'name' => 'Simple Metatag',
+        'description' => 'Basic meta tags for SEO optimization.',
+        'default' => TRUE,
+      ],
+      'simple_sitemap_generator' => [
+        'name' => 'Simple Sitemap Generator',
+        'description' => 'Generate XML sitemaps for search engines.',
+        'default' => TRUE,
+      ],
+    ];
 
     // Core Modules Section
     $form['core_section'] = $this->createSectionHeader(

@@ -78,8 +78,8 @@ class AIIntegrationForm extends InstallerFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('OpenAI API Key'),
       '#default_value' => $saved_values['api_key'] ?? '',
-      '#required' => TRUE,
-      '#description' => $this->t('Enter your OpenAI API key. Get one from <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600 hover:underline">platform.openai.com</a>.'),
+      '#required' => FALSE,
+      '#description' => $this->t('Enter your OpenAI API key. Get one from <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600 hover:underline">platform.openai.com</a>. You can skip this step and configure later.'),
       '#attributes' => [
         'placeholder' => 'sk-...',
         'autocomplete' => 'off',
@@ -88,7 +88,6 @@ class AIIntegrationForm extends InstallerFormBase {
           'text-gray-900', 'font-mono', 'text-sm',
         ],
       ],
-      '#wrapper_attributes' => ['class' => ['mb-6']],
     ];
 
     // Get models
@@ -138,22 +137,22 @@ class AIIntegrationForm extends InstallerFormBase {
       '#attributes' => [
         'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg'],
       ],
-      '#wrapper_attributes' => ['class' => ['mb-6']],
     ];
 
-    $form['params_grid']['max_tokens'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Max Tokens'),
-      '#min' => 100,
-      '#max' => 128000,
-      '#step' => 100,
-      '#default_value' => $saved_values['max_tokens'] ?? 4096,
-      '#description' => $this->t('Maximum length of generated content.'),
-      '#attributes' => [
-        'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg'],
+    $form['params_grid']['max_tokens'] = $this->createSelectField(
+      $this->t('Max Tokens'),
+      [
+        '500' => $this->t('Short responses (500 tokens)'),
+        '1000' => $this->t('Medium responses (1,000 tokens)'),
+        '2000' => $this->t('Standard articles (2,000 tokens)'),
+        '4000' => $this->t('Long articles (4,000 tokens)'),
+        '8000' => $this->t('Extended content (8,000 tokens)'),
+        '16000' => $this->t('Maximum (16,000 tokens)'),
       ],
-      '#wrapper_attributes' => ['class' => ['mb-6']],
-    ];
+      $saved_values['max_tokens'] ?? '2000',
+      FALSE,
+      $this->t('Maximum length of generated content.')
+    );
 
     // Image Generation Settings
     $form['image_section'] = $this->createSectionHeader(
@@ -205,7 +204,7 @@ class AIIntegrationForm extends InstallerFormBase {
       '#title' => $this->t('Enable AI content suggestions'),
       '#default_value' => $saved_values['enable_auto_generate'] ?? TRUE,
       '#description' => $this->t('Show AI generation button on content edit forms.'),
-      '#wrapper_attributes' => ['class' => ['flex', 'items-start', 'gap-3', 'p-4', 'border', 'border-gray-200', 'rounded-lg']],
+      '#wrapper_attributes' => ['class' => ['p-4', 'border', 'border-gray-200', 'rounded-lg']],
     ];
 
     $form['features_grid']['enable_seo_generation'] = [
@@ -213,7 +212,7 @@ class AIIntegrationForm extends InstallerFormBase {
       '#title' => $this->t('Enable AI SEO generation'),
       '#default_value' => $saved_values['enable_seo_generation'] ?? TRUE,
       '#description' => $this->t('Allow AI to generate meta descriptions and SEO content.'),
-      '#wrapper_attributes' => ['class' => ['flex', 'items-start', 'gap-3', 'p-4', 'border', 'border-gray-200', 'rounded-lg']],
+      '#wrapper_attributes' => ['class' => ['p-4', 'border', 'border-gray-200', 'rounded-lg']],
     ];
 
     $form['features_grid']['enable_image_generation'] = [
@@ -221,34 +220,17 @@ class AIIntegrationForm extends InstallerFormBase {
       '#title' => $this->t('Enable AI image generation'),
       '#default_value' => $saved_values['enable_image_generation'] ?? TRUE,
       '#description' => $this->t('Allow AI to generate images using DALL-E.'),
-      '#wrapper_attributes' => ['class' => ['flex', 'items-start', 'gap-3', 'p-4', 'border', 'border-gray-200', 'rounded-lg']],
+      '#wrapper_attributes' => ['class' => ['p-4', 'border', 'border-gray-200', 'rounded-lg']],
     ];
 
-    // Test connection button
-    $form['test_connection'] = [
+    // Note: Test connection feature can be added after installation in OpenAI settings.
+    $form['test_info'] = [
       '#type' => 'container',
-      '#attributes' => ['class' => ['mt-8', 'p-4', 'bg-gray-50', 'rounded-lg']],
+      '#attributes' => ['class' => ['mt-8', 'p-4', 'bg-blue-50', 'rounded-lg', 'border', 'border-blue-200']],
     ];
 
-    $form['test_connection']['test_button'] = [
-      '#type' => 'button',
-      '#value' => $this->t('Test API Connection'),
-      '#attributes' => [
-        'class' => [
-          'px-6', 'py-2', 'bg-blue-600', 'text-white', 'font-medium',
-          'rounded-lg', 'hover:bg-blue-700', 'transition-colors',
-        ],
-      ],
-      '#ajax' => [
-        'callback' => '::testApiConnection',
-        'wrapper' => 'api-test-result',
-        'effect' => 'fade',
-      ],
-    ];
-
-    $form['test_connection']['result'] = [
-      '#type' => 'container',
-      '#attributes' => ['id' => 'api-test-result', 'class' => ['mt-4']],
+    $form['test_info']['message'] = [
+      '#markup' => '<p class="text-sm text-blue-800">' . $this->t('You can test your API connection after installation in the OpenAI Provider settings.') . '</p>',
     ];
 
     return $form;

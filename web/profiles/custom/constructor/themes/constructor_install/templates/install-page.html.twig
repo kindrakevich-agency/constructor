@@ -7,9 +7,7 @@
 #}
 {% set steps = [
     { title: 'Choose Language'|t, desc: 'Select installation language'|t },
-    { title: 'Verify Requirements'|t, desc: 'Check system requirements'|t },
     { title: 'Database Setup'|t, desc: 'Configure database connection'|t },
-    { title: 'Install'|t, desc: 'Install Drupal and modules'|t },
     { title: 'Site Basics'|t, desc: 'Configure basic site settings'|t },
     { title: 'Languages'|t, desc: 'Select languages for your site'|t },
     { title: 'Content Types'|t, desc: 'Define your content structure'|t },
@@ -80,7 +78,7 @@
         <div class="min-h-screen px-10 py-10">
             <!-- Page Header -->
             <div class="mb-6">
-                <p class="text-sm text-gray-500 mb-1">{{ 'Step'|t }} {{ current }}/10</p>
+                <p class="text-sm text-gray-500 mb-1">{{ 'Step'|t }} {{ current }}/8</p>
                 <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ title }}</h1>
             </div>
 
@@ -94,7 +92,7 @@
             {% endif %}
 
             <!-- Form Content -->
-            <div class="max-w-4xl">
+            <div>
                 {{ page.content }}
             </div>
         </div>

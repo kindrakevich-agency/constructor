@@ -133,25 +133,11 @@ abstract class InstallerFormBase extends FormBase {
       '#attributes' => ['class' => ['flex', 'justify-end', 'gap-4', 'mt-8', 'pt-6', 'border-t', 'border-gray-200']],
     ];
 
-    if ($current_step > 1) {
-      $form['actions']['back'] = [
-        '#type' => 'submit',
-        '#value' => $this->t('Back'),
-        '#submit' => ['::backSubmit'],
-        '#limit_validation_errors' => [],
-        '#attributes' => [
-          'class' => [
-            'px-6', 'py-3', 'bg-white', 'text-gray-700', 'font-medium',
-            'rounded-lg', 'border', 'border-gray-300', 'hover:bg-gray-50',
-            'transition-colors', 'cursor-pointer',
-          ],
-        ],
-      ];
-    }
-
+    // Next/Continue button.
     $form['actions']['next'] = [
       '#type' => 'submit',
       '#value' => $current_step === count($steps) ? $this->t('Finish Installation') : $this->t('Continue'),
+      '#name' => 'next',
       '#button_type' => 'primary',
       '#attributes' => [
         'class' => [
@@ -169,17 +155,15 @@ abstract class InstallerFormBase extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->submitStepForm($form, $form_state);
+    // Ensure form doesn't rebuild - let Drupal installer proceed to next task.
+    $form_state->setRebuild(FALSE);
   }
 
   /**
-   * Back button submit handler.
-   */
-  public function backSubmit(array &$form, FormStateInterface $form_state) {
-    // The installer handles navigation automatically.
-  }
-
-  /**
-   * Save data to state for later processing.
+   * Save data to key_value storage for later processing.
+   *
+   * During Drupal installation, we use key_value storage which persists
+   * to the database and works reliably between HTTP requests.
    *
    * @param string $key
    *   The state key (without prefix).
@@ -187,11 +171,21 @@ abstract class InstallerFormBase extends FormBase {
    *   The value to save.
    */
   protected function saveToState(string $key, $value): void {
-    $this->state->set('constructor.' . $key, $value);
+    try {
+      // Use key_value storage which is more reliable during installation.
+      $key_value = \Drupal::keyValue('constructor_install');
+      $key_value->set($key, $value);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('saveToState error for "@key": @message', [
+        '@key' => $key,
+        '@message' => $e->getMessage(),
+      ]);
+    }
   }
 
   /**
-   * Get data from state.
+   * Get data from key_value storage.
    *
    * @param string $key
    *   The state key (without prefix).
@@ -202,7 +196,14 @@ abstract class InstallerFormBase extends FormBase {
    *   The stored value or default.
    */
   protected function getFromState(string $key, $default = NULL) {
-    return $this->state->get('constructor.' . $key, $default);
+    try {
+      $key_value = \Drupal::keyValue('constructor_install');
+      $value = $key_value->get($key);
+      return $value !== NULL ? $value : $default;
+    }
+    catch (\Exception $e) {
+      return $default;
+    }
   }
 
   /**

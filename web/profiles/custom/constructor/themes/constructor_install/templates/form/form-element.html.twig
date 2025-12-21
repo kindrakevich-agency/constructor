@@ -17,34 +17,49 @@
     errors ? 'form-item--error',
   ]
 %}
+{% set is_checkbox = type in ['checkbox', 'radio'] %}
 <div{{ attributes.addClass(classes) }}>
-  {% if label_display in ['before', 'invisible'] %}
-    {{ label }}
-  {% endif %}
+  {% if is_checkbox %}
+    <div class="flex items-start gap-3">
+      {{ children }}
+      {% if label_display == 'after' %}
+        {{ label }}
+      {% endif %}
+    </div>
+    {% if description.content %}
+      <div class="text-xs text-gray-500 mt-2 leading-relaxed">
+        {{ description.content }}
+      </div>
+    {% endif %}
+  {% else %}
+    {% if label_display in ['before', 'invisible'] %}
+      {{ label }}
+    {% endif %}
 
-  {% if prefix is not empty %}
-    <span class="mr-2">{{ prefix }}</span>
-  {% endif %}
+    {% if prefix is not empty %}
+      <span class="mr-2">{{ prefix }}</span>
+    {% endif %}
 
-  {{ children }}
+    {{ children }}
 
-  {% if suffix is not empty %}
-    <span class="ml-2">{{ suffix }}</span>
-  {% endif %}
+    {% if suffix is not empty %}
+      <span class="ml-2">{{ suffix }}</span>
+    {% endif %}
 
-  {% if label_display == 'after' %}
-    {{ label }}
+    {% if label_display == 'after' %}
+      {{ label }}
+    {% endif %}
+
+    {% if description.content %}
+      <div class="text-xs text-gray-500 mt-2 leading-relaxed">
+        {{ description.content }}
+      </div>
+    {% endif %}
   {% endif %}
 
   {% if errors %}
     <div class="text-sm text-red-600 mt-2">
       {{ errors }}
-    </div>
-  {% endif %}
-
-  {% if description.content %}
-    <div class="text-xs text-gray-500 mt-2 leading-relaxed">
-      {{ description.content }}
     </div>
   {% endif %}
 </div>

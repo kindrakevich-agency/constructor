@@ -93,6 +93,26 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
 | `lando composer <cmd>` | Run Composer commands |
 | `lando mysql` | Access MySQL CLI |
 
+## Database Connection
+
+### Internal (from Lando containers)
+| Setting | Value |
+|---------|-------|
+| Host | `database` |
+| Port | `3306` |
+| Database | `drupal` |
+| Username | `drupal` |
+| Password | `drupal` |
+
+### External (from host machine)
+| Setting | Value |
+|---------|-------|
+| Host | `127.0.0.1` |
+| Port | Run `lando info` to get current port |
+| Database | `drupal` |
+| Username | `drupal` |
+| Password | `drupal` |
+
 ## Project Structure
 
 ```

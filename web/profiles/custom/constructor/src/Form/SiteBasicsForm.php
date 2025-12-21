@@ -5,7 +5,7 @@ namespace Drupal\constructor\Form;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Step 2: Site Basics form.
+ * Step 1: Site Basics form.
  */
 class SiteBasicsForm extends InstallerFormBase {
 
@@ -20,7 +20,7 @@ class SiteBasicsForm extends InstallerFormBase {
    * {@inheritdoc}
    */
   protected function getStepNumber(): int {
-    return 2;
+    return 1;
   }
 
   /**
