@@ -19,13 +19,18 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
   - Simple Sitemap Generator: XML sitemaps with domain support
   - OpenAI Provider: AI content generation
 
-- **Custom Theme**: Modern, responsive theme with CSS variables
+- **Custom Theme**: Modern, responsive theme built with Tailwind CSS v4
+  - Dark mode support (class-based toggle)
+  - Full template override for clean HTML output
+  - Plyr video player integration
+  - Mobile-first responsive design
 
 ## Requirements
 
 - PHP 8.3 or higher
 - MySQL 8.0 or MariaDB 10.6+
 - Composer 2.x
+- Node.js 22+ (for Tailwind CSS v4)
 - Lando (for local development)
 
 ## Installation
@@ -34,7 +39,7 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url> constructor
+   git clone https://github.com/kindrakevich-agency/constructor.git
    cd constructor
    ```
 
@@ -50,27 +55,31 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
 
 4. Install Drupal with the Constructor profile:
    ```bash
-   lando install
-   ```
-   Or manually:
-   ```bash
    lando drush site:install constructor --yes --account-name=admin --account-pass=admin
    ```
 
 5. Access your site at: https://constructor.lndo.site
 
-### Manual Installation
+### Theme Development
 
-1. Install Composer dependencies:
+1. Navigate to the theme directory:
    ```bash
-   composer install
+   cd web/themes/custom/constructor_theme
    ```
 
-2. Create `web/sites/default/settings.php` from default template
-
-3. Install via Drush:
+2. Install Node dependencies:
    ```bash
-   ./vendor/bin/drush site:install constructor --yes
+   npm install
+   ```
+
+3. Build CSS:
+   ```bash
+   npm run build
+   ```
+
+4. Watch for changes (development):
+   ```bash
+   npm run watch
    ```
 
 ## Lando Commands
@@ -80,11 +89,8 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
 | `lando start` | Start the Lando environment |
 | `lando stop` | Stop the Lando environment |
 | `lando rebuild` | Rebuild the Lando environment |
-| `lando install` | Install Drupal with Constructor profile |
 | `lando drush <cmd>` | Run Drush commands |
 | `lando composer <cmd>` | Run Composer commands |
-| `lando cr` | Clear Drupal caches |
-| `lando uli` | Generate one-time login link |
 | `lando mysql` | Access MySQL CLI |
 
 ## Project Structure
@@ -101,15 +107,26 @@ constructor/
 │   ├── profiles/
 │   │   └── custom/
 │   │       └── constructor/              # Installation profile
-│   │           ├── config/
-│   │           │   └── install/          # Default configurations
-│   │           ├── css/                  # Installer styles
-│   │           ├── js/                   # Installer scripts
-│   │           └── src/
-│   │               └── Form/             # Wizard form classes
+│   │           ├── config/install/       # Default configurations
+│   │           ├── themes/
+│   │           │   └── constructor_install/  # Installer theme
+│   │           └── src/Form/             # Wizard form classes
 │   └── themes/
 │       └── custom/
-│           └── constructor_theme/        # Custom theme
+│           └── constructor_theme/        # Custom frontend theme
+│               ├── css/                  # Compiled CSS
+│               ├── js/                   # JavaScript files
+│               ├── src/input.css         # Tailwind source
+│               └── templates/            # Twig templates
+│                   ├── block/
+│                   ├── content/
+│                   ├── field/
+│                   ├── form/
+│                   ├── layout/
+│                   ├── misc/
+│                   ├── navigation/
+│                   ├── user/
+│                   └── views/
 └── README.md
 ```
 
@@ -124,7 +141,6 @@ constructor/
 - Default language selection
 - Enable multilingual support
 - Add additional languages
-- Content and interface translation options
 
 ### Step 3: Content Types
 - Select from pre-configured content types:
@@ -136,102 +152,92 @@ constructor/
   - Team Member
   - FAQ
   - Testimonial
-- Add custom content types
 
 ### Step 4: Modules
 - Core modules: Contact, Search, Media, etc.
 - Custom modules: Simple Metatag, Simple Sitemap Generator
-- SEO configuration options
 
 ### Step 5: Design & Layout
 - Color scheme selection
 - Dark mode toggle
 - Front page configuration
-- Block region setup (Header, Sidebar, Footer)
 
 ### Step 6: AI Integration
 - OpenAI API configuration
 - Model selection (GPT-4o, GPT-4, etc.)
-- Temperature and token settings
 - Default prompts per content type
-- AI content suggestions toggle
+
+## Theme Features
+
+### Tailwind CSS v4
+The theme uses Tailwind CSS v4 with the standalone CLI:
+- CSS nesting support
+- Class-based dark mode via `@variant dark`
+- Custom component styles
+
+### Template Structure
+All Drupal templates are overridden for clean HTML output:
+- Minimal wrapper elements
+- Semantic HTML5 structure
+- Tailwind utility classes
+
+### Dark Mode
+Toggle dark mode by adding/removing the `dark` class on the `<html>` element:
+```javascript
+document.documentElement.classList.toggle('dark');
+```
 
 ## Configuration
 
 ### OpenAI Settings
-
 After installation, configure OpenAI at `/admin/config/services/openai`:
 - API Key (required)
-- Organization ID (optional)
 - Default model
 - Temperature and max tokens
 
 ### Pathauto Patterns
-
 Default patterns are configured:
 - Content: `[node:content-type]/[node:title]`
 - Taxonomy terms: `[term:vocabulary]/[term:name]`
 
-Customize at `/admin/config/search/path/patterns`.
-
-## Custom Modules
-
-### Simple Metatag
-Provides SEO metatags with path-based overrides.
-- Configure at `/admin/config/search/simple-metatag`
-
-### Simple Sitemap Generator
-Generates XML sitemaps with domain support.
-- Configure at `/admin/config/search/simple-sitemap-generator`
-
 ## Development
 
-### Adding New Content Types
-
-1. Add to `ContentTypesForm.php` in the `$default_types` array
-2. Configure default fields and extra fields
-3. Test the installation wizard
-
-### Modifying the Theme
-
-The theme uses CSS variables for easy customization:
-```css
-:root {
-  --color-primary: #2563eb;
-  --color-text: #1e293b;
-  /* ... */
-}
+### Building Theme CSS
+```bash
+cd web/themes/custom/constructor_theme
+npm run build
 ```
 
-### Running Tests
-
+### Clearing Caches
 ```bash
-lando drush pm:list --status=enabled  # Verify modules
-lando drush status                     # Check site status
-lando drush cr                         # Clear caches
+lando drush cr
+```
+
+### Viewing Logs
+```bash
+lando drush watchdog:show
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Composer memory limit**: Increase PHP memory limit or use `COMPOSER_MEMORY_LIMIT=-1 composer install`
+1. **Node.js version**: Tailwind CSS v4 requires Node.js 22+. Use nvm to switch:
+   ```bash
+   nvm use 22
+   ```
 
 2. **Permission issues**: Ensure `web/sites/default/files` is writable
 
-3. **Database connection**: Verify `.lando.yml` database credentials match `settings.php`
-
-### Logs
-
-View Drupal logs:
-```bash
-lando drush watchdog:show
-```
+3. **Test themes visible**: Add to settings.php:
+   ```php
+   $settings['extension_discovery_scan_tests'] = FALSE;
+   ```
 
 ## License
 
 GPL-2.0-or-later
 
-## Credits
+## Repository
 
-Built with Drupal 11 and Lando.
+https://github.com/kindrakevich-agency/constructor
