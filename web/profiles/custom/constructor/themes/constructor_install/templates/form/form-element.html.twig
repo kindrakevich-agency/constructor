@@ -1,0 +1,50 @@
+{#
+/**
+ * @file
+ * Theme override for a form element.
+ */
+#}
+{%
+  set classes = [
+    'js-form-item',
+    'form-item',
+    'js-form-type-' ~ type|clean_class,
+    'form-type-' ~ type|clean_class,
+    'js-form-item-' ~ name|clean_class,
+    'form-item-' ~ name|clean_class,
+    'mb-6',
+    disabled == 'disabled' ? 'opacity-50',
+    errors ? 'form-item--error',
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
+  {% if label_display in ['before', 'invisible'] %}
+    {{ label }}
+  {% endif %}
+
+  {% if prefix is not empty %}
+    <span class="mr-2">{{ prefix }}</span>
+  {% endif %}
+
+  {{ children }}
+
+  {% if suffix is not empty %}
+    <span class="ml-2">{{ suffix }}</span>
+  {% endif %}
+
+  {% if label_display == 'after' %}
+    {{ label }}
+  {% endif %}
+
+  {% if errors %}
+    <div class="text-sm text-red-600 mt-2">
+      {{ errors }}
+    </div>
+  {% endif %}
+
+  {% if description.content %}
+    <div class="text-xs text-gray-500 mt-2 leading-relaxed">
+      {{ description.content }}
+    </div>
+  {% endif %}
+</div>

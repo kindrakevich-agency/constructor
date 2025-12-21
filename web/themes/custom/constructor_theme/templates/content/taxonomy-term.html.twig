@@ -1,0 +1,24 @@
+{#
+/**
+ * @file
+ * Theme override to display a taxonomy term.
+ */
+#}
+{%
+  set classes = [
+    'taxonomy-term',
+    'vocabulary-' ~ term.bundle|clean_class,
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
+  {{ title_prefix }}
+  {% if name and not page %}
+    <h2{{ title_attributes.addClass('text-2xl font-bold text-gray-900 dark:text-white mb-4') }}>
+      <a href="{{ url }}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ name }}</a>
+    </h2>
+  {% endif %}
+  {{ title_suffix }}
+  <div{{ content_attributes.addClass('taxonomy-term__content') }}>
+    {{ content }}
+  </div>
+</div>

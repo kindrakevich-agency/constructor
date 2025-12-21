@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Info - Ziemann</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#1e293b',
+                        'blue-link': '#2563eb',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-80 bg-white border-r border-gray-100 p-8 flex flex-col">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 mb-12">
+                <div class="w-8 h-8">
+                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="14" stroke="#2563eb" stroke-width="2"/>
+                        <circle cx="16" cy="16" r="6" fill="#2563eb"/>
+                    </svg>
+                </div>
+                <span class="text-xl font-semibold text-gray-900">Ziemann</span>
+            </div>
+
+            <!-- Steps -->
+            <nav class="flex-1">
+                <ol class="relative">
+                    <!-- Step 1 - Active -->
+                    <li class="pb-8 relative">
+                        <div class="absolute left-4 top-8 w-px h-full bg-gray-200"></div>
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium shrink-0">
+                                1
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Vehicle Info</h3>
+                                <p class="text-sm text-gray-500 mt-1">Provide your vehicle information</p>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Step 2 -->
+                    <li class="pb-8 relative">
+                        <div class="absolute left-4 top-8 w-px h-full bg-gray-200"></div>
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-medium shrink-0">
+                                2
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Retailer</h3>
+                                <p class="text-sm text-gray-500 mt-1">Find the retailer you would like to get in touch with</p>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Step 3 -->
+                    <li class="pb-8 relative">
+                        <div class="absolute left-4 top-8 w-px h-full bg-gray-200"></div>
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-medium shrink-0">
+                                3
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Services</h3>
+                                <p class="text-sm text-gray-500 mt-1">Add one or more services</p>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Step 4 -->
+                    <li class="pb-8 relative">
+                        <div class="absolute left-4 top-8 w-px h-full bg-gray-200"></div>
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-medium shrink-0">
+                                4
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Date & Time</h3>
+                                <p class="text-sm text-gray-500 mt-1">Select date and time that works best for you</p>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Step 5 -->
+                    <li class="pb-8 relative">
+                        <div class="absolute left-4 top-8 w-px h-full bg-gray-200"></div>
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-medium shrink-0">
+                                5
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Personal Details</h3>
+                                <p class="text-sm text-gray-500 mt-1">Provide your personal details</p>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Step 6 -->
+                    <li class="relative">
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-200 text-gray-400 flex items-center justify-center text-sm font-medium shrink-0">
+                                6
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">Confirm</h3>
+                                <p class="text-sm text-gray-500 mt-1">Overview</p>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col">
+            <!-- Top Header -->
+            <header class="flex items-center justify-between px-10 py-6">
+                <button class="flex items-center gap-2 px-5 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    <span class="font-medium">Back</span>
+                </button>
+
+                <div class="flex items-center gap-3">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+                         alt="Robert Kassulke"
+                         class="w-10 h-10 rounded-full object-cover">
+                    <span class="font-medium text-gray-700">Robert Kassulke</span>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            </header>
+
+            <!-- Form Content -->
+            <div class="flex-1 px-10 pb-10">
+                <!-- Page Header -->
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Step 1/6</p>
+                        <h1 class="text-4xl font-bold text-gray-900 mb-2">Vehicle Info</h1>
+                        <p class="text-gray-500">Provide your vehicle information below</p>
+                    </div>
+                    <button class="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+                        Scan VIN Number
+                    </button>
+                </div>
+
+                <hr class="border-gray-200 mb-8">
+
+                <!-- Form Section -->
+                <div class="max-w-4xl">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Customised Car Services</h2>
+
+                    <div class="flex gap-12">
+                        <!-- Left Description -->
+                        <div class="w-72 shrink-0">
+                            <p class="text-gray-500 text-sm leading-relaxed mb-4">
+                                By providing your vehicle information, we can ensure that our services and pricing are tailored to your specific needs. This will save you time and ensure that your car receives the best care possible.
+                            </p>
+                            <a href="#" class="text-blue-600 font-medium hover:text-blue-700 transition-colors">
+                                How to scan VIN Number?
+                            </a>
+                        </div>
+
+                        <!-- Right Form -->
+                        <div class="flex-1">
+                            <!-- VIN / Registration Row -->
+                            <div class="flex items-end gap-4 mb-6">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">VIN Number</label>
+                                    <div class="relative">
+                                        <input type="text"
+                                               value="SALCA2BT0NH913274"
+                                               class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10">
+                                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <span class="text-gray-400 font-medium pb-3">OR</span>
+
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Registration Number</label>
+                                    <input type="text"
+                                           placeholder="Enter"
+                                           class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <!-- Brand -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                                <div class="relative">
+                                    <select class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                        <option>Volkswagen</option>
+                                        <option>Audi</option>
+                                        <option>BMW</option>
+                                        <option>Mercedes</option>
+                                    </select>
+                                    <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Engine Type / Model Row -->
+                            <div class="flex gap-4 mb-6">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Engine Type</label>
+                                    <div class="relative">
+                                        <select class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                            <option>Inline-4, 2.0L TSI (Turbocharged Gasoline)</option>
+                                            <option>V6, 3.0L TDI (Turbocharged Diesel)</option>
+                                            <option>Electric</option>
+                                        </select>
+                                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                                    <div class="relative">
+                                        <select class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                            <option>Tayron R-Line</option>
+                                            <option>Tiguan</option>
+                                            <option>Golf</option>
+                                            <option>Passat</option>
+                                        </select>
+                                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Year / Color Row -->
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                                    <div class="relative">
+                                        <select class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                            <option>2024</option>
+                                            <option>2023</option>
+                                            <option>2022</option>
+                                            <option>2021</option>
+                                        </select>
+                                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                                    <div class="relative">
+                                        <select class="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                            <option>LC9X (Deep Black Pearl)</option>
+                                            <option>Pure White</option>
+                                            <option>Atlantic Blue</option>
+                                            <option>Reflex Silver</option>
+                                        </select>
+                                        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Button -->
+                <div class="flex justify-end mt-12">
+                    <button class="px-16 py-3.5 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-900 transition-colors">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

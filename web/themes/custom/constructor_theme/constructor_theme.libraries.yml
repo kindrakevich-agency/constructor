@@ -1,0 +1,110 @@
+global:
+  version: 1.0
+  css:
+    theme:
+      css/styles.css: {}
+  js:
+    js/theme.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+# Swiper carousel library
+swiper:
+  version: 11.1.15
+  css:
+    component:
+      https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css: { type: external, minified: true }
+  js:
+    https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js: { type: external, minified: true }
+
+# Plyr video player
+plyr:
+  version: 3.7.8
+  css:
+    component:
+      https://cdn.plyr.io/3.7.8/plyr.css: { type: external, minified: true }
+  js:
+    https://cdn.plyr.io/3.7.8/plyr.polyfilled.js: { type: external, minified: true }
+
+# PhotoSwipe gallery lightbox
+photoswipe:
+  version: 5.4.4
+  css:
+    component:
+      https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css: { type: external, minified: true }
+  js:
+    https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js: { type: external, minified: true, attributes: { type: module } }
+    https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.min.js: { type: external, minified: true, attributes: { type: module } }
+
+# Dark mode toggle
+dark-mode:
+  version: 1.0
+  js:
+    js/dark-mode.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+# Modals and drawers
+modals:
+  version: 1.0
+  js:
+    js/modals.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+# Accordion component
+accordion:
+  version: 1.0
+  js:
+    js/accordion.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+# Carousels (requires Swiper)
+carousels:
+  version: 1.0
+  js:
+    js/carousels.js: {}
+  dependencies:
+    - constructor_theme/swiper
+    - core/drupal
+    - core/once
+
+# Gallery (requires PhotoSwipe)
+gallery:
+  version: 1.0
+  js:
+    js/gallery.js: { attributes: { type: module } }
+  dependencies:
+    - constructor_theme/photoswipe
+    - core/drupal
+
+# Video player (requires Plyr)
+video:
+  version: 1.0
+  js:
+    js/video.js: {}
+  dependencies:
+    - constructor_theme/plyr
+    - core/drupal
+    - core/once
+
+# Example page - includes all components
+example-page:
+  version: 1.0
+  dependencies:
+    - constructor_theme/global
+    - constructor_theme/swiper
+    - constructor_theme/plyr
+    - constructor_theme/photoswipe
+    - constructor_theme/dark-mode
+    - constructor_theme/modals
+    - constructor_theme/accordion
+    - constructor_theme/carousels
+    - constructor_theme/gallery
+    - constructor_theme/video
+

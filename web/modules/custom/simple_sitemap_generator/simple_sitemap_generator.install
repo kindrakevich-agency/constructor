@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Simple Sitemap Generator module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function simple_sitemap_generator_schema() {
+  $schema['simple_sitemap_custom_urls'] = [
+    'description' => 'Stores custom URLs for sitemap.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary key.',
+      ],
+      'domain_id' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Domain ID this URL belongs to.',
+      ],
+      'url' => [
+        'type' => 'varchar',
+        'length' => 2048,
+        'not null' => TRUE,
+        'description' => 'The custom URL path.',
+      ],
+      'priority' => [
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 0.5,
+        'description' => 'URL priority (0.0 to 1.0).',
+      ],
+      'changefreq' => [
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => 'weekly',
+        'description' => 'Change frequency.',
+      ],
+      'status' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 1,
+        'description' => 'Whether URL is active.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp when URL was added.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'domain_id' => ['domain_id'],
+      'status' => ['status'],
+    ],
+  ];
+
+  $schema['simple_sitemap_cache'] = [
+    'description' => 'Stores generated sitemap cache.',
+    'fields' => [
+      'domain_id' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Domain ID.',
+      ],
+      'page' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Page number (0 for index).',
+      ],
+      'data' => [
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'Cached sitemap XML.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Cache creation timestamp.',
+      ],
+    ],
+    'primary key' => ['domain_id', 'page'],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function simple_sitemap_generator_uninstall() {
+  // Delete module configuration.
+  \Drupal::configFactory()->getEditable('simple_sitemap_generator.settings')->delete();
+}

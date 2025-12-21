@@ -1,0 +1,28 @@
+simple_sitemap_generator.settings:
+  type: config_object
+  label: 'Simple Sitemap Generator settings'
+  mapping:
+    enabled_content_types:
+      type: sequence
+      label: 'Enabled content types'
+      sequence:
+        type: string
+        label: 'Content type'
+    default_priority:
+      type: string
+      label: 'Default priority'
+    default_changefreq:
+      type: string
+      label: 'Default change frequency'
+    urls_per_sitemap:
+      type: integer
+      label: 'URLs per sitemap'
+    cache_lifetime:
+      type: integer
+      label: 'Cache lifetime'
+    include_images:
+      type: boolean
+      label: 'Include images'
+    include_lastmod:
+      type: boolean
+      label: 'Include last modification date'

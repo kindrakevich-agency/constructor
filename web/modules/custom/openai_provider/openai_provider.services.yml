@@ -1,0 +1,4 @@
+services:
+  openai_provider.client:
+    class: Drupal\openai_provider\Service\OpenAIClient
+    arguments: ['@config.factory', '@http_client', '@file_system', '@transliteration']

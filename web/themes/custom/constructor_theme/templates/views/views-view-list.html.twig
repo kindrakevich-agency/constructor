@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Theme override for views list.
+ */
+#}
+{% if title %}
+  <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">{{ title }}</h3>
+{% endif %}
+{% if list.type == 'ol' %}
+  <ol{{ list.attributes.addClass('list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300') }}>
+{% else %}
+  <ul{{ list.attributes.addClass('list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300') }}>
+{% endif %}
+{% for row in rows %}
+  <li{{ row.attributes }}>{{ row.content }}</li>
+{% endfor %}
+{% if list.type == 'ol' %}
+  </ol>
+{% else %}
+  </ul>
+{% endif %}

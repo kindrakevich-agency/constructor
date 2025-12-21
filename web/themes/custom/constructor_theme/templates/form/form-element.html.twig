@@ -1,0 +1,43 @@
+{#
+/**
+ * @file
+ * Theme override for a form element.
+ */
+#}
+{%
+  set classes = [
+    'form-item',
+    type == 'checkbox' or type == 'radio' ? 'flex items-center gap-2' : 'space-y-1',
+    errors ? 'has-error',
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
+  {% if label_display in ['before', 'invisible'] %}
+    {{ label }}
+  {% endif %}
+  {% if description_display == 'before' and description.content %}
+    <div class="text-sm text-gray-500 dark:text-gray-400">
+      {{ description.content }}
+    </div>
+  {% endif %}
+  {% if prefix is not empty %}
+    <span class="field-prefix">{{ prefix }}</span>
+  {% endif %}
+  {{ children }}
+  {% if suffix is not empty %}
+    <span class="field-suffix">{{ suffix }}</span>
+  {% endif %}
+  {% if label_display == 'after' %}
+    {{ label }}
+  {% endif %}
+  {% if errors %}
+    <div class="text-sm text-red-600 dark:text-red-400 mt-1">
+      {{ errors }}
+    </div>
+  {% endif %}
+  {% if description_display in ['after', 'invisible'] and description.content %}
+    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+      {{ description.content }}
+    </div>
+  {% endif %}
+</div>

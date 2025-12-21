@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override for a details element.
+ */
+#}
+<details{{ attributes.addClass('border', 'border-gray-200', 'rounded-lg', 'p-4', 'mb-4', 'bg-white') }}{{ open ? ' open' : '' }}>
+  {%- if summary_attributes -%}
+    <summary{{ summary_attributes.addClass('font-semibold', 'cursor-pointer', 'text-gray-700', 'py-1', 'select-none') }}>{{ title }}</summary>
+  {%- else -%}
+    <summary class="font-semibold cursor-pointer text-gray-700 py-1 select-none">{{ title }}</summary>
+  {%- endif -%}
+  <div class="mt-4 pt-3 border-t border-gray-200">
+    {% if errors %}
+      <div class="text-sm text-red-600 mb-4">
+        {{ errors }}
+      </div>
+    {% endif %}
+    {{ description }}
+    {{ children }}
+    {{ value }}
+  </div>
+</details>

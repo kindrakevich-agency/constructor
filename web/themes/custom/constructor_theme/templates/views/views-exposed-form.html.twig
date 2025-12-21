@@ -1,0 +1,12 @@
+{#
+/**
+ * @file
+ * Theme override for views exposed form.
+ */
+#}
+{% if q %}
+  {{ q }}
+{% endif %}
+<div{{ attributes.addClass('flex flex-wrap gap-4 items-end') }}>
+  {{ form }}
+</div>

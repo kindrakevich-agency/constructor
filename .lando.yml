@@ -1,0 +1,70 @@
+name: constructor
+recipe: drupal11
+config:
+  php: '8.3'
+  via: nginx
+  webroot: web
+  database: mysql:8.0
+  xdebug: false
+  composer_version: 2
+
+services:
+  appserver:
+    build_as_root:
+      - apt-get update -y
+      - apt-get install -y libicu-dev
+    overrides:
+      environment:
+        PHP_IDE_CONFIG: "serverName=constructor"
+        DRUSH_OPTIONS_URI: "https://constructor.lndo.site"
+    config:
+      php: .lando/php.ini
+
+  database:
+    portforward: true
+    creds:
+      user: drupal
+      password: drupal
+      database: drupal
+
+  mailhog:
+    type: mailhog
+    portforward: true
+    hogfrom:
+      - appserver
+
+tooling:
+  drush:
+    service: appserver
+    cmd: /app/vendor/bin/drush
+
+  composer:
+    service: appserver
+
+  php:
+    service: appserver
+
+  mysql:
+    service: database
+    cmd: mysql -u drupal -pdrupal drupal
+
+  install:
+    service: appserver
+    description: Install Drupal with Constructor profile
+    cmd: /app/vendor/bin/drush site:install constructor --yes --account-name=admin --account-pass=admin
+
+  cr:
+    service: appserver
+    description: Clear Drupal cache
+    cmd: /app/vendor/bin/drush cr
+
+  uli:
+    service: appserver
+    description: Generate one-time login link
+    cmd: /app/vendor/bin/drush uli
+
+proxy:
+  appserver_nginx:
+    - constructor.lndo.site
+  mailhog:
+    - mail.constructor.lndo.site

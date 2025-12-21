@@ -1,0 +1,13 @@
+{
+  "name": "constructor_install",
+  "version": "1.0.0",
+  "description": "Constructor install theme with Tailwind CSS",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./src/input.css -o ./css/styles.css --minify",
+    "watch": "npx @tailwindcss/cli -i ./src/input.css -o ./css/styles.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  }
+}

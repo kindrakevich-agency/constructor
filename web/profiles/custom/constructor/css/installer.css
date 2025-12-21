@@ -1,0 +1,410 @@
+/**
+ * Constructor Profile Installer Styles
+ * Based on form.html design
+ */
+
+/* CSS Variables */
+:root {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --text-color: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --bg-light: #f8fafc;
+  --white: #ffffff;
+  --success-color: #10b981;
+  --error-color: #ef4444;
+}
+
+/* Base Layout */
+.installer-progress {
+  background: var(--white);
+  border-right: 1px solid var(--border-color);
+  padding: 2rem;
+  min-width: 280px;
+  max-width: 320px;
+}
+
+/* Progress Steps */
+.progress-step {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  position: relative;
+}
+
+.progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 48px;
+  width: 2px;
+  height: calc(100% - 32px);
+  background: var(--border-color);
+}
+
+.progress-step .step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  background: var(--white);
+  position: relative;
+  z-index: 1;
+}
+
+.progress-step.active .step-number {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white);
+}
+
+.progress-step.completed .step-number {
+  background: var(--success-color);
+  border-color: var(--success-color);
+  color: var(--white);
+}
+
+.progress-step.completed::after {
+  background: var(--success-color);
+}
+
+.progress-step .step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.progress-step .step-title {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.progress-step .step-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Step Header */
+.installer-step-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.installer-step-header .step-count {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.installer-step-header .step-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 0.5rem 0;
+}
+
+.installer-step-header .step-description {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Sections */
+.installer-section {
+  margin-bottom: 2rem;
+}
+
+.installer-section .section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0 0 0.5rem 0;
+}
+
+.installer-section .section-description {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+/* Form Elements */
+.form-item {
+  margin-bottom: 1.5rem;
+}
+
+.form-item label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.form-item .description {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 14px;
+  color: var(--text-color);
+  background: var(--white);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="url"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Checkboxes & Radios */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 0.5rem;
+  accent-color: var(--primary-color);
+}
+
+.form-checkboxes .form-item,
+.form-radios .form-item {
+  margin-bottom: 0.75rem;
+}
+
+.form-checkboxes label,
+.form-radios label {
+  display: inline-flex;
+  align-items: flex-start;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+/* Select Dropdown */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3e%3c/path%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+}
+
+/* Details/Accordion */
+details {
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+details summary {
+  padding: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-color);
+  background: var(--bg-light);
+  border-radius: 0.5rem;
+}
+
+details[open] summary {
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+details > *:not(summary) {
+  padding: 1rem;
+}
+
+/* Content Types Grid */
+.content-types-grid,
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.content-type-item,
+.module-item {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--white);
+}
+
+.content-type-item:has(input:checked),
+.module-item:has(input:checked) {
+  border-color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.05);
+}
+
+/* Default Fields List */
+.default-fields-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.default-fields-list li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.default-fields-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--success-color);
+  font-weight: bold;
+}
+
+/* Actions/Buttons */
+.installer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.button,
+button[type="submit"],
+input[type="submit"] {
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border-color);
+  background: var(--white);
+  color: var(--text-color);
+}
+
+.button:hover,
+button[type="submit"]:hover,
+input[type="submit"]:hover {
+  background: var(--bg-light);
+}
+
+.button--primary,
+button[type="submit"].button--primary,
+input[type="submit"].button--primary,
+.form-actions input[type="submit"]:last-child {
+  background: var(--text-color);
+  border-color: var(--text-color);
+  color: var(--white);
+  padding: 0.75rem 3rem;
+}
+
+.button--primary:hover,
+button[type="submit"].button--primary:hover,
+input[type="submit"].button--primary:hover,
+.form-actions input[type="submit"]:last-child:hover {
+  background: #0f172a;
+  border-color: #0f172a;
+}
+
+.button--secondary {
+  background: var(--white);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+/* Messages */
+.messages {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.messages--status {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.messages--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.messages--warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+/* Required Marker */
+.required-marker {
+  color: var(--error-color);
+  font-size: 12px;
+  font-weight: normal;
+}
+
+/* Link Styles */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .installer-progress {
+    display: none;
+  }
+
+  .content-types-grid,
+  .modules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .installer-actions {
+    flex-direction: column;
+  }
+
+  .installer-actions .button {
+    width: 100%;
+    text-align: center;
+  }
+}

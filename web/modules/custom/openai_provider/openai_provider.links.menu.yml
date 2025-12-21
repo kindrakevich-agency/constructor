@@ -1,0 +1,6 @@
+openai_provider.settings:
+  title: 'OpenAI'
+  description: 'Configure OpenAI API settings for GPT and DALL-E.'
+  route_name: openai_provider.settings
+  parent: system.admin_config_services
+  weight: 10

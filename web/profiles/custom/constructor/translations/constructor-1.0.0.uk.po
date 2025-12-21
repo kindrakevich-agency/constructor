@@ -1,0 +1,646 @@
+# Ukrainian translation for Constructor profile.
+# Copyright (c) Constructor
+# This file is distributed under the same license as the Constructor package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Constructor 1.0.0\n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\n"
+"PO-Revision-Date: 2024-01-01 00:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uk\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+# ========================================
+# Navigation buttons
+# ========================================
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Continue"
+msgstr "Продовжити"
+
+msgid "Finish Installation"
+msgstr "Завершити встановлення"
+
+# ========================================
+# Step 1: Site Basics
+# ========================================
+
+msgid "Site Basics"
+msgstr "Основні налаштування"
+
+msgid "Configure basic site settings"
+msgstr "Налаштуйте базові параметри сайту"
+
+msgid "Site Information"
+msgstr "Інформація про сайт"
+
+msgid "Enter basic information about your website."
+msgstr "Введіть основну інформацію про ваш веб-сайт."
+
+msgid "Site Name"
+msgstr "Назва сайту"
+
+msgid "My Awesome Website"
+msgstr "Мій чудовий веб-сайт"
+
+msgid "Site Slogan"
+msgstr "Слоган сайту"
+
+msgid "A catchy tagline for your site"
+msgstr "Привабливий слоган для вашого сайту"
+
+msgid "Site Email"
+msgstr "Email сайту"
+
+msgid "This email will be used for system notifications."
+msgstr "Цей email буде використовуватися для системних сповіщень."
+
+msgid "Administrator Account"
+msgstr "Обліковий запис адміністратора"
+
+msgid "Create the main administrator account for your site."
+msgstr "Створіть основний обліковий запис адміністратора для вашого сайту."
+
+msgid "Username"
+msgstr "Ім'я користувача"
+
+msgid "Email"
+msgstr "Email"
+
+# ========================================
+# Step 2: Languages
+# ========================================
+
+msgid "Languages"
+msgstr "Мови"
+
+msgid "Select languages for your site"
+msgstr "Виберіть мови для вашого сайту"
+
+msgid "Language Configuration"
+msgstr "Налаштування мов"
+
+msgid "Configure the languages for your site. You can add more languages later."
+msgstr "Налаштуйте мови для вашого сайту. Ви можете додати більше мов пізніше."
+
+msgid "Default Language"
+msgstr "Мова за замовчуванням"
+
+msgid "Select the primary language for your site."
+msgstr "Виберіть основну мову для вашого сайту."
+
+msgid "Enable multilingual support"
+msgstr "Увімкнути багатомовну підтримку"
+
+msgid "Enable this to add support for multiple languages."
+msgstr "Увімкніть це, щоб додати підтримку кількох мов."
+
+msgid "Additional Languages"
+msgstr "Додаткові мови"
+
+msgid "Select additional languages"
+msgstr "Виберіть додаткові мови"
+
+msgid "Select the additional languages you want to enable."
+msgstr "Виберіть додаткові мови, які ви хочете увімкнути."
+
+msgid "Translation Settings"
+msgstr "Налаштування перекладу"
+
+msgid "Enable content translation"
+msgstr "Увімкнути переклад контенту"
+
+msgid "Allow translating content into multiple languages."
+msgstr "Дозволити переклад контенту на різні мови."
+
+msgid "Enable interface translation"
+msgstr "Увімкнути переклад інтерфейсу"
+
+msgid "Allow translating the user interface."
+msgstr "Дозволити переклад інтерфейсу користувача."
+
+# ========================================
+# Step 3: Content Types
+# ========================================
+
+msgid "Content Types"
+msgstr "Типи контенту"
+
+msgid "Define your content structure"
+msgstr "Визначте структуру вашого контенту"
+
+msgid "Select Content Types"
+msgstr "Виберіть типи контенту"
+
+msgid "Choose the content types you need for your site. You can add or modify them later."
+msgstr "Виберіть типи контенту, які вам потрібні. Ви можете додати або змінити їх пізніше."
+
+msgid "Basic Page"
+msgstr "Базова сторінка"
+
+msgid "Use basic pages for static content like About us, Contact."
+msgstr "Використовуйте базові сторінки для статичного контенту, як-от Про нас, Контакти."
+
+msgid "Article"
+msgstr "Стаття"
+
+msgid "Use articles for time-sensitive content like news, blog posts."
+msgstr "Використовуйте статті для актуального контенту, як-от новини, блог-пости."
+
+msgid "Landing Page"
+msgstr "Лендінг"
+
+msgid "Flexible landing pages with customizable sections."
+msgstr "Гнучкі лендінги з налаштовуваними секціями."
+
+msgid "Event"
+msgstr "Подія"
+
+msgid "Events with date, location, and registration."
+msgstr "Події з датою, місцем та реєстрацією."
+
+msgid "Service"
+msgstr "Послуга"
+
+msgid "Services or products your organization offers."
+msgstr "Послуги або продукти, які пропонує ваша організація."
+
+msgid "Team Member"
+msgstr "Член команди"
+
+msgid "Staff profiles with photo, bio, and contact info."
+msgstr "Профілі співробітників з фото, біографією та контактами."
+
+msgid "FAQ"
+msgstr "Часті запитання"
+
+msgid "Frequently asked questions with answers."
+msgstr "Часті запитання з відповідями."
+
+msgid "Testimonial"
+msgstr "Відгук"
+
+msgid "Customer testimonials and reviews."
+msgstr "Відгуки та рецензії клієнтів."
+
+msgid "Add Custom Content Type"
+msgstr "Додати власний тип контенту"
+
+msgid "Optionally create a custom content type during installation."
+msgstr "За бажанням створіть власний тип контенту під час встановлення."
+
+msgid "Custom Content Type"
+msgstr "Власний тип контенту"
+
+msgid "Machine Name"
+msgstr "Машинна назва"
+
+msgid "Display Name"
+msgstr "Назва для відображення"
+
+msgid "e.g., Portfolio Item"
+msgstr "напр., Елемент портфоліо"
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Brief description of this content type..."
+msgstr "Короткий опис цього типу контенту..."
+
+msgid "Default Fields"
+msgstr "Поля за замовчуванням"
+
+msgid "Each content type will include these base fields by default:"
+msgstr "Кожен тип контенту міститиме ці базові поля за замовчуванням:"
+
+msgid "You can customize fields for each content type after installation."
+msgstr "Ви можете налаштувати поля для кожного типу контенту після встановлення."
+
+# ========================================
+# Step 4: Modules
+# ========================================
+
+msgid "Modules"
+msgstr "Модулі"
+
+msgid "Enable additional functionality"
+msgstr "Увімкніть додаткову функціональність"
+
+msgid "Core Modules"
+msgstr "Основні модулі"
+
+msgid "Select additional Drupal core modules to enable."
+msgstr "Виберіть додаткові модулі ядра Drupal для активації."
+
+msgid "Contact"
+msgstr "Контакт"
+
+msgid "Enables contact forms on your site."
+msgstr "Вмикає контактні форми на вашому сайті."
+
+msgid "Search"
+msgstr "Пошук"
+
+msgid "Enables site-wide keyword searching."
+msgstr "Вмикає пошук за ключовими словами по всьому сайту."
+
+msgid "Media"
+msgstr "Медіа"
+
+msgid "Media management and library."
+msgstr "Управління медіа та бібліотека."
+
+msgid "Media Library"
+msgstr "Медіа бібліотека"
+
+msgid "Enhanced media browser and selection."
+msgstr "Покращений браузер та вибір медіа."
+
+msgid "Responsive Image"
+msgstr "Адаптивні зображення"
+
+msgid "Provides responsive image styles."
+msgstr "Надає адаптивні стилі зображень."
+
+msgid "Custom Menu Links"
+msgstr "Власні пункти меню"
+
+msgid "Allows creating custom menu items."
+msgstr "Дозволяє створювати власні пункти меню."
+
+msgid "Shortcut"
+msgstr "Ярлик"
+
+msgid "Quick links for administrators."
+msgstr "Швидкі посилання для адміністраторів."
+
+msgid "Book"
+msgstr "Книга"
+
+msgid "Create hierarchical content like documentation."
+msgstr "Створення ієрархічного контенту, як-от документація."
+
+msgid "Statistics"
+msgstr "Статистика"
+
+msgid "Track page views and popular content."
+msgstr "Відстеження переглядів сторінок та популярного контенту."
+
+msgid "Custom Modules"
+msgstr "Власні модулі"
+
+msgid "These custom modules are included with Constructor profile."
+msgstr "Ці власні модулі включені до профілю Constructor."
+
+msgid "SEO Settings"
+msgstr "Налаштування SEO"
+
+msgid "Configure search engine optimization settings."
+msgstr "Налаштуйте параметри оптимізації для пошукових систем."
+
+msgid "Configure default SEO settings"
+msgstr "Налаштувати параметри SEO за замовчуванням"
+
+msgid "Set up default metatag patterns and sitemap configuration."
+msgstr "Налаштуйте шаблони метатегів та конфігурацію карти сайту."
+
+msgid "Generate robots.txt"
+msgstr "Згенерувати robots.txt"
+
+msgid "Create a default robots.txt file for search engines."
+msgstr "Створити файл robots.txt за замовчуванням для пошукових систем."
+
+# ========================================
+# Step 5: Design & Layout
+# ========================================
+
+msgid "Design & Layout"
+msgstr "Дизайн та макет"
+
+msgid "Configure site appearance"
+msgstr "Налаштуйте зовнішній вигляд сайту"
+
+msgid "Configure your site appearance"
+msgstr "Налаштуйте зовнішній вигляд вашого сайту"
+
+msgid "Theme Settings"
+msgstr "Налаштування теми"
+
+msgid "Configure the visual appearance of your site."
+msgstr "Налаштуйте візуальне оформлення вашого сайту."
+
+msgid "Color Scheme"
+msgstr "Колірна схема"
+
+msgid "Blue (Default)"
+msgstr "Синій (за замовчуванням)"
+
+msgid "Green"
+msgstr "Зелений"
+
+msgid "Purple"
+msgstr "Фіолетовий"
+
+msgid "Orange"
+msgstr "Помаранчевий"
+
+msgid "Red"
+msgstr "Червоний"
+
+msgid "Dark"
+msgstr "Темний"
+
+msgid "Select the primary color scheme for your site."
+msgstr "Виберіть основну колірну схему для вашого сайту."
+
+msgid "Enable dark mode toggle"
+msgstr "Увімкнути перемикач темного режиму"
+
+msgid "Allow visitors to switch between light and dark themes."
+msgstr "Дозволити відвідувачам перемикатися між світлою та темною темами."
+
+msgid "Front Page Layout"
+msgstr "Макет головної сторінки"
+
+msgid "Configure the layout and content for your front page."
+msgstr "Налаштуйте макет та контент для вашої головної сторінки."
+
+msgid "Front Page Type"
+msgstr "Тип головної сторінки"
+
+msgid "Default content listing"
+msgstr "Список контенту за замовчуванням"
+
+msgid "Specific page/node"
+msgstr "Конкретна сторінка/вузол"
+
+msgid "Custom blocks layout"
+msgstr "Макет з власних блоків"
+
+msgid "Block Regions"
+msgstr "Регіони блоків"
+
+msgid "Select which blocks to display in each region."
+msgstr "Виберіть, які блоки відображати в кожному регіоні."
+
+msgid "Header Region"
+msgstr "Регіон заголовка"
+
+msgid "Site branding (logo & name)"
+msgstr "Брендинг сайту (логотип та назва)"
+
+msgid "Main navigation menu"
+msgstr "Головне навігаційне меню"
+
+msgid "Search form"
+msgstr "Форма пошуку"
+
+msgid "Sidebar Region"
+msgstr "Регіон бічної панелі"
+
+msgid "Enable sidebar"
+msgstr "Увімкнути бічну панель"
+
+msgid "Secondary navigation"
+msgstr "Додаткова навігація"
+
+msgid "Recent content block"
+msgstr "Блок нещодавнього контенту"
+
+msgid "Popular tags cloud"
+msgstr "Хмара популярних тегів"
+
+msgid "Footer Region"
+msgstr "Регіон підвалу"
+
+msgid "Footer menu"
+msgstr "Меню підвалу"
+
+msgid "Copyright notice"
+msgstr "Повідомлення про авторські права"
+
+msgid "Social media links"
+msgstr "Посилання на соціальні мережі"
+
+# ========================================
+# Step 6: AI Integration
+# ========================================
+
+msgid "AI Integration"
+msgstr "Інтеграція з ШІ"
+
+msgid "Set up AI content generation"
+msgstr "Налаштуйте генерацію контенту за допомогою ШІ"
+
+msgid "OpenAI Integration"
+msgstr "Інтеграція з OpenAI"
+
+msgid "Configure OpenAI Provider module for AI-powered content generation and image creation."
+msgstr "Налаштуйте модуль OpenAI Provider для генерації контенту та зображень за допомогою ШІ."
+
+msgid "API Configuration"
+msgstr "Налаштування API"
+
+msgid "OpenAI API Key"
+msgstr "API ключ OpenAI"
+
+msgid "Enter your OpenAI API key. Get one from <a href=\"https://platform.openai.com/api-keys\" target=\"_blank\" class=\"text-blue-600 hover:underline\">platform.openai.com</a>."
+msgstr "Введіть ваш API ключ OpenAI. Отримайте його на <a href=\"https://platform.openai.com/api-keys\" target=\"_blank\" class=\"text-blue-600 hover:underline\">platform.openai.com</a>."
+
+msgid "Model Settings"
+msgstr "Налаштування моделі"
+
+msgid "Text Generation Model"
+msgstr "Модель генерації тексту"
+
+msgid "Select the default AI model for text/content generation."
+msgstr "Виберіть модель ШІ за замовчуванням для генерації тексту/контенту."
+
+msgid "Image Generation Model"
+msgstr "Модель генерації зображень"
+
+msgid "Select the default AI model for image generation."
+msgstr "Виберіть модель ШІ за замовчуванням для генерації зображень."
+
+msgid "Temperature"
+msgstr "Температура"
+
+msgid "Controls randomness. Lower = more focused, higher = more creative."
+msgstr "Контролює випадковість. Нижче = більш сфокусовано, вище = більш креативно."
+
+msgid "Max Tokens"
+msgstr "Максимум токенів"
+
+msgid "Maximum length of generated content."
+msgstr "Максимальна довжина згенерованого контенту."
+
+msgid "Image Generation Settings"
+msgstr "Налаштування генерації зображень"
+
+msgid "Default Image Size"
+msgstr "Розмір зображення за замовчуванням"
+
+msgid "Default size for DALL-E generated images."
+msgstr "Розмір за замовчуванням для зображень, згенерованих DALL-E."
+
+msgid "Image Quality"
+msgstr "Якість зображення"
+
+msgid "Standard"
+msgstr "Стандартна"
+
+msgid "HD (Higher detail, slower)"
+msgstr "HD (вища деталізація, повільніше)"
+
+msgid "Quality setting for DALL-E 3 images."
+msgstr "Налаштування якості для зображень DALL-E 3."
+
+msgid "Content Generation Features"
+msgstr "Функції генерації контенту"
+
+msgid "Enable AI-powered features for content creation."
+msgstr "Увімкніть функції на основі ШІ для створення контенту."
+
+msgid "Enable AI content suggestions"
+msgstr "Увімкнути пропозиції контенту від ШІ"
+
+msgid "Show AI generation button on content edit forms."
+msgstr "Показувати кнопку генерації ШІ на формах редагування контенту."
+
+msgid "Enable AI SEO generation"
+msgstr "Увімкнути генерацію SEO за допомогою ШІ"
+
+msgid "Allow AI to generate meta descriptions and SEO content."
+msgstr "Дозволити ШІ генерувати мета-описи та SEO контент."
+
+msgid "Enable AI image generation"
+msgstr "Увімкнути генерацію зображень ШІ"
+
+msgid "Allow AI to generate images using DALL-E."
+msgstr "Дозволити ШІ генерувати зображення за допомогою DALL-E."
+
+msgid "Test API Connection"
+msgstr "Перевірити з'єднання з API"
+
+msgid "Please enter an API key first."
+msgstr "Спочатку введіть API ключ."
+
+msgid "API connection successful! Found @count models."
+msgstr "З'єднання з API успішне! Знайдено @count моделей."
+
+msgid "API connection failed: @message"
+msgstr "З'єднання з API не вдалося: @message"
+
+# ========================================
+# Finalization
+# ========================================
+
+msgid "Finalizing"
+msgstr "Завершення"
+
+msgid "Finalizing installation"
+msgstr "Завершення встановлення"
+
+msgid "Creating content types..."
+msgstr "Створення типів контенту..."
+
+msgid "Enabling modules..."
+msgstr "Активація модулів..."
+
+msgid "Configuring layout..."
+msgstr "Налаштування макету..."
+
+msgid "Configuring AI integration..."
+msgstr "Налаштування інтеграції з ШІ..."
+
+msgid "Clearing caches..."
+msgstr "Очищення кешу..."
+
+msgid "Installation completed successfully."
+msgstr "Встановлення успішно завершено."
+
+msgid "Installation encountered errors."
+msgstr "Під час встановлення виникли помилки."
+
+msgid "Applying default configuration..."
+msgstr "Застосування конфігурації за замовчуванням..."
+
+# ========================================
+# Install page template - sidebar steps
+# ========================================
+
+msgid "Choose Language"
+msgstr "Виберіть мову"
+
+msgid "Select installation language"
+msgstr "Виберіть мову встановлення"
+
+msgid "Verify Requirements"
+msgstr "Перевірка вимог"
+
+msgid "Check system requirements"
+msgstr "Перевірте системні вимоги"
+
+msgid "Database Setup"
+msgstr "Налаштування бази даних"
+
+msgid "Configure database connection"
+msgstr "Налаштуйте з'єднання з базою даних"
+
+msgid "Install"
+msgstr "Встановлення"
+
+msgid "Install Drupal and modules"
+msgstr "Встановіть Drupal та модулі"
+
+msgid "Installing Constructor"
+msgstr "Встановлення Constructor"
+
+msgid "Installing Constructor Profile"
+msgstr "Встановлення профілю Constructor"
+
+msgid "Please wait while we configure your site..."
+msgstr "Будь ласка, зачекайте, поки ми налаштовуємо ваш сайт..."
+
+msgid "This may take a few moments"
+msgstr "Це може зайняти кілька хвилин"
+
+msgid "Powered by Drupal 11"
+msgstr "Працює на Drupal 11"
+
+msgid "Step"
+msgstr "Крок"
+
+msgid "Configuring site"
+msgstr "Налаштування сайту"
+
+msgid "Preparing your site..."
+msgstr "Підготовка вашого сайту..."
+
+# ========================================
+# Common UI elements
+# ========================================
+
+msgid "Title"
+msgstr "Заголовок"
+
+msgid "Body"
+msgstr "Тіло"
+
+msgid "Image"
+msgstr "Зображення"
+
+msgid "Tags"
+msgstr "Теги"
+
+msgid "Required"
+msgstr "Обов'язково"
+
+msgid "admin"
+msgstr "адмін"

@@ -1,0 +1,33 @@
+{#
+/**
+ * @file
+ * Theme override for a mini pager.
+ */
+#}
+{% if items.previous or items.next %}
+  <nav class="pager flex items-center justify-between py-4" role="navigation" aria-label="{{ 'Pagination'|t }}">
+    {% if items.previous %}
+      <a href="{{ items.previous.href }}" title="{{ 'Go to previous page'|t }}" rel="prev" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        {{ 'Previous'|t }}
+      </a>
+    {% else %}
+      <span></span>
+    {% endif %}
+
+    {% if items.current %}
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        {{ 'Page @current'|t({'@current': items.current}) }}
+      </span>
+    {% endif %}
+
+    {% if items.next %}
+      <a href="{{ items.next.href }}" title="{{ 'Go to next page'|t }}" rel="next" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+        {{ 'Next'|t }}
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    {% else %}
+      <span></span>
+    {% endif %}
+  </nav>
+{% endif %}

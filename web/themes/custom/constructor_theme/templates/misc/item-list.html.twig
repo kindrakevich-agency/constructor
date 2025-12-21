@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * Theme override for an item list.
+ */
+#}
+{% if items or empty %}
+  {%- if title is not empty -%}
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ title }}</h3>
+  {%- endif -%}
+
+  {%- if items -%}
+    {%- if list_type == 'ol' -%}
+      <ol{{ attributes.addClass('list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300') }}>
+    {%- else -%}
+      <ul{{ attributes.addClass('list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300') }}>
+    {%- endif -%}
+    {%- for item in items -%}
+      <li{{ item.attributes }}>{{ item.value }}</li>
+    {%- endfor -%}
+    {%- if list_type == 'ol' -%}
+      </ol>
+    {%- else -%}
+      </ul>
+    {%- endif -%}
+  {%- else -%}
+    {{ empty }}
+  {%- endif -%}
+{%- endif %}

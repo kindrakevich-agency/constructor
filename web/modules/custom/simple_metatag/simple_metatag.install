@@ -1,0 +1,248 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the simple_metatag module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function simple_metatag_schema() {
+  $schema['simple_metatag_path'] = [
+    'description' => 'Stores path-based metatag overrides.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique metatag override ID.',
+      ],
+      'path' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The path pattern (e.g., /blog/*, <front>).',
+      ],
+      'domains' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Serialized array of domain names.',
+      ],
+      'language' => [
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'Language code.',
+      ],
+      'title' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'Meta title.',
+      ],
+      'description' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Meta description.',
+      ],
+      'image' => [
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'File ID for og:image.',
+      ],
+      'weight' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Weight for sorting (higher = more specific).',
+      ],
+      'status' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+        'size' => 'tiny',
+        'description' => 'Whether this override is active.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'path' => ['path'],
+      'status' => ['status'],
+      'weight' => ['weight'],
+    ],
+  ];
+
+  $schema['simple_metatag_entity'] = [
+    'description' => 'Stores entity-level metatags for nodes and taxonomy terms.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique ID.',
+      ],
+      'entity_type' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'description' => 'Entity type (node, taxonomy_term).',
+      ],
+      'entity_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Entity ID.',
+      ],
+      'langcode' => [
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Language code.',
+      ],
+      'title' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'Meta title.',
+      ],
+      'description' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Meta description.',
+      ],
+      'image' => [
+        'type' => 'int',
+        'not null' => FALSE,
+        'description' => 'File ID for og:image.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'unique keys' => [
+      'entity' => ['entity_type', 'entity_id', 'langcode'],
+    ],
+    'indexes' => [
+      'entity_type' => ['entity_type'],
+      'entity_id' => ['entity_id'],
+      'langcode' => ['langcode'],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Initialize OpenAI settings for existing installations.
+ */
+function simple_metatag_update_9001() {
+  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
+
+  // Only set if config doesn't exist yet.
+  if ($config->isNew()) {
+    $config->set('api_key', '');
+    $config->set('model', 'gpt-4o-mini');
+    $config->set('vocabulary', '');
+    $config->set('term_id', '');
+    $config->save();
+  }
+
+  return t('OpenAI settings initialized.');
+}
+
+/**
+ * Add vocabulary and term_id to OpenAI settings.
+ */
+function simple_metatag_update_9002() {
+  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
+
+  // Add new fields if they don't exist.
+  if ($config->get('vocabulary') === NULL) {
+    $config->set('vocabulary', '');
+  }
+  if ($config->get('term_id') === NULL) {
+    $config->set('term_id', '');
+  }
+  $config->save();
+
+  return t('Added vocabulary and term_id fields to OpenAI settings.');
+}
+
+/**
+ * Add node_count and seo_length to OpenAI settings.
+ */
+function simple_metatag_update_9003() {
+  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
+
+  // Add new fields with defaults if they don't exist.
+  if ($config->get('node_count') === NULL) {
+    $config->set('node_count', 1);
+  }
+  if ($config->get('seo_length') === NULL) {
+    $config->set('seo_length', 1000);
+  }
+  $config->save();
+
+  return t('Added node_count and seo_length fields to OpenAI settings.');
+}
+
+/**
+ * Add langcode field to simple_metatag_entity table for multilanguage support.
+ */
+function simple_metatag_update_9004() {
+  $schema = \Drupal::database()->schema();
+  $table = 'simple_metatag_entity';
+
+  // Add langcode field.
+  if (!$schema->fieldExists($table, 'langcode')) {
+    $spec = [
+      'type' => 'varchar',
+      'length' => 12,
+      'not null' => TRUE,
+      'default' => '',
+      'description' => 'Language code.',
+    ];
+    $schema->addField($table, 'langcode', $spec);
+  }
+
+  // Drop old unique key.
+  if ($schema->indexExists($table, 'entity')) {
+    $schema->dropUniqueKey($table, 'entity');
+  }
+
+  // Add new unique key with langcode.
+  if (!$schema->indexExists($table, 'entity')) {
+    $schema->addUniqueKey($table, 'entity', ['entity_type', 'entity_id', 'langcode']);
+  }
+
+  // Add langcode index.
+  if (!$schema->indexExists($table, 'langcode')) {
+    $spec = [
+      'fields' => [
+        'langcode' => [
+          'type' => 'varchar',
+          'length' => 12,
+          'not null' => TRUE,
+          'default' => '',
+        ],
+      ],
+    ];
+    $schema->addIndex($table, 'langcode', ['langcode'], $spec);
+  }
+
+  return t('Added langcode field to simple_metatag_entity table for multilanguage support.');
+}
+
+/**
+ * Add regenerate_existing setting to OpenAI settings.
+ */
+function simple_metatag_update_9005() {
+  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
+
+  // Add regenerate_existing field with default FALSE if it doesn't exist.
+  if ($config->get('regenerate_existing') === NULL) {
+    $config->set('regenerate_existing', FALSE);
+  }
+  $config->save();
+
+  return t('Added regenerate_existing setting to OpenAI settings.');
+}

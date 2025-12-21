@@ -1,0 +1,19 @@
+{
+  "name": "constructor-theme",
+  "version": "1.0.0",
+  "description": "Constructor Drupal 11 theme with Tailwind CSS",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./src/input.css -o ./css/styles.css --minify",
+    "watch": "npx @tailwindcss/cli -i ./src/input.css -o ./css/styles.css --watch",
+    "dev": "npx @tailwindcss/cli -i ./src/input.css -o ./css/styles.css"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "dependencies": {
+    "swiper": "^11.1.15",
+    "plyr": "^3.7.8",
+    "photoswipe": "^5.4.4"
+  }
+}

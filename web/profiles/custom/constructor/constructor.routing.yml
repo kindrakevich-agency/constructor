@@ -1,0 +1,7 @@
+constructor.example:
+  path: '/example'
+  defaults:
+    _controller: '\Drupal\constructor\Controller\ExampleController::page'
+    _title: 'Theme Example - All Blocks'
+  requirements:
+    _permission: 'access content'

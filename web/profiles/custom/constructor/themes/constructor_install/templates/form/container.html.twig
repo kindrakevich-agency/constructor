@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Theme override for a container.
+ */
+#}
+{% set is_form_actions = attributes.hasClass('form-actions') %}
+
+{% if is_form_actions %}
+  <div{{ attributes.addClass('flex', 'gap-4', 'justify-end', 'mt-8', 'pt-6', 'border-t', 'border-gray-200') }}>
+    {{ children }}
+  </div>
+{% else %}
+  <div{{ attributes }}>
+    {{ children }}
+  </div>
+{% endif %}

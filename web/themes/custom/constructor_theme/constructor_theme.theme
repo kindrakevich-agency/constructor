@@ -1,0 +1,46 @@
+<?php
+
+/**
+ * @file
+ * Constructor theme functions.
+ */
+
+/**
+ * Implements hook_css_alter().
+ *
+ * Remove ALL core CSS files.
+ */
+function constructor_theme_css_alter(&$css) {
+  // Remove all CSS from core modules.
+  foreach ($css as $key => $value) {
+    if (strpos($key, '/core/') !== FALSE) {
+      unset($css[$key]);
+    }
+  }
+}
+
+/**
+ * Implements hook_page_attachments_alter().
+ *
+ * Remove core libraries that add CSS.
+ */
+function constructor_theme_page_attachments_alter(array &$attachments) {
+  // Remove specific core libraries if they're attached.
+  $remove_libraries = [
+    'core/normalize',
+    'system/base',
+    'system/admin',
+    'core/drupal.progress',
+    'core/drupal.ajax',
+  ];
+
+  if (isset($attachments['#attached']['library'])) {
+    foreach ($attachments['#attached']['library'] as $key => $library) {
+      foreach ($remove_libraries as $remove) {
+        if ($library === $remove) {
+          unset($attachments['#attached']['library'][$key]);
+        }
+      }
+    }
+  }
+}

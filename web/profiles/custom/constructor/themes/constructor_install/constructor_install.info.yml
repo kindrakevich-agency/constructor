@@ -1,0 +1,12 @@
+name: Constructor Install
+type: theme
+description: 'Installation theme for Constructor profile with Tailwind CSS design.'
+core_version_requirement: ^11
+base theme: false
+hidden: true
+
+libraries:
+  - constructor_install/global
+
+regions:
+  content: Content

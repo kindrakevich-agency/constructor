@@ -1,0 +1,18 @@
+{#
+/**
+ * @file
+ * Theme override for a 'select' element.
+ */
+#}
+{%
+  set classes = [
+    'w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600',
+    'bg-white dark:bg-slate-800 text-gray-900 dark:text-white',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
+    'cursor-pointer appearance-none',
+    'bg-no-repeat bg-right',
+  ]
+%}
+<select{{ attributes.addClass(classes) }}>
+  {{ options }}
+</select>

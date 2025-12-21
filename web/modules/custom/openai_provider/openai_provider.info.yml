@@ -1,0 +1,6 @@
+name: 'OpenAI Provider'
+type: module
+description: 'Integration with OpenAI API for text generation (GPT-4, GPT-4o) and image generation (DALL-E).'
+core_version_requirement: ^10 || ^11
+package: 'AI Providers'
+configure: openai_provider.settings

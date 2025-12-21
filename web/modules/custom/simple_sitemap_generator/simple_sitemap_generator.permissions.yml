@@ -1,0 +1,4 @@
+administer simple sitemap:
+  title: 'Administer Simple Sitemap'
+  description: 'Configure sitemap settings and manage custom URLs.'
+  restrict access: true

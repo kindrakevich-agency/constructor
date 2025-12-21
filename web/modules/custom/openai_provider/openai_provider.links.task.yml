@@ -1,0 +1,17 @@
+openai_provider.settings:
+  title: 'Settings'
+  route_name: openai_provider.settings
+  base_route: openai_provider.settings
+  weight: -10
+
+openai_provider.test:
+  title: 'Test'
+  route_name: openai_provider.test
+  base_route: openai_provider.settings
+  weight: 0
+
+openai_provider.help:
+  title: 'API Documentation'
+  route_name: openai_provider.help
+  base_route: openai_provider.settings
+  weight: 10

@@ -1,0 +1,10 @@
+simple_sitemap_generator.settings:
+  title: 'Settings'
+  route_name: simple_sitemap_generator.settings
+  base_route: simple_sitemap_generator.settings
+
+simple_sitemap_generator.custom_urls:
+  title: 'Custom URLs'
+  route_name: simple_sitemap_generator.custom_urls
+  base_route: simple_sitemap_generator.settings
+  weight: 10

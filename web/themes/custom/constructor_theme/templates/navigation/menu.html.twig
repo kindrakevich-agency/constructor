@@ -1,0 +1,37 @@
+{#
+/**
+ * @file
+ * Theme override to display a menu.
+ */
+#}
+{% import _self as menus %}
+{{ menus.menu_links(items, attributes, 0) }}
+
+{% macro menu_links(items, attributes, menu_level) %}
+  {% import _self as menus %}
+  {% if items %}
+    {%
+      set ul_classes = menu_level == 0
+        ? 'flex flex-col lg:flex-row gap-1 lg:gap-6'
+        : 'pl-4 space-y-1'
+    %}
+    <ul{{ menu_level == 0 ? attributes.addClass(ul_classes) : create_attribute().addClass(ul_classes) }}>
+    {% for item in items %}
+      {%
+        set item_classes = [
+          'menu-item',
+          item.in_active_trail ? 'active',
+        ]
+      %}
+      <li{{ item.attributes.addClass(item_classes) }}>
+        <a href="{{ item.url }}" class="block py-2 px-3 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors {{ item.in_active_trail ? 'text-blue-600 dark:text-blue-400 font-medium' }}">
+          {{ item.title }}
+        </a>
+        {% if item.below %}
+          {{ menus.menu_links(item.below, attributes, menu_level + 1) }}
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}

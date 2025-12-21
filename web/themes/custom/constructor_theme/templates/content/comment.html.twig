@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Theme override for a comment.
+ */
+#}
+{%
+  set classes = [
+    'comment',
+    'js-comment',
+    status != 'published' ? 'comment--unpublished',
+    parent_comment ? 'ml-8',
+  ]
+%}
+<article{{ attributes.addClass(classes, 'border-l-2 border-gray-200 dark:border-slate-700 pl-4 py-4') }}>
+  <footer class="flex items-center gap-3 mb-3">
+    {% if user_picture %}
+      <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-slate-700">
+        {{ user_picture }}
+      </div>
+    {% endif %}
+    <div>
+      <p class="font-medium text-gray-900 dark:text-white">{{ author }}</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">{{ created }}</p>
+    </div>
+  </footer>
+  <div{{ content_attributes.addClass('text-gray-700 dark:text-gray-300') }}>
+    {% if title %}
+      {{ title_prefix }}
+      <h3{{ title_attributes.addClass('font-semibold text-lg mb-2') }}>{{ title }}</h3>
+      {{ title_suffix }}
+    {% endif %}
+    {{ content }}
+  </div>
+</article>

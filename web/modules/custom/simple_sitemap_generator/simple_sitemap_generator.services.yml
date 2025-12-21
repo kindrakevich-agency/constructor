@@ -1,0 +1,12 @@
+services:
+  simple_sitemap_generator.generator:
+    class: Drupal\simple_sitemap_generator\Service\SitemapGenerator
+    arguments:
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@database'
+      - '@domain.negotiator'
+      - '@url_generator'
+      - '@datetime.time'
+      - '@file_url_generator'
+      - '@language_manager'

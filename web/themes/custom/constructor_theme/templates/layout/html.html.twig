@@ -1,0 +1,28 @@
+{#
+/**
+ * @file
+ * Theme override for the basic structure of a single Drupal page.
+ */
+#}
+<!DOCTYPE html>
+<html{{ html_attributes.addClass('light') }}>
+  <head>
+    <head-placeholder token="{{ placeholder_token }}">
+    <title>{{ head_title|safe_join(' | ') }}</title>
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+  </head>
+  <body{{ attributes.addClass('font-sans', 'antialiased', 'text-gray-900', 'dark:text-gray-100', 'dark:bg-slate-900', 'transition-colors', 'duration-300') }}>
+    {#
+      Keyboard navigation/accessibility link to main content section in
+      temporary location at top until placement is defined.
+    #}
+    <a href="#main-content" class="visually-hidden focusable skip-link">
+      {{ 'Skip to main content'|t }}
+    </a>
+    {{ page_top }}
+    {{ page }}
+    {{ page_bottom }}
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+  </body>
+</html>

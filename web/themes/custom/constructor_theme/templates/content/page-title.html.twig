@@ -1,0 +1,11 @@
+{#
+/**
+ * @file
+ * Theme override for a page title.
+ */
+#}
+{% if title %}
+  <h1{{ title_attributes.addClass('text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6') }}>
+    {{ title }}
+  </h1>
+{% endif %}

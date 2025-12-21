@@ -1,0 +1,9 @@
+enabled_content_types:
+  - article
+  - page
+default_priority: '0.5'
+default_changefreq: weekly
+urls_per_sitemap: 5000
+cache_lifetime: 86400
+include_images: true
+include_lastmod: true

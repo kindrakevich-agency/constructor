@@ -1,0 +1,6 @@
+simple_sitemap_generator.settings:
+  title: 'Simple Sitemap'
+  description: 'Configure sitemap generation settings.'
+  route_name: simple_sitemap_generator.settings
+  parent: system.admin_config_search
+  weight: 10

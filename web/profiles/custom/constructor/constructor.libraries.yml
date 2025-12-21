@@ -1,0 +1,10 @@
+installer:
+  version: 1.0
+  css:
+    theme:
+      css/installer.css: {}
+  js:
+    js/installer.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery

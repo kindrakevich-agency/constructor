@@ -1,0 +1,10 @@
+name: 'Simple Sitemap Generator'
+type: module
+description: 'Generates XML sitemaps with domain module support and custom URLs.'
+core_version_requirement: ^10 || ^11
+package: Custom
+dependencies:
+  - drupal:node
+  - domain:domain
+
+configure: simple_sitemap_generator.settings

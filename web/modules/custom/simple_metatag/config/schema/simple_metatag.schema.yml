@@ -1,0 +1,44 @@
+simple_metatag.settings:
+  type: config_object
+  label: 'Simple Metatag settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Enable automatic metatag generation'
+
+simple_metatag.openai_settings:
+  type: config_object
+  label: 'OpenAI Settings'
+  mapping:
+    api_key:
+      type: string
+      label: 'OpenAI API Key'
+    model:
+      type: string
+      label: 'OpenAI Model'
+    node_count:
+      type: integer
+      label: 'Number of Nodes'
+    seo_length:
+      type: integer
+      label: 'SEO Text Length'
+    vocabulary:
+      type: string
+      label: 'Taxonomy Vocabulary'
+    term_id:
+      type: string
+      label: 'Term ID'
+    regenerate_existing:
+      type: boolean
+      label: 'Regenerate Existing Content'
+
+simple_metatag.gtag_settings:
+  type: config_object
+  label: 'Google Tag Settings'
+  mapping:
+    gtag_codes:
+      type: sequence
+      label: 'Google Tag Codes'
+      sequence:
+        type: string
+        label: 'Google Tag Code'

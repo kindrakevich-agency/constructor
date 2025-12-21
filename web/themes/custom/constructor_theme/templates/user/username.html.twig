@@ -1,0 +1,11 @@
+{#
+/**
+ * @file
+ * Theme override for a username.
+ */
+#}
+{% if link_path %}
+  <a{{ attributes.addClass('text-blue-600 dark:text-blue-400 hover:underline') }}>{{ name }}{{ extra }}</a>
+{% else %}
+  <span{{ attributes.addClass('text-gray-700 dark:text-gray-300') }}>{{ name }}{{ extra }}</span>
+{% endif %}

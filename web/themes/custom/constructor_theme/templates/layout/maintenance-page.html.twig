@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Theme override for the maintenance page.
+ */
+#}
+<!DOCTYPE html>
+<html{{ html_attributes.addClass('light') }}>
+  <head>
+    <head-placeholder token="{{ placeholder_token }}">
+    <title>{{ head_title|safe_join(' | ') }}</title>
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+  </head>
+  <body{{ attributes.addClass('font-sans', 'antialiased', 'bg-gray-100', 'dark:bg-slate-900', 'min-h-screen', 'flex', 'items-center', 'justify-center') }}>
+    <div class="max-w-lg w-full mx-auto p-8">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center">
+        {% if logo %}
+          <img src="{{ logo }}" alt="" class="h-16 w-auto mx-auto mb-6" />
+        {% endif %}
+        {% if site_name %}
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ site_name }}</h1>
+        {% endif %}
+        {% if title %}
+          <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">{{ title }}</h2>
+        {% endif %}
+        {{ messages }}
+        <div class="text-gray-600 dark:text-gray-400">
+          {{ content }}
+        </div>
+      </div>
+    </div>
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{#
+/**
+ * @file
+ * Theme override for local actions block.
+ */
+#}
+{% block content %}
+  {% if content %}
+    <nav class="action-links mb-6" role="navigation" aria-label="{{ 'Primary actions'|t }}">
+      <ul class="flex flex-wrap gap-2">
+        {{ content }}
+      </ul>
+    </nav>
+  {% endif %}
+{% endblock %}

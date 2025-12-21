@@ -1,0 +1,36 @@
+{#
+/**
+ * @file
+ * Theme override for an 'input' element.
+ */
+#}
+{# Always add a test class first to verify addClass works #}
+{% set attributes = attributes.addClass('tw-input-element') %}
+
+{# Detect submit buttons by checking for form-submit class #}
+{% set class_string = attributes.class|render|default('') %}
+{% set is_submit = 'form-submit' in class_string or 'button' in class_string %}
+{% set is_checkbox = 'checkbox' in (attributes.type|render|default('')) %}
+{% set is_radio = 'radio' in (attributes.type|render|default('')) %}
+{% set is_hidden = 'hidden' in (attributes.type|render|default('')) %}
+
+{% if is_submit %}
+  {# Submit button styling #}
+  {% set btn_value = attributes.value|render|default('') %}
+  {% set is_back = 'Back' in btn_value %}
+  {% if is_back %}
+    <input{{ attributes.addClass('inline-flex', 'items-center', 'justify-center', 'px-6', 'py-3', 'rounded-lg', 'font-medium', 'text-sm', 'cursor-pointer', 'bg-white', 'text-gray-700', 'border', 'border-gray-300') }}/>
+  {% else %}
+    <input{{ attributes.addClass('inline-flex', 'items-center', 'justify-center', 'px-8', 'py-3', 'rounded-lg', 'font-medium', 'text-sm', 'cursor-pointer', 'bg-slate-800', 'text-white', 'border-0', 'shadow-sm') }}/>
+  {% endif %}
+{% elseif is_checkbox %}
+  <input{{ attributes.addClass('w-5', 'h-5', 'accent-blue-600', 'cursor-pointer', 'rounded') }}/>
+{% elseif is_radio %}
+  <input{{ attributes.addClass('w-5', 'h-5', 'accent-blue-600', 'cursor-pointer') }}/>
+{% elseif is_hidden %}
+  <input{{ attributes }}/>
+{% else %}
+  {# Text inputs and other types - default styling #}
+  <input{{ attributes.addClass('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 'text-gray-900', 'text-sm', 'bg-white') }}/>
+{% endif %}
+{{ children }}

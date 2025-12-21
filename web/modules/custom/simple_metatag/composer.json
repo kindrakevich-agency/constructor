@@ -1,0 +1,10 @@
+{
+  "name": "drupal/simple_metatag",
+  "description": "Provides simple metatag generation for nodes and taxonomy terms with path-based overrides and OpenAI integration.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.1",
+    "openai-php/client": "^0.17"
+  }
+}

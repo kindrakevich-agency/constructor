@@ -1,0 +1,46 @@
+<?php
+
+/**
+ * @file
+ * Theme functions for Constructor Install theme.
+ */
+
+/**
+ * Implements hook_preprocess_install_page().
+ */
+function constructor_install_preprocess_install_page(&$variables) {
+  // Determine current step based on the active task.
+  $install_state = $GLOBALS['install_state'] ?? [];
+  $active_task = $install_state['active_task'] ?? '';
+
+  // Map Drupal install tasks to our 10-step wizard.
+  // Steps: 1-Language, 2-Requirements, 3-Database, 4-Install, 5-Site Basics,
+  //        6-Languages, 7-Content Types, 8-Modules, 9-Design, 10-AI
+  $step_mapping = [
+    // Drupal core install tasks (steps 1-4).
+    'install_select_language' => 1,
+    'install_select_profile' => 1,
+    'install_load_profile' => 1,
+    'install_verify_requirements' => 2,
+    'install_settings_form' => 3,
+    'install_verify_database_ready' => 3,
+    'install_base_system' => 4,
+    'install_bootstrap_full' => 4,
+    'install_profile_modules' => 4,
+    'install_profile_themes' => 4,
+    'install_install_profile' => 4,
+    // Hidden configure form (auto-submits, stays on step 4).
+    'install_configure_form' => 4,
+    // Constructor custom wizard steps (steps 5-10).
+    'constructor_install_site_basics' => 5,
+    'constructor_install_languages' => 6,
+    'constructor_install_content_types' => 7,
+    'constructor_install_modules' => 8,
+    'constructor_install_design_layout' => 9,
+    'constructor_install_ai_integration' => 10,
+    'constructor_finalize_installation' => 10,
+    'install_finished' => 10,
+  ];
+
+  $variables['current_step'] = $step_mapping[$active_task] ?? 1;
+}

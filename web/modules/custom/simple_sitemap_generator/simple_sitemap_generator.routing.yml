@@ -1,0 +1,56 @@
+simple_sitemap_generator.settings:
+  path: '/admin/config/search/simple-sitemap'
+  defaults:
+    _form: '\Drupal\simple_sitemap_generator\Form\SettingsForm'
+    _title: 'Simple Sitemap Settings'
+  requirements:
+    _permission: 'administer simple sitemap'
+
+simple_sitemap_generator.custom_urls:
+  path: '/admin/config/search/simple-sitemap/custom-urls'
+  defaults:
+    _form: '\Drupal\simple_sitemap_generator\Form\CustomUrlsForm'
+    _title: 'Custom URLs'
+  requirements:
+    _permission: 'administer simple sitemap'
+
+simple_sitemap_generator.add_custom_url:
+  path: '/admin/config/search/simple-sitemap/custom-urls/add'
+  defaults:
+    _form: '\Drupal\simple_sitemap_generator\Form\CustomUrlForm'
+    _title: 'Add Custom URL'
+  requirements:
+    _permission: 'administer simple sitemap'
+
+simple_sitemap_generator.edit_custom_url:
+  path: '/admin/config/search/simple-sitemap/custom-urls/{id}/edit'
+  defaults:
+    _form: '\Drupal\simple_sitemap_generator\Form\CustomUrlForm'
+    _title: 'Edit Custom URL'
+  requirements:
+    _permission: 'administer simple sitemap'
+    id: \d+
+
+simple_sitemap_generator.delete_custom_url:
+  path: '/admin/config/search/simple-sitemap/custom-urls/{id}/delete'
+  defaults:
+    _form: '\Drupal\simple_sitemap_generator\Form\CustomUrlDeleteForm'
+    _title: 'Delete Custom URL'
+  requirements:
+    _permission: 'administer simple sitemap'
+    id: \d+
+
+simple_sitemap_generator.regenerate:
+  path: '/admin/config/search/simple-sitemap/regenerate'
+  defaults:
+    _controller: '\Drupal\simple_sitemap_generator\Controller\SitemapController::regenerate'
+    _title: 'Regenerate Sitemap'
+  requirements:
+    _permission: 'administer simple sitemap'
+
+simple_sitemap_generator.sitemap:
+  path: '/sitemap.xml'
+  defaults:
+    _controller: '\Drupal\simple_sitemap_generator\Controller\SitemapController::sitemap'
+  requirements:
+    _access: 'TRUE'

@@ -1,0 +1,29 @@
+{#
+/**
+ * @file
+ * Theme override for a breadcrumb trail.
+ */
+#}
+{% if breadcrumb %}
+  <nav role="navigation" aria-labelledby="system-breadcrumb" class="py-4">
+    <h2 id="system-breadcrumb" class="sr-only">{{ 'Breadcrumb'|t }}</h2>
+    <ol class="flex flex-wrap items-center gap-2 text-sm">
+    {% for item in breadcrumb %}
+      <li class="flex items-center gap-2">
+        {% if not loop.last %}
+          {% if item.url %}
+            <a href="{{ item.url }}" class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{{ item.text }}</a>
+          {% else %}
+            <span class="text-gray-500 dark:text-gray-400">{{ item.text }}</span>
+          {% endif %}
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        {% else %}
+          <span class="text-gray-900 dark:text-white font-medium">{{ item.text }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ol>
+  </nav>
+{% endif %}

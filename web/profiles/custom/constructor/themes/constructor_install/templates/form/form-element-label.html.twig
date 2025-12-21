@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override for a form element label.
+ */
+#}
+{% if title is not empty or required %}
+  {% if title_display == 'after' %}
+    {# Label after checkbox/radio - inline style #}
+    <label{{ attributes.addClass('text-sm', 'text-gray-700', 'cursor-pointer', 'leading-relaxed', 'select-none') }}>
+      {{ title }}{% if required %}<span class="text-red-500 ml-0.5">*</span>{% endif %}
+    </label>
+  {% elseif title_display == 'invisible' %}
+    <label{{ attributes.addClass('sr-only') }}>
+      {{ title }}{% if required %}<span class="text-red-500 ml-0.5">*</span>{% endif %}
+    </label>
+  {% else %}
+    {# Label before input - block style #}
+    <label{{ attributes.addClass('block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-2') }}>
+      {{ title }}{% if required %}<span class="text-red-500 ml-0.5">*</span>{% endif %}
+    </label>
+  {% endif %}
+{% endif %}

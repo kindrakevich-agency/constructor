@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override for a branding block.
+ */
+#}
+{% block content %}
+  {% if site_logo %}
+    <a href="{{ path('<front>') }}" rel="home" class="flex items-center gap-2">
+      <img src="{{ site_logo }}" alt="{{ 'Home'|t }}" class="h-8 w-auto" />
+      {% if site_name %}
+        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ site_name }}</span>
+      {% endif %}
+    </a>
+  {% elseif site_name %}
+    <a href="{{ path('<front>') }}" rel="home" class="text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+      {{ site_name }}
+    </a>
+  {% endif %}
+  {% if site_slogan %}
+    <p class="text-sm text-gray-500 dark:text-gray-400">{{ site_slogan }}</p>
+  {% endif %}
+{% endblock %}

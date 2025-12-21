@@ -1,0 +1,126 @@
+{#
+/**
+ * @file
+ * Theme override for the installation batch page.
+ * The current_step variable is set in constructor_preprocess_install_page().
+ */
+#}
+{% set steps = [
+    { title: 'Choose Language'|t, desc: 'Select installation language'|t },
+    { title: 'Verify Requirements'|t, desc: 'Check system requirements'|t },
+    { title: 'Database Setup'|t, desc: 'Configure database connection'|t },
+    { title: 'Install'|t, desc: 'Install Drupal and modules'|t },
+    { title: 'Site Basics'|t, desc: 'Configure basic site settings'|t },
+    { title: 'Languages'|t, desc: 'Select languages for your site'|t },
+    { title: 'Content Types'|t, desc: 'Define your content structure'|t },
+    { title: 'Modules'|t, desc: 'Enable additional functionality'|t },
+    { title: 'Design & Layout'|t, desc: 'Configure site appearance'|t },
+    { title: 'AI Integration'|t, desc: 'Set up AI content generation'|t }
+] %}
+
+{# current_step is passed from constructor_preprocess_install_page() #}
+{% set current = current_step|default(4) %}
+
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-80 bg-white border-r border-gray-100 p-8 flex flex-col fixed h-full overflow-y-auto">
+        <!-- Logo -->
+        <div class="flex items-center gap-2 mb-12">
+            <div class="w-8 h-8">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" stroke="#2563eb" stroke-width="2"/>
+                    <circle cx="16" cy="16" r="6" fill="#2563eb"/>
+                </svg>
+            </div>
+            <span class="text-xl font-semibold text-gray-900">Constructor</span>
+        </div>
+
+        <!-- Steps -->
+        <nav class="flex-1 overflow-y-auto">
+            <ol class="relative">
+                {% for step in steps %}
+                <li class="pb-8 relative">
+                    {% if not loop.last %}
+                    <div class="absolute left-4 top-8 w-px h-full {{ loop.index < current ? 'bg-blue-600' : 'bg-gray-200' }}"></div>
+                    {% endif %}
+                    <div class="flex gap-4">
+                        {% if loop.index < current %}
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium shrink-0 relative z-10">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        {% elseif loop.index == current %}
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium shrink-0 relative z-10">
+                            {{ loop.index }}
+                        </div>
+                        {% else %}
+                        <div class="w-8 h-8 rounded-full border-2 border-gray-200 bg-white text-gray-400 flex items-center justify-center text-sm font-medium shrink-0 relative z-10">
+                            {{ loop.index }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h3 class="font-semibold {{ loop.index <= current ? 'text-gray-900' : 'text-gray-400' }}">{{ step.title }}</h3>
+                            <p class="text-sm {{ loop.index <= current ? 'text-gray-500' : 'text-gray-400' }} mt-1">{{ step.desc }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ol>
+        </nav>
+
+        <!-- Footer -->
+        <div class="text-xs text-gray-400 pt-4 border-t border-gray-100 mt-4">
+            {{ 'Powered by Drupal 11'|t }}
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-80">
+        <div class="min-h-screen px-12 py-10">
+            <!-- Page Header -->
+            <div class="mb-8">
+                <p class="text-sm text-gray-500 mb-2">{{ 'Step'|t }} {{ current }}/10</p>
+                <h1 class="text-3xl font-bold text-gray-900">{{ title|default('Installing Constructor'|t) }}</h1>
+            </div>
+
+            <hr class="border-gray-200 mb-8">
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-6">
+                {{ messages }}
+            </div>
+            {% endif %}
+
+            <!-- Batch Content -->
+            <div class="w-full max-w-2xl">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                    <!-- Loading Icon -->
+                    <div class="flex items-center justify-center mb-6">
+                        <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Progress Info -->
+                    <div class="text-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ 'Installing Constructor Profile'|t }}</h2>
+                        <p class="text-gray-500 text-sm">{{ 'Please wait while we configure your site...'|t }}</p>
+                    </div>
+
+                    <!-- Progress Bar Content -->
+                    {{ page.content }}
+
+                    <!-- Status Message -->
+                    <div class="mt-6 text-center">
+                        <p class="text-sm text-gray-400">{{ 'This may take a few moments'|t }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

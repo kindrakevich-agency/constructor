@@ -1,0 +1,89 @@
+name: Constructor Theme
+type: theme
+description: 'Custom theme for Constructor installation profile.'
+core_version_requirement: ^11
+base theme: false
+
+libraries:
+  - constructor_theme/global
+
+regions:
+  header: Header
+  primary_menu: 'Primary menu'
+  secondary_menu: 'Secondary menu'
+  hero: Hero
+  highlighted: Highlighted
+  help: Help
+  breadcrumb: Breadcrumb
+  content: Content
+  sidebar_first: 'Sidebar first'
+  sidebar_second: 'Sidebar second'
+  featured_top: 'Featured top'
+  featured_bottom: 'Featured bottom'
+  footer_first: 'Footer first'
+  footer_second: 'Footer second'
+  footer_third: 'Footer third'
+  footer: Footer
+  page_top: 'Page top'
+  page_bottom: 'Page bottom'
+
+libraries-override:
+  # Disable ALL core and system CSS
+  claro/global-styling: false
+  core/normalize: false
+  core/drupal.progress: false
+  core/drupal.vertical-tabs: false
+  core/drupal.autocomplete: false
+  core/drupal.dialog: false
+  core/drupal.tabledrag: false
+  core/drupal.tableresponsive: false
+  core/drupal.collapse: false
+  core/drupal.tableselect: false
+  core/drupal.dropbutton: false
+  core/drupal.ajax: false
+  core/drupal.message: false
+  core/drupal.states: false
+
+  # System module - disable all CSS
+  system/base:
+    css:
+      component:
+        /core/modules/system/css/components/ajax-progress.module.css: false
+        /core/modules/system/css/components/align.module.css: false
+        /core/modules/system/css/components/autocomplete-loading.module.css: false
+        /core/modules/system/css/components/fieldgroup.module.css: false
+        /core/modules/system/css/components/container-inline.module.css: false
+        /core/modules/system/css/components/clearfix.module.css: false
+        /core/modules/system/css/components/details.module.css: false
+        /core/modules/system/css/components/hidden.module.css: false
+        /core/modules/system/css/components/item-list.module.css: false
+        /core/modules/system/css/components/js.module.css: false
+        /core/modules/system/css/components/nowrap.module.css: false
+        /core/modules/system/css/components/position-container.module.css: false
+        /core/modules/system/css/components/progress.module.css: false
+        /core/modules/system/css/components/reset-appearance.module.css: false
+        /core/modules/system/css/components/resize.module.css: false
+        /core/modules/system/css/components/sticky-header.module.css: false
+        /core/modules/system/css/components/system-status-counter.css: false
+        /core/modules/system/css/components/system-status-report-counters.css: false
+        /core/modules/system/css/components/system-status-report-general-info.css: false
+        /core/modules/system/css/components/tabledrag.module.css: false
+        /core/modules/system/css/components/tablesort.module.css: false
+        /core/modules/system/css/components/tree-child.module.css: false
+
+  system/admin: false
+
+stylesheets-remove:
+  - '@core/assets/vendor/normalize-css/normalize.css'
+  - '@core/misc/vertical-tabs.css'
+  - '@system/css/components/hidden.module.css'
+  - '@system/css/components/details.module.css'
+  - '@system/css/components/clearfix.module.css'
+  - '@system/css/components/container-inline.module.css'
+  - '@system/css/components/item-list.module.css'
+  - '@system/css/components/js.module.css'
+  - '@system/css/components/nowrap.module.css'
+  - '@system/css/components/progress.module.css'
+  - '@system/css/components/resize.module.css'
+  - '@system/css/components/tabledrag.module.css'
+  - '@system/css/components/tablesort.module.css'

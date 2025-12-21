@@ -1,0 +1,352 @@
+<?php
+
+namespace Drupal\constructor\Form;
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\State\StateInterface;
+use Drupal\openai_provider\Service\OpenAIClient;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+/**
+ * Step 6: AI Integration form.
+ */
+class AIIntegrationForm extends InstallerFormBase {
+
+  /**
+   * The OpenAI client service.
+   *
+   * @var \Drupal\openai_provider\Service\OpenAIClient|null
+   */
+  protected $openaiClient;
+
+  /**
+   * Constructs an AIIntegrationForm object.
+   */
+  public function __construct(StateInterface $state, ?OpenAIClient $openai_client = NULL) {
+    parent::__construct($state);
+    $this->openaiClient = $openai_client;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    $openai_client = NULL;
+    if ($container->has('openai_provider.client')) {
+      $openai_client = $container->get('openai_provider.client');
+    }
+
+    return new static(
+      $container->get('state'),
+      $openai_client
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId() {
+    return 'constructor_ai_integration_form';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getStepNumber(): int {
+    return 6;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function buildStepForm(array $form, FormStateInterface $form_state): array {
+    $saved_values = $this->getFromState('ai_settings', []);
+
+    // OpenAI Integration Section
+    $form['ai_intro'] = $this->createSectionHeader(
+      $this->t('OpenAI Integration'),
+      $this->t('Configure OpenAI Provider module for AI-powered content generation and image creation.')
+    );
+
+    // API Configuration
+    $form['api_section'] = $this->createSectionHeader(
+      $this->t('API Configuration'),
+      ''
+    );
+
+    $form['api_key'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('OpenAI API Key'),
+      '#default_value' => $saved_values['api_key'] ?? '',
+      '#required' => TRUE,
+      '#description' => $this->t('Enter your OpenAI API key. Get one from <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600 hover:underline">platform.openai.com</a>.'),
+      '#attributes' => [
+        'placeholder' => 'sk-...',
+        'autocomplete' => 'off',
+        'class' => [
+          'w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg',
+          'text-gray-900', 'font-mono', 'text-sm',
+        ],
+      ],
+      '#wrapper_attributes' => ['class' => ['mb-6']],
+    ];
+
+    // Get models
+    $text_models = $this->getTextModels();
+    $image_models = $this->getImageModels();
+
+    // Model Settings Section
+    $form['model_section'] = $this->createSectionHeader(
+      $this->t('Model Settings'),
+      ''
+    );
+
+    $form['models_grid'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-6', 'mb-6']],
+    ];
+
+    $form['models_grid']['text_model'] = $this->createSelectField(
+      $this->t('Text Generation Model'),
+      $text_models,
+      $saved_values['text_model'] ?? 'gpt-4o-mini',
+      FALSE,
+      $this->t('Select the default AI model for text/content generation.')
+    );
+
+    $form['models_grid']['image_model'] = $this->createSelectField(
+      $this->t('Image Generation Model'),
+      $image_models,
+      $saved_values['image_model'] ?? 'dall-e-3',
+      FALSE,
+      $this->t('Select the default AI model for image generation.')
+    );
+
+    $form['params_grid'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-6', 'mb-8']],
+    ];
+
+    $form['params_grid']['temperature'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Temperature'),
+      '#min' => 0,
+      '#max' => 2,
+      '#step' => 0.1,
+      '#default_value' => $saved_values['temperature'] ?? 0.7,
+      '#description' => $this->t('Controls randomness. Lower = more focused, higher = more creative.'),
+      '#attributes' => [
+        'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg'],
+      ],
+      '#wrapper_attributes' => ['class' => ['mb-6']],
+    ];
+
+    $form['params_grid']['max_tokens'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Max Tokens'),
+      '#min' => 100,
+      '#max' => 128000,
+      '#step' => 100,
+      '#default_value' => $saved_values['max_tokens'] ?? 4096,
+      '#description' => $this->t('Maximum length of generated content.'),
+      '#attributes' => [
+        'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg'],
+      ],
+      '#wrapper_attributes' => ['class' => ['mb-6']],
+    ];
+
+    // Image Generation Settings
+    $form['image_section'] = $this->createSectionHeader(
+      $this->t('Image Generation Settings'),
+      ''
+    );
+
+    $form['image_grid'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-6', 'mb-8']],
+    ];
+
+    $form['image_grid']['image_size'] = $this->createSelectField(
+      $this->t('Default Image Size'),
+      [
+        '1024x1024' => '1024x1024 (Square)',
+        '1792x1024' => '1792x1024 (Landscape)',
+        '1024x1792' => '1024x1792 (Portrait)',
+      ],
+      $saved_values['image_size'] ?? '1024x1024',
+      FALSE,
+      $this->t('Default size for DALL-E generated images.')
+    );
+
+    $form['image_grid']['image_quality'] = $this->createSelectField(
+      $this->t('Image Quality'),
+      [
+        'standard' => $this->t('Standard'),
+        'hd' => $this->t('HD (Higher detail, slower)'),
+      ],
+      $saved_values['image_quality'] ?? 'standard',
+      FALSE,
+      $this->t('Quality setting for DALL-E 3 images.')
+    );
+
+    // Content Generation Section
+    $form['content_section'] = $this->createSectionHeader(
+      $this->t('Content Generation Features'),
+      $this->t('Enable AI-powered features for content creation.')
+    );
+
+    $form['features_grid'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['space-y-4', 'mb-6']],
+    ];
+
+    $form['features_grid']['enable_auto_generate'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable AI content suggestions'),
+      '#default_value' => $saved_values['enable_auto_generate'] ?? TRUE,
+      '#description' => $this->t('Show AI generation button on content edit forms.'),
+      '#wrapper_attributes' => ['class' => ['flex', 'items-start', 'gap-3', 'p-4', 'border', 'border-gray-200', 'rounded-lg']],
+    ];
+
+    $form['features_grid']['enable_seo_generation'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable AI SEO generation'),
+      '#default_value' => $saved_values['enable_seo_generation'] ?? TRUE,
+      '#description' => $this->t('Allow AI to generate meta descriptions and SEO content.'),
+      '#wrapper_attributes' => ['class' => ['flex', 'items-start', 'gap-3', 'p-4', 'border', 'border-gray-200', 'rounded-lg']],
+    ];
+
+    $form['features_grid']['enable_image_generation'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable AI image generation'),
+      '#default_value' => $saved_values['enable_image_generation'] ?? TRUE,
+      '#description' => $this->t('Allow AI to generate images using DALL-E.'),
+      '#wrapper_attributes' => ['class' => ['flex', 'items-start', 'gap-3', 'p-4', 'border', 'border-gray-200', 'rounded-lg']],
+    ];
+
+    // Test connection button
+    $form['test_connection'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['mt-8', 'p-4', 'bg-gray-50', 'rounded-lg']],
+    ];
+
+    $form['test_connection']['test_button'] = [
+      '#type' => 'button',
+      '#value' => $this->t('Test API Connection'),
+      '#attributes' => [
+        'class' => [
+          'px-6', 'py-2', 'bg-blue-600', 'text-white', 'font-medium',
+          'rounded-lg', 'hover:bg-blue-700', 'transition-colors',
+        ],
+      ],
+      '#ajax' => [
+        'callback' => '::testApiConnection',
+        'wrapper' => 'api-test-result',
+        'effect' => 'fade',
+      ],
+    ];
+
+    $form['test_connection']['result'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'api-test-result', 'class' => ['mt-4']],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * Get text models from OpenAI Provider or defaults.
+   */
+  protected function getTextModels(): array {
+    if ($this->openaiClient) {
+      return $this->openaiClient->getTextModels();
+    }
+
+    return [
+      'gpt-4o' => 'GPT-4o (Latest)',
+      'gpt-4o-mini' => 'GPT-4o Mini (Fast & Cheap)',
+      'gpt-4-turbo' => 'GPT-4 Turbo',
+      'gpt-4' => 'GPT-4',
+      'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
+    ];
+  }
+
+  /**
+   * Get image models from OpenAI Provider or defaults.
+   */
+  protected function getImageModels(): array {
+    if ($this->openaiClient) {
+      return $this->openaiClient->getImageModels();
+    }
+
+    return [
+      'dall-e-3' => 'DALL-E 3 (High Quality)',
+      'dall-e-2' => 'DALL-E 2 (Faster)',
+    ];
+  }
+
+  /**
+   * AJAX callback to test API connection.
+   */
+  public function testApiConnection(array &$form, FormStateInterface $form_state) {
+    $api_key = $form_state->getValue('api_key');
+    $result = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'api-test-result', 'class' => ['mt-4']],
+    ];
+
+    if (empty($api_key)) {
+      $result['message'] = [
+        '#markup' => '<div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">' . $this->t('Please enter an API key first.') . '</div>',
+      ];
+      return $result;
+    }
+
+    try {
+      $client = \Drupal::httpClient();
+      $response = $client->request('GET', 'https://api.openai.com/v1/models', [
+        'headers' => [
+          'Authorization' => 'Bearer ' . $api_key,
+          'Content-Type' => 'application/json',
+        ],
+        'timeout' => 10,
+      ]);
+
+      if ($response->getStatusCode() === 200) {
+        $body = json_decode((string) $response->getBody(), TRUE);
+        $model_count = count($body['data'] ?? []);
+        $result['message'] = [
+          '#markup' => '<div class="p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' . $this->t('API connection successful! Found @count models.', ['@count' => $model_count]) . '</div>',
+        ];
+      }
+    }
+    catch (\Exception $e) {
+      $result['message'] = [
+        '#markup' => '<div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">' . $this->t('API connection failed: @message', ['@message' => $e->getMessage()]) . '</div>',
+      ];
+    }
+
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function submitStepForm(array &$form, FormStateInterface $form_state): void {
+    $values = [
+      'api_key' => $form_state->getValue('api_key'),
+      'text_model' => $form_state->getValue('text_model'),
+      'image_model' => $form_state->getValue('image_model'),
+      'temperature' => $form_state->getValue('temperature'),
+      'max_tokens' => $form_state->getValue('max_tokens'),
+      'image_size' => $form_state->getValue('image_size'),
+      'image_quality' => $form_state->getValue('image_quality'),
+      'enable_auto_generate' => $form_state->getValue('enable_auto_generate'),
+      'enable_seo_generation' => $form_state->getValue('enable_seo_generation'),
+      'enable_image_generation' => $form_state->getValue('enable_image_generation'),
+    ];
+
+    $this->saveToState('ai_settings', $values);
+  }
+
+}

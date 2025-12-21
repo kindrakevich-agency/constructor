@@ -1,0 +1,45 @@
+name: Constructor
+type: profile
+description: 'A customizable Drupal 11 installation profile with multi-step setup wizard.'
+core_version_requirement: ^11
+version: '1.0.0'
+
+install:
+  - node
+  - block
+  - block_content
+  - ckeditor5
+  - config
+  - datetime
+  - dblog
+  - dynamic_page_cache
+  - editor
+  - field
+  - field_ui
+  - file
+  - filter
+  - help
+  - image
+  - link
+  - menu_ui
+  - options
+  - page_cache
+  - path
+  - path_alias
+  - taxonomy
+  - text
+  - toolbar
+  - user
+  - views
+  - views_ui
+  - pathauto
+  - token
+
+themes:
+  - claro
+  - constructor_install
+
+distribution:
+  name: Constructor
+  install:
+    theme: constructor_install

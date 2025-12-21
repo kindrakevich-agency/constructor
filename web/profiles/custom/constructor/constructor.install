@@ -1,0 +1,136 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Constructor profile.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function constructor_install() {
+  // Set the default theme.
+  \Drupal::configFactory()
+    ->getEditable('system.theme')
+    ->set('default', 'constructor_theme')
+    ->set('admin', 'claro')
+    ->save();
+
+  // Enable the admin theme for editing.
+  \Drupal::configFactory()
+    ->getEditable('node.settings')
+    ->set('use_admin_theme', TRUE)
+    ->save();
+
+  // Set default Pathauto patterns.
+  _constructor_set_pathauto_patterns();
+
+  // Create default taxonomy vocabularies.
+  _constructor_create_default_vocabularies();
+
+  // Set default site settings.
+  _constructor_set_site_defaults();
+}
+
+/**
+ * Set default Pathauto patterns.
+ */
+function _constructor_set_pathauto_patterns() {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $pattern_storage = $entity_type_manager->getStorage('pathauto_pattern');
+
+  // Content pattern.
+  if (!$pattern_storage->load('content')) {
+    $pattern = $pattern_storage->create([
+      'id' => 'content',
+      'label' => 'Content',
+      'type' => 'canonical_entities:node',
+      'pattern' => '[node:content-type]/[node:title]',
+      'weight' => 0,
+    ]);
+    $pattern->save();
+  }
+
+  // Taxonomy term pattern.
+  if (!$pattern_storage->load('taxonomy_term')) {
+    $pattern = $pattern_storage->create([
+      'id' => 'taxonomy_term',
+      'label' => 'Taxonomy Term',
+      'type' => 'canonical_entities:taxonomy_term',
+      'pattern' => '[term:vocabulary]/[term:name]',
+      'weight' => 0,
+    ]);
+    $pattern->save();
+  }
+}
+
+/**
+ * Create default taxonomy vocabularies.
+ */
+function _constructor_create_default_vocabularies() {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $vocabulary_storage = $entity_type_manager->getStorage('taxonomy_vocabulary');
+
+  // Tags vocabulary.
+  if (!$vocabulary_storage->load('tags')) {
+    $vocabulary = $vocabulary_storage->create([
+      'vid' => 'tags',
+      'name' => 'Tags',
+      'description' => 'Use tags to group content on similar topics.',
+    ]);
+    $vocabulary->save();
+  }
+
+  // Categories vocabulary.
+  if (!$vocabulary_storage->load('categories')) {
+    $vocabulary = $vocabulary_storage->create([
+      'vid' => 'categories',
+      'name' => 'Categories',
+      'description' => 'Use categories to organize content hierarchically.',
+    ]);
+    $vocabulary->save();
+  }
+}
+
+/**
+ * Set default site settings.
+ */
+function _constructor_set_site_defaults() {
+  // Set default date format.
+  \Drupal::configFactory()
+    ->getEditable('system.date')
+    ->set('country.default', '')
+    ->set('first_day', 1)
+    ->set('timezone.default', 'UTC')
+    ->set('timezone.user.configurable', TRUE)
+    ->set('timezone.user.default', 0)
+    ->save();
+
+  // Enable clean URLs (already default in D11).
+  // Set default front page.
+  \Drupal::configFactory()
+    ->getEditable('system.site')
+    ->set('page.front', '/node')
+    ->save();
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function constructor_requirements($phase) {
+  $requirements = [];
+
+  if ($phase === 'install') {
+    // Check PHP version.
+    if (version_compare(PHP_VERSION, '8.3.0', '<')) {
+      $requirements['php_version'] = [
+        'title' => t('PHP Version'),
+        'value' => PHP_VERSION,
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('Constructor profile requires PHP 8.3 or higher.'),
+      ];
+    }
+  }
+
+  return $requirements;
+}

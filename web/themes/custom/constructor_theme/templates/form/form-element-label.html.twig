@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Theme override for a form element label.
+ */
+#}
+{% if title is not empty or required %}
+{%
+  set classes = [
+    'block text-sm font-medium text-gray-700 dark:text-gray-300',
+    title_display == 'invisible' ? 'sr-only',
+  ]
+%}
+<label{{ attributes.addClass(classes) }}>
+  {{ title }}
+  {% if required %}
+    <span class="text-red-500 ml-1">*</span>
+  {% endif %}
+</label>
+{% endif %}

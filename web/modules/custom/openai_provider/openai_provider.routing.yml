@@ -1,0 +1,23 @@
+openai_provider.settings:
+  path: '/admin/config/services/openai'
+  defaults:
+    _form: '\Drupal\openai_provider\Form\SettingsForm'
+    _title: 'OpenAI Settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+openai_provider.test:
+  path: '/admin/config/services/openai/test'
+  defaults:
+    _form: '\Drupal\openai_provider\Form\TestForm'
+    _title: 'Test OpenAI'
+  requirements:
+    _permission: 'administer site configuration'
+
+openai_provider.help:
+  path: '/admin/config/services/openai/help'
+  defaults:
+    _controller: '\Drupal\openai_provider\Controller\HelpController::content'
+    _title: 'API Documentation'
+  requirements:
+    _permission: 'administer site configuration'

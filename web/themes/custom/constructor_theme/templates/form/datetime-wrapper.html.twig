@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Theme override for a datetime form element wrapper.
+ */
+#}
+<div{{ attributes.addClass('space-y-2') }}>
+  {% if title %}
+    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ title }}</h4>
+  {% endif %}
+  {{ content }}
+  {% if errors %}
+    <div class="text-sm text-red-600 dark:text-red-400">
+      {{ errors }}
+    </div>
+  {% endif %}
+  {% if description %}
+    <div class="text-sm text-gray-500 dark:text-gray-400">
+      {{ description }}
+    </div>
+  {% endif %}
+</div>

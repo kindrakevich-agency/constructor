@@ -1,0 +1,26 @@
+{#
+/**
+ * @file
+ * Theme override for a progress bar.
+ *
+ * Note: The batch.js looks for [data-drupal-progress] and replaces content
+ * with a JS-powered progress bar. We keep Drupal's expected class structure.
+ */
+#}
+<div{{ attributes.addClass('progress', 'mb-4') }} data-drupal-progress aria-live="polite">
+  <div class="progress__label text-sm font-medium text-gray-900 mb-2">
+    {% if label %}{{ label }}{% else %}&nbsp;{% endif %}
+  </div>
+
+  <div class="progress__track h-2.5 bg-gray-200 rounded-full overflow-hidden">
+    <div class="progress__bar h-full rounded-full transition-all duration-300 ease-out bg-gradient-to-r from-blue-600 to-blue-500" style="width: {{ percent }}%;"></div>
+  </div>
+
+  <div class="progress__percentage text-xs text-gray-400 mt-1">
+    {% if percent is not empty %}{{ percent }}%{% endif %}
+  </div>
+
+  <div class="progress__description text-sm text-gray-600 mt-2">
+    {% if message %}{{ message }}{% else %}&nbsp;{% endif %}
+  </div>
+</div>

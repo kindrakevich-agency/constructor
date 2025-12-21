@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+/* Source paths for Tailwind to scan */
+@source "../templates/**/*.twig";
+
+/* Theme customizations */
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-primary: #1e293b;
+  --color-blue-link: #2563eb;
+}
+
+/* ===== BASE STYLES ===== */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  a {
+    color: #2563eb;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ===== FORM COMPONENTS ===== */
+@layer components {
+  /* Text inputs */
+  .form-input {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 text-sm
+           bg-white transition-all duration-150 ease-in-out;
+  }
+
+  .form-input:focus {
+    @apply outline-none border-blue-500 ring-2 ring-blue-500/20;
+  }
+
+  .form-input::placeholder {
+    @apply text-gray-400;
+  }
+
+  /* Select */
+  .form-select {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 text-sm
+           bg-white bg-no-repeat transition-all duration-150 ease-in-out appearance-none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+
+  .form-select:focus {
+    @apply outline-none border-blue-500 ring-2 ring-blue-500/20;
+  }
+
+  /* Textarea */
+  .form-textarea {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 text-sm
+           bg-white resize-y transition-all duration-150 ease-in-out;
+  }
+
+  .form-textarea:focus {
+    @apply outline-none border-blue-500 ring-2 ring-blue-500/20;
+  }
+
+  /* Labels */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  /* Descriptions */
+  .form-description {
+    @apply text-xs text-gray-500 mt-1.5 leading-relaxed;
+  }
+
+  /* Checkboxes and Radios */
+  .form-checkbox,
+  .form-radio {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: #2563eb;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  .form-checkbox-wrapper,
+  .form-radio-wrapper {
+    @apply flex items-start gap-2 mb-3;
+  }
+
+  .form-checkbox-label,
+  .form-radio-label {
+    @apply text-sm text-gray-700 cursor-pointer leading-relaxed;
+  }
+
+  /* Form item wrapper */
+  .form-item {
+    @apply mb-6;
+  }
+
+  .form-item--error .form-input,
+  .form-item--error .form-select,
+  .form-item--error .form-textarea {
+    @apply border-red-500;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium text-sm
+           transition-all duration-150 ease-in-out cursor-pointer border-0;
+  }
+
+  .btn-primary {
+    @apply bg-slate-800 text-white;
+  }
+
+  .btn-primary:hover {
+    @apply bg-slate-900;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-300;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-gray-50;
+  }
+
+  /* Form actions */
+  .form-actions {
+    @apply flex gap-4 justify-end mt-8 pt-6 border-t border-gray-200;
+  }
+
+  /* Messages */
+  .messages {
+    @apply p-4 rounded-lg mb-6 text-sm;
+  }
+
+  .messages--error {
+    @apply bg-red-50 border border-red-200 text-red-800;
+  }
+
+  .messages--warning {
+    @apply bg-amber-50 border border-amber-200 text-amber-800;
+  }
+
+  .messages--status {
+    @apply bg-green-50 border border-green-200 text-green-800;
+  }
+
+  /* Details/Fieldset */
+  .form-details {
+    @apply border border-gray-200 rounded-lg p-4 mb-4 bg-white;
+  }
+
+  .form-details__summary {
+    @apply font-semibold cursor-pointer text-gray-700 py-1;
+  }
+
+  .form-details[open] .form-details__summary {
+    @apply mb-4 pb-3 border-b border-gray-200;
+  }
+
+  .form-fieldset {
+    @apply border border-gray-300 rounded-lg p-6 mb-6 bg-white shadow-sm;
+  }
+
+  .form-legend {
+    @apply font-semibold text-gray-900 px-3 py-1 border border-gray-300 rounded bg-gray-50 text-sm;
+  }
+
+  /* Progress bar - Drupal's JS classes */
+  .progress {
+    @apply mb-4;
+  }
+
+  .progress__label {
+    @apply text-sm font-medium text-gray-900 mb-2;
+  }
+
+  .progress__track {
+    @apply h-2.5 bg-gray-200 rounded-full overflow-hidden;
+  }
+
+  .progress__bar {
+    @apply h-full rounded-full transition-all duration-300 ease-out;
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+  }
+
+  .progress__percentage {
+    @apply text-xs text-gray-400 mt-1;
+  }
+
+  .progress__description {
+    @apply text-sm text-gray-600 mt-2;
+  }
+
+  /* Legacy progress bar classes */
+  .progress-bar {
+    @apply h-2.5 bg-gray-200 rounded-full overflow-hidden;
+  }
+
+  .progress-bar__fill {
+    @apply h-full rounded-full transition-all duration-300 ease-out;
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+  }
+
+  /* Password strength */
+  .password-strength__meter {
+    @apply h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1;
+  }
+
+  .password-strength__indicator {
+    @apply h-full transition-all duration-300;
+  }
+
+  /* Machine name */
+  .machine-name-value {
+    @apply font-mono text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded;
+  }
+
+  /* AJAX loader */
+  .ajax-progress .throbber {
+    @apply w-4 h-4 border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin;
+  }
+
+  /* Section headers */
+  .section-header {
+    @apply mb-6;
+  }
+
+  .section-header__title {
+    @apply text-xl font-semibold text-gray-900 mb-2;
+  }
+
+  .section-header__description {
+    @apply text-sm text-gray-500;
+  }
+
+  /* Grid layouts */
+  .form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 mb-8;
+  }
+
+  .form-grid--3 {
+    @apply md:grid-cols-3;
+  }
+
+  /* Card style checkboxes */
+  .checkbox-card {
+    @apply p-4 border border-gray-200 rounded-lg transition-colors;
+  }
+
+  .checkbox-card:hover {
+    @apply border-blue-300;
+  }
+
+  .checkbox-card--checked {
+    @apply border-blue-500 bg-blue-50/50;
+  }
+}
+
+/* ===== UTILITIES ===== */
+@layer utilities {
+  .hide-default {
+    display: none;
+  }
+}

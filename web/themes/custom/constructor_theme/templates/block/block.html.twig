@@ -1,0 +1,15 @@
+{#
+/**
+ * @file
+ * Constructor Theme's implementation of block.html.twig.
+ * Outputs content directly without wrapper divs.
+ */
+#}
+{{ title_prefix }}
+{% if label %}
+  <h2{{ title_attributes }}>{{ label }}</h2>
+{% endif %}
+{{ title_suffix }}
+{% block content %}
+  {{ content }}
+{% endblock %}
