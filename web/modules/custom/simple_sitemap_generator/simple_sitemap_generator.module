@@ -73,13 +73,19 @@ function simple_sitemap_generator_invalidate_on_change(EntityInterface $entity) 
     return;
   }
 
-  // Clear cache for the domain this node belongs to.
-  if ($entity->hasField('field_domain_access') && !$entity->get('field_domain_access')->isEmpty()) {
-    /** @var \Drupal\simple_sitemap_generator\Service\SitemapGenerator $generator */
-    $generator = \Drupal::service('simple_sitemap_generator.generator');
+  /** @var \Drupal\simple_sitemap_generator\Service\SitemapGenerator $generator */
+  $generator = \Drupal::service('simple_sitemap_generator.generator');
 
+  // Clear cache for the domain this node belongs to (only if domain module is installed).
+  if (\Drupal::moduleHandler()->moduleExists('domain') &&
+      $entity->hasField('field_domain_access') &&
+      !$entity->get('field_domain_access')->isEmpty()) {
     foreach ($entity->get('field_domain_access') as $item) {
       $generator->clearCache($item->target_id);
     }
+  }
+  else {
+    // Clear default cache for single-site installations.
+    $generator->clearCache('default');
   }
 }

@@ -5,3 +5,11 @@ constructor.example:
     _title: 'Theme Example - All Blocks'
   requirements:
     _permission: 'access content'
+
+constructor.frontpage:
+  path: '/frontpage'
+  defaults:
+    _controller: '\Drupal\constructor\Controller\FrontpageController::content'
+    _title: ''
+  requirements:
+    _access: 'TRUE'

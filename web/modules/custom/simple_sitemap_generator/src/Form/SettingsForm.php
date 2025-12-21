@@ -67,34 +67,48 @@ class SettingsForm extends ConfigFormBase {
       '#open' => TRUE,
     ];
 
-    // Get domains and show sitemap links.
-    $domain_storage = $this->entityTypeManager->getStorage('domain');
-    $domains = $domain_storage->loadMultipleSorted();
+    // Get domains and show sitemap links (only if domain module is installed).
+    if (\Drupal::moduleHandler()->moduleExists('domain')) {
+      $domain_storage = $this->entityTypeManager->getStorage('domain');
+      $domains = $domain_storage->loadMultipleSorted();
 
-    if (!empty($domains)) {
-      $form['status']['domain_sitemaps'] = [
-        '#type' => 'table',
-        '#header' => [
-          $this->t('Domain'),
-          $this->t('Sitemap URL'),
-          $this->t('Status'),
-        ],
-        '#empty' => $this->t('No domains configured.'),
-      ];
-
-      foreach ($domains as $domain) {
-        $sitemap_url = $domain->getScheme() . $domain->getHostname() . '/sitemap.xml';
-        $form['status']['domain_sitemaps'][$domain->id()] = [
-          'domain' => ['#markup' => $domain->label()],
-          'url' => [
-            '#type' => 'link',
-            '#title' => $sitemap_url,
-            '#url' => Url::fromUri($sitemap_url),
-            '#attributes' => ['target' => '_blank'],
+      if (!empty($domains)) {
+        $form['status']['domain_sitemaps'] = [
+          '#type' => 'table',
+          '#header' => [
+            $this->t('Domain'),
+            $this->t('Sitemap URL'),
+            $this->t('Status'),
           ],
-          'status' => ['#markup' => $this->t('Active')],
+          '#empty' => $this->t('No domains configured.'),
         ];
+
+        foreach ($domains as $domain) {
+          $sitemap_url = $domain->getScheme() . $domain->getHostname() . '/sitemap.xml';
+          $form['status']['domain_sitemaps'][$domain->id()] = [
+            'domain' => ['#markup' => $domain->label()],
+            'url' => [
+              '#type' => 'link',
+              '#title' => $sitemap_url,
+              '#url' => Url::fromUri($sitemap_url),
+              '#attributes' => ['target' => '_blank'],
+            ],
+            'status' => ['#markup' => $this->t('Active')],
+          ];
+        }
       }
+    }
+    else {
+      // Show single sitemap link for non-domain installations.
+      $sitemap_url = \Drupal::request()->getSchemeAndHttpHost() . '/sitemap.xml';
+      $form['status']['sitemap_link'] = [
+        '#type' => 'link',
+        '#title' => $sitemap_url,
+        '#url' => Url::fromUri($sitemap_url),
+        '#attributes' => ['target' => '_blank'],
+        '#prefix' => '<p>' . $this->t('Your sitemap is available at:') . ' ',
+        '#suffix' => '</p>',
+      ];
     }
 
     $form['status']['regenerate'] = [

@@ -1,0 +1,7 @@
+faq-accordion:
+  version: 1.x
+  js:
+    js/faq-accordion.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

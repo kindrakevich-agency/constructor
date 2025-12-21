@@ -5,7 +5,6 @@ namespace Drupal\simple_sitemap_generator\Service;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
-use Drupal\domain\DomainNegotiatorInterface;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
@@ -38,9 +37,9 @@ class SitemapGenerator {
   protected $database;
 
   /**
-   * The domain negotiator.
+   * The domain negotiator (optional, only available if domain module is installed).
    *
-   * @var \Drupal\domain\DomainNegotiatorInterface
+   * @var \Drupal\domain\DomainNegotiatorInterface|null
    */
   protected $domainNegotiator;
 
@@ -74,12 +73,29 @@ class SitemapGenerator {
 
   /**
    * Constructs a SitemapGenerator object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Database\Connection $database
+   *   The database connection.
+   * @param mixed|null $domain_negotiator
+   *   The domain negotiator (optional, can be null if domain module is not installed).
+   * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
+   *   The URL generator.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator
+   *   The file URL generator.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager.
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
     ConfigFactoryInterface $config_factory,
     Connection $database,
-    DomainNegotiatorInterface $domain_negotiator,
+    $domain_negotiator,
     UrlGeneratorInterface $url_generator,
     TimeInterface $time,
     FileUrlGeneratorInterface $file_url_generator,
@@ -106,6 +122,16 @@ class SitemapGenerator {
   }
 
   /**
+   * Checks if domain module is available.
+   *
+   * @return bool
+   *   TRUE if domain module is installed and negotiator is available.
+   */
+  protected function hasDomainSupport() {
+    return $this->domainNegotiator !== NULL && \Drupal::moduleHandler()->moduleExists('domain');
+  }
+
+  /**
    * Gets the base URL for a domain.
    *
    * @param string $domain_id
@@ -115,9 +141,11 @@ class SitemapGenerator {
    *   The base URL (e.g., https://example.com).
    */
   protected function getDomainBaseUrl($domain_id) {
-    $domain = $this->entityTypeManager->getStorage('domain')->load($domain_id);
-    if ($domain) {
-      return $domain->getScheme() . $domain->getHostname();
+    if ($this->hasDomainSupport() && $domain_id !== 'default') {
+      $domain = $this->entityTypeManager->getStorage('domain')->load($domain_id);
+      if ($domain) {
+        return $domain->getScheme() . $domain->getHostname();
+      }
     }
     return \Drupal::request()->getSchemeAndHttpHost();
   }
@@ -132,8 +160,11 @@ class SitemapGenerator {
    *   The XML sitemap content.
    */
   public function getSitemap($page = NULL) {
-    $domain = $this->domainNegotiator->getActiveDomain();
-    $domain_id = $domain ? $domain->id() : 'default';
+    $domain_id = 'default';
+    if ($this->hasDomainSupport()) {
+      $domain = $this->domainNegotiator->getActiveDomain();
+      $domain_id = $domain ? $domain->id() : 'default';
+    }
 
     // Check cache.
     $cached = $this->getCache($domain_id, $page ?? 0);
@@ -182,22 +213,29 @@ class SitemapGenerator {
     $enabled_types = $config->get('enabled_content_types') ?: [];
 
     if (!empty($enabled_types)) {
-      // Count all translations for nodes in this domain.
       $query = $this->database->select('node_field_data', 'nfd');
-      $query->join('node__field_domain_access', 'da', 'nfd.nid = da.entity_id AND nfd.langcode = da.langcode');
       $query->condition('nfd.status', 1);
       $query->condition('nfd.type', $enabled_types, 'IN');
-      $query->condition('da.field_domain_access_target_id', $domain_id);
+
+      // Only join with domain table if domain module is available.
+      if ($this->hasDomainSupport() && $domain_id !== 'default') {
+        $query->join('node__field_domain_access', 'da', 'nfd.nid = da.entity_id AND nfd.langcode = da.langcode');
+        $query->condition('da.field_domain_access_target_id', $domain_id);
+      }
+
       $count += $query->countQuery()->execute()->fetchField();
     }
 
     // Count custom URLs.
-    $count += $this->database->select('simple_sitemap_custom_urls', 'u')
-      ->condition('domain_id', $domain_id)
-      ->condition('status', 1)
-      ->countQuery()
-      ->execute()
-      ->fetchField();
+    $custom_query = $this->database->select('simple_sitemap_custom_urls', 'u')
+      ->condition('status', 1);
+
+    // Only filter by domain if domain module is available.
+    if ($this->hasDomainSupport() && $domain_id !== 'default') {
+      $custom_query->condition('domain_id', $domain_id);
+    }
+
+    $count += $custom_query->countQuery()->execute()->fetchField();
 
     return $count;
   }
@@ -264,13 +302,18 @@ class SitemapGenerator {
     $languages = $this->languageManager->getLanguages();
 
     if (!empty($enabled_types)) {
-      // Query all translations for nodes in this domain.
+      // Query all translations for nodes.
       $query = $this->database->select('node_field_data', 'nfd');
-      $query->join('node__field_domain_access', 'da', 'nfd.nid = da.entity_id AND nfd.langcode = da.langcode');
       $query->fields('nfd', ['nid', 'langcode', 'changed', 'title']);
       $query->condition('nfd.status', 1);
       $query->condition('nfd.type', $enabled_types, 'IN');
-      $query->condition('da.field_domain_access_target_id', $domain_id);
+
+      // Only filter by domain if domain module is available.
+      if ($this->hasDomainSupport() && $domain_id !== 'default') {
+        $query->join('node__field_domain_access', 'da', 'nfd.nid = da.entity_id AND nfd.langcode = da.langcode');
+        $query->condition('da.field_domain_access_target_id', $domain_id);
+      }
+
       $query->orderBy('nfd.changed', 'DESC');
       $query->range($offset, $urls_per_sitemap);
 
@@ -322,12 +365,16 @@ class SitemapGenerator {
       }
     }
 
-    // Get custom URLs for this domain.
+    // Get custom URLs.
     $custom_query = $this->database->select('simple_sitemap_custom_urls', 'u')
       ->fields('u')
-      ->condition('domain_id', $domain_id)
       ->condition('status', 1)
       ->orderBy('priority', 'DESC');
+
+    // Only filter by domain if domain module is available.
+    if ($this->hasDomainSupport() && $domain_id !== 'default') {
+      $custom_query->condition('domain_id', $domain_id);
+    }
 
     // Adjust range based on how many nodes we got.
     $remaining = $urls_per_sitemap - count($urls);
@@ -446,10 +493,15 @@ class SitemapGenerator {
     }
 
     $query = $this->database->select('node_field_data', 'nfd');
-    $query->join('node__field_domain_access', 'da', 'nfd.nid = da.entity_id AND nfd.langcode = da.langcode');
     $query->condition('nfd.status', 1);
     $query->condition('nfd.type', $enabled_types, 'IN');
-    $query->condition('da.field_domain_access_target_id', $domain_id);
+
+    // Only filter by domain if domain module is available.
+    if ($this->hasDomainSupport() && $domain_id !== 'default') {
+      $query->join('node__field_domain_access', 'da', 'nfd.nid = da.entity_id AND nfd.langcode = da.langcode');
+      $query->condition('da.field_domain_access_target_id', $domain_id);
+    }
+
     return $query->countQuery()->execute()->fetchField();
   }
 
@@ -667,7 +719,7 @@ class SitemapGenerator {
   }
 
   /**
-   * Regenerates sitemaps for all domains.
+   * Regenerates sitemaps for all domains (or single default sitemap if no domain module).
    *
    * @return array
    *   Array of results per domain.
@@ -678,15 +730,27 @@ class SitemapGenerator {
     // Clear all cache.
     $this->clearCache();
 
-    // Get all domains.
-    $domains = $this->entityTypeManager->getStorage('domain')->loadMultipleSorted();
+    // Get all domains or use default if domain module is not available.
+    if ($this->hasDomainSupport()) {
+      $domains = $this->entityTypeManager->getStorage('domain')->loadMultipleSorted();
+    }
+    else {
+      // Create a pseudo-domain for single-site mode.
+      $domains = [
+        'default' => (object) [
+          'id' => 'default',
+          'label' => 'Default',
+        ],
+      ];
+    }
 
     foreach ($domains as $domain) {
-      $domain_id = $domain->id();
+      $domain_id = is_object($domain) && method_exists($domain, 'id') ? $domain->id() : $domain->id;
+      $domain_label = is_object($domain) && method_exists($domain, 'label') ? $domain->label() : $domain->label;
       $total_urls = $this->getTotalUrls($domain_id);
 
       $results[$domain_id] = [
-        'label' => $domain->label(),
+        'label' => $domain_label,
         'urls' => $total_urls,
       ];
 

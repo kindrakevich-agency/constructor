@@ -1,0 +1,16 @@
+{#
+/**
+ * @file
+ * Constructor Theme's frontpage template.
+ * Empty frontpage with header and footer.
+ */
+#}
+
+{% include directory ~ '/templates/partials/header.html.twig' %}
+
+<main id="main-content" class="main-content min-h-screen bg-white dark:bg-slate-900 transition-colors" role="main">
+    {# Frontpage content blocks will be placed here via Drupal block system #}
+    {{ page.content }}
+</main>
+
+{% include directory ~ '/templates/partials/footer.html.twig' %}

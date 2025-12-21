@@ -79,6 +79,7 @@ class AIIntegrationForm extends InstallerFormBase {
       '#title' => $this->t('OpenAI API Key'),
       '#default_value' => $saved_values['api_key'] ?? '',
       '#required' => FALSE,
+      '#maxlength' => 255,
       '#description' => $this->t('Enter your OpenAI API key. Get one from <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600 hover:underline">platform.openai.com</a>. You can skip this step and configure later.'),
       '#attributes' => [
         'placeholder' => 'sk-...',
@@ -132,7 +133,7 @@ class AIIntegrationForm extends InstallerFormBase {
       '#min' => 0,
       '#max' => 2,
       '#step' => 0.1,
-      '#default_value' => $saved_values['temperature'] ?? 0.7,
+      '#default_value' => $saved_values['temperature'] ?? 0.3,
       '#description' => $this->t('Controls randomness. Lower = more focused, higher = more creative.'),
       '#attributes' => [
         'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg'],
@@ -149,7 +150,7 @@ class AIIntegrationForm extends InstallerFormBase {
         '8000' => $this->t('Extended content (8,000 tokens)'),
         '16000' => $this->t('Maximum (16,000 tokens)'),
       ],
-      $saved_values['max_tokens'] ?? '2000',
+      $saved_values['max_tokens'] ?? '4000',
       FALSE,
       $this->t('Maximum length of generated content.')
     );

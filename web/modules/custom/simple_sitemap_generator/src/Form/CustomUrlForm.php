@@ -89,12 +89,19 @@ class CustomUrlForm extends FormBase {
         ->fetchObject();
     }
 
-    // Load domains.
-    $domain_storage = $this->entityTypeManager->getStorage('domain');
-    $domains = $domain_storage->loadMultipleSorted();
+    // Load domains (only if domain module is installed).
     $domain_options = [];
-    foreach ($domains as $domain) {
-      $domain_options[$domain->id()] = $domain->label();
+    $has_domain_module = \Drupal::moduleHandler()->moduleExists('domain');
+
+    if ($has_domain_module) {
+      $domain_storage = $this->entityTypeManager->getStorage('domain');
+      $domains = $domain_storage->loadMultipleSorted();
+      foreach ($domains as $domain) {
+        $domain_options[$domain->id()] = $domain->label();
+      }
+    }
+    else {
+      $domain_options['default'] = $this->t('Default');
     }
 
     $form['domain_id'] = [
@@ -102,8 +109,9 @@ class CustomUrlForm extends FormBase {
       '#title' => $this->t('Domain'),
       '#options' => $domain_options,
       '#required' => TRUE,
-      '#default_value' => $this->record->domain_id ?? NULL,
+      '#default_value' => $this->record->domain_id ?? ($has_domain_module ? NULL : 'default'),
       '#description' => $this->t('Select the domain this URL belongs to.'),
+      '#access' => $has_domain_module || count($domain_options) > 1,
     ];
 
     $form['url'] = [

@@ -63,8 +63,9 @@ class ContentTypesForm extends InstallerFormBase {
       ],
       'faq' => [
         'name' => 'FAQ',
-        'description' => 'Frequently asked questions with answers.',
+        'description' => 'Frequently asked questions with answers. Includes FAQ block.',
         'default' => FALSE,
+        'module' => 'content_faq',
       ],
       'testimonial' => [
         'name' => 'Testimonial',
@@ -313,6 +314,7 @@ class ContentTypesForm extends InstallerFormBase {
       'faq' => [
         'name' => 'FAQ',
         'description' => 'Frequently asked questions.',
+        'module' => 'content_faq',
       ],
       'testimonial' => [
         'name' => 'Testimonial',
@@ -338,9 +340,19 @@ class ContentTypesForm extends InstallerFormBase {
       ],
     ];
 
+    // Track modules to enable for content types.
+    $content_type_modules = [];
+
     foreach ($types as $type_id => $type_data) {
       if (!empty($type_data['enabled'])) {
         $config = $type_configs[$type_id] ?? [];
+
+        // If this content type is provided by a module, just track the module.
+        if (!empty($config['module'])) {
+          $content_type_modules[] = $config['module'];
+          continue;
+        }
+
         $fields = $default_fields;
 
         // Add Tags field only for Article content type.
@@ -377,6 +389,7 @@ class ContentTypesForm extends InstallerFormBase {
     }
 
     $this->saveToState('content_types', $content_types);
+    $this->saveToState('content_type_modules', $content_type_modules);
   }
 
 }

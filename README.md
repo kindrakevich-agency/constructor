@@ -2,22 +2,33 @@
 
 A customizable Drupal 11 installation profile with a multi-step setup wizard for configuring languages, content types, modules, layout, and AI content integration.
 
+![Constructor Installation Wizard](installer.png)
+
 ## Features
 
-- **Multi-step Installation Wizard**: 6-step guided setup process
-  - Site Basics: Site name, admin account, email
+- **Multi-step Installation Wizard**: 8-step guided setup process
+  - Choose Language: Select installation language
+  - Database Setup: Configure database connection
+  - Site Basics: Site name, admin account, email, site description
   - Languages: Multi-language support with content and interface translation
-  - Content Types: Pre-configured types with customizable fields
+  - Content Types: Pre-configured types with customizable fields (FAQ, Article, etc.)
   - Modules: Core and custom module selection
   - Design & Layout: Theme settings and block configuration
-  - AI Integration: OpenAI-powered content generation
+  - AI Integration: OpenAI-powered content generation with automatic FAQ creation
 
 - **Pre-configured Modules**:
   - Pathauto: Automatic URL alias generation
   - Views: Content listing and display
   - Simple Metatag: SEO metatags with path-based overrides
-  - Simple Sitemap Generator: XML sitemaps with domain support
+  - Simple Sitemap Generator: XML sitemaps (domain module optional)
   - OpenAI Provider: AI content generation
+  - Content FAQ: FAQ content type with accordion block
+
+- **Development-Ready**:
+  - CSS/JS aggregation disabled by default
+  - Twig debug mode enabled
+  - All caching disabled (render, page, dynamic page)
+  - Full HTML text format included
 
 - **Custom Theme**: Modern, responsive theme built with Tailwind CSS v4
   - Dark mode support (class-based toggle)

@@ -5,7 +5,7 @@ services:
       - '@entity_type.manager'
       - '@config.factory'
       - '@database'
-      - '@domain.negotiator'
+      - '@?domain.negotiator'
       - '@url_generator'
       - '@datetime.time'
       - '@file_url_generator'

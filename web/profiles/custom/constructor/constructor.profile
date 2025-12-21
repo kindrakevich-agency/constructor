@@ -306,8 +306,10 @@ function constructor_finalize_batch(&$install_state) {
   // Get constructor settings from key_value storage.
   $key_value = \Drupal::keyValue('constructor_install');
   $constructor_settings = [
+    'site_basics' => $key_value->get('site_basics', []),
     'languages' => $key_value->get('languages', []),
     'content_types' => $key_value->get('content_types', []),
+    'content_type_modules' => $key_value->get('content_type_modules', []),
     'modules' => $key_value->get('modules', []),
     'modules_to_enable' => $key_value->get('modules_to_enable', []),
     'layout' => $key_value->get('layout', []),
@@ -318,6 +320,9 @@ function constructor_finalize_batch(&$install_state) {
 
   // Apply languages.
   $operations[] = ['constructor_batch_apply_languages', [$constructor_settings]];
+
+  // Apply content type modules (like content_faq).
+  $operations[] = ['constructor_batch_apply_content_type_modules', [$constructor_settings]];
 
   // Apply content types.
   $operations[] = ['constructor_batch_apply_content_types', [$constructor_settings]];
@@ -331,8 +336,23 @@ function constructor_finalize_batch(&$install_state) {
   // Apply AI settings.
   $operations[] = ['constructor_batch_apply_ai_settings', [$constructor_settings]];
 
-  // Set default theme.
+  // Set default theme FIRST (before placing blocks).
   $operations[] = ['constructor_batch_set_default_theme', []];
+
+  // Generate AI content (FAQ nodes).
+  $operations[] = ['constructor_batch_generate_ai_content', [$constructor_settings]];
+
+  // Place content blocks on frontpage (after theme is set).
+  $operations[] = ['constructor_batch_place_content_blocks', [$constructor_settings]];
+
+  // Configure frontpage.
+  $operations[] = ['constructor_batch_configure_frontpage', [$constructor_settings]];
+
+  // Create full_html text format.
+  $operations[] = ['constructor_batch_create_full_html_format', []];
+
+  // Configure development settings.
+  $operations[] = ['constructor_batch_configure_development_settings', []];
 
   // Clear caches.
   $operations[] = ['constructor_batch_clear_caches', []];
@@ -364,6 +384,41 @@ function constructor_update_translations_batch(&$install_state) {
 function constructor_batch_apply_languages($constructor_settings, &$context) {
   $context['message'] = t('Configuring languages...');
   constructor_apply_languages($context, $constructor_settings);
+}
+
+/**
+ * Batch operation: Apply content type modules (like content_faq).
+ */
+function constructor_batch_apply_content_type_modules($constructor_settings, &$context) {
+  $context['message'] = t('Installing content type modules...');
+
+  $modules = $constructor_settings['content_type_modules'] ?? [];
+
+  if (!empty($modules) && is_array($modules)) {
+    /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */
+    $module_installer = \Drupal::service('module_installer');
+
+    foreach ($modules as $module) {
+      if (!empty($module) && is_string($module)) {
+        try {
+          // Check if module exists before installing.
+          $module_handler = \Drupal::service('extension.list.module');
+          if ($module_handler->exists($module)) {
+            $module_installer->install([$module]);
+            \Drupal::logger('constructor')->notice('Installed content type module: @module', ['@module' => $module]);
+          }
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('constructor')->error('Failed to install module @module: @message', [
+            '@module' => $module,
+            '@message' => $e->getMessage(),
+          ]);
+        }
+      }
+    }
+  }
+
+  $context['results'][] = 'content_type_modules';
 }
 
 /**
@@ -399,6 +454,386 @@ function constructor_batch_apply_ai_settings($constructor_settings, &$context) {
 }
 
 /**
+ * Batch operation: Place content blocks on frontpage.
+ */
+function constructor_batch_place_content_blocks($constructor_settings, &$context) {
+  $context['message'] = t('Placing content blocks...');
+
+  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
+
+  \Drupal::logger('constructor')->notice('Content type modules: @modules', ['@modules' => implode(', ', $content_type_modules)]);
+
+  // If content_faq module was installed, place the FAQ block on frontpage.
+  if (in_array('content_faq', $content_type_modules)) {
+    \Drupal::logger('constructor')->notice('FAQ module detected, placing block...');
+
+    try {
+      // Check if content_faq module is actually installed.
+      if (!\Drupal::moduleHandler()->moduleExists('content_faq')) {
+        \Drupal::logger('constructor')->warning('content_faq module not installed yet.');
+        $context['results'][] = 'content_blocks_skipped';
+        return;
+      }
+
+      $block_storage = \Drupal::entityTypeManager()->getStorage('block');
+
+      // Check if block already exists and update or create it.
+      $existing_block = $block_storage->load('constructor_theme_faq_block');
+      if ($existing_block) {
+        // Update existing block to ensure correct settings.
+        $existing_block->setRegion('content');
+        $existing_block->setWeight(10);
+        $existing_block->enable();
+        $existing_block->save();
+        \Drupal::logger('constructor')->notice('FAQ block updated: region=content, status=enabled.');
+      }
+      else {
+        // Create the FAQ block placement.
+        $block = $block_storage->create([
+          'id' => 'constructor_theme_faq_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 10,
+          'status' => TRUE,
+          'plugin' => 'faq_block',
+          'settings' => [
+            'id' => 'faq_block',
+            'label' => 'FAQ Block',
+            'label_display' => '0',
+            'provider' => 'content_faq',
+            'title' => 'Frequently Asked Questions',
+            'subtitle' => 'FAQs',
+            'button_text' => 'Contact Us',
+            'button_url' => '/contact',
+            'limit' => 5,
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $block->save();
+        \Drupal::logger('constructor')->notice('FAQ block created: region=content, status=enabled.');
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Failed to place FAQ block: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+  else {
+    \Drupal::logger('constructor')->notice('FAQ module not in content_type_modules, skipping block placement.');
+  }
+
+  $context['results'][] = 'content_blocks';
+}
+
+/**
+ * Batch operation: Generate AI content (FAQ nodes).
+ */
+function constructor_batch_generate_ai_content($constructor_settings, &$context) {
+  $context['message'] = t('Generating AI content...');
+
+  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  // Check if FAQ module is enabled.
+  if (!in_array('content_faq', $content_type_modules)) {
+    \Drupal::logger('constructor')->notice('AI content skipped: FAQ module not selected.');
+    $context['results'][] = 'ai_content_skipped';
+    return;
+  }
+
+  // Check if AI has API key configured.
+  if (empty($ai_settings['api_key'])) {
+    \Drupal::logger('constructor')->notice('AI content skipped: No API key configured.');
+    $context['results'][] = 'ai_content_no_api';
+    return;
+  }
+
+  // Get site description.
+  $site_description = $site_basics['site_description'] ?? '';
+  $site_name = $site_basics['site_name'] ?? 'Website';
+
+  if (empty($site_description)) {
+    $site_description = "A professional website for $site_name";
+  }
+
+  // Get main language.
+  $main_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+
+  \Drupal::logger('constructor')->notice('Starting AI FAQ generation for site: @desc, language: @lang', [
+    '@desc' => $site_description,
+    '@lang' => $main_language,
+  ]);
+
+  try {
+    // Generate FAQ content using OpenAI.
+    $faqs = _constructor_generate_faq_with_ai($site_description, $main_language, $ai_settings);
+
+    \Drupal::logger('constructor')->notice('AI returned @count FAQs.', ['@count' => count($faqs)]);
+
+    if (!empty($faqs)) {
+      // Create FAQ nodes.
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+      // Enable translation for FAQ content type if multilingual.
+      if (!empty($languages['enable_multilingual']) && !empty($additional_languages)) {
+        _constructor_enable_faq_translation();
+      }
+
+      foreach ($faqs as $index => $faq) {
+        \Drupal::logger('constructor')->notice('Creating FAQ @num: @question', [
+          '@num' => $index + 1,
+          '@question' => $faq['question'],
+        ]);
+
+        $node = $node_storage->create([
+          'type' => 'faq',
+          'title' => $faq['question'],
+          'field_faq_answer' => [
+            'value' => $faq['answer'],
+            'format' => 'basic_html',
+          ],
+          'status' => 1,
+          'langcode' => $main_language,
+        ]);
+        $node->save();
+
+        // Create translations if multilingual.
+        if (!empty($languages['enable_multilingual']) && !empty($additional_languages)) {
+          _constructor_translate_faq_node($node, $additional_languages, $site_description, $ai_settings);
+        }
+      }
+
+      \Drupal::logger('constructor')->notice('Generated @count FAQ nodes with AI.', ['@count' => count($faqs)]);
+    }
+    else {
+      \Drupal::logger('constructor')->warning('AI returned empty FAQ list.');
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to generate AI content: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'ai_content';
+}
+
+/**
+ * Enable translation for FAQ content type.
+ */
+function _constructor_enable_faq_translation() {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping FAQ translation setup.');
+    return;
+  }
+
+  try {
+    // Enable translation for the FAQ content type.
+    $config = \Drupal::configFactory()->getEditable('language.content_settings.node.faq');
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'node');
+    $config->set('target_bundle', 'faq');
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for FAQ content type.');
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable FAQ translation: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Generate FAQ content using OpenAI API.
+ */
+function _constructor_generate_faq_with_ai($site_description, $language, $ai_settings) {
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+
+  // Language names for prompt.
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+  ];
+  $language_name = $language_names[$language] ?? 'English';
+
+  $prompt = "Generate 5 frequently asked questions (FAQs) for a website with the following description: \"$site_description\".
+
+Please respond in $language_name language.
+
+Return the response as a JSON array with objects containing 'question' and 'answer' keys. Each answer should be 2-3 sentences. Example format:
+[
+  {\"question\": \"Question text here?\", \"answer\": \"Answer text here.\"},
+  ...
+]
+
+Only return the JSON array, no other text.";
+
+  try {
+    $client = \Drupal::httpClient();
+    $response = $client->post('https://api.openai.com/v1/chat/completions', [
+      'headers' => [
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+      ],
+      'json' => [
+        'model' => $model,
+        'messages' => [
+          ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.7,
+        'max_tokens' => 2000,
+      ],
+      'timeout' => 60,
+    ]);
+
+    $data = json_decode($response->getBody()->getContents(), TRUE);
+    $content = $data['choices'][0]['message']['content'] ?? '';
+
+    // Parse JSON from response.
+    $content = trim($content);
+    // Remove markdown code blocks if present.
+    $content = preg_replace('/^```json\s*/', '', $content);
+    $content = preg_replace('/\s*```$/', '', $content);
+
+    $faqs = json_decode($content, TRUE);
+
+    if (is_array($faqs) && !empty($faqs)) {
+      return $faqs;
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('OpenAI API error: @message', ['@message' => $e->getMessage()]);
+  }
+
+  return [];
+}
+
+/**
+ * Translate FAQ node to additional languages.
+ */
+function _constructor_translate_faq_node($node, $languages, $site_description, $ai_settings) {
+  // Reload node to get latest translation settings.
+  $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+  $node = $node_storage->load($node->id());
+
+  if (!$node || !$node->isTranslatable()) {
+    \Drupal::logger('constructor')->notice('Node @nid is not translatable, skipping.', ['@nid' => $node ? $node->id() : 'null']);
+    return;
+  }
+
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $original_question = $node->getTitle();
+  $original_answer = $node->get('field_faq_answer')->value;
+
+  \Drupal::logger('constructor')->notice('Translating FAQ: @title to @langs', [
+    '@title' => $original_question,
+    '@langs' => implode(', ', $languages),
+  ]);
+
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+  ];
+
+  foreach ($languages as $langcode) {
+    if ($langcode === $node->language()->getId()) {
+      continue;
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      $prompt = "Translate the following FAQ to $language_name:
+
+Question: $original_question
+Answer: $original_answer
+
+Return as JSON with 'question' and 'answer' keys. Only return the JSON, no other text.";
+
+      $client = \Drupal::httpClient();
+      $response = $client->post('https://api.openai.com/v1/chat/completions', [
+        'headers' => [
+          'Authorization' => 'Bearer ' . $api_key,
+          'Content-Type' => 'application/json',
+        ],
+        'json' => [
+          'model' => $model,
+          'messages' => [
+            ['role' => 'user', 'content' => $prompt],
+          ],
+          'temperature' => 0.3,
+          'max_tokens' => 500,
+        ],
+        'timeout' => 30,
+      ]);
+
+      $data = json_decode($response->getBody()->getContents(), TRUE);
+      $content = $data['choices'][0]['message']['content'] ?? '';
+
+      $content = trim($content);
+      $content = preg_replace('/^```json\s*/', '', $content);
+      $content = preg_replace('/\s*```$/', '', $content);
+
+      $translation_data = json_decode($content, TRUE);
+
+      if (!empty($translation_data['question']) && !empty($translation_data['answer'])) {
+        $node->addTranslation($langcode, [
+          'title' => $translation_data['question'],
+          'field_faq_answer' => [
+            'value' => $translation_data['answer'],
+            'format' => 'basic_html',
+          ],
+        ]);
+        $node->save();
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Translation error for @lang: @message', [
+        '@lang' => $langcode,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+}
+
+/**
+ * Batch operation: Configure frontpage.
+ */
+function constructor_batch_configure_frontpage($constructor_settings, &$context) {
+  $context['message'] = t('Configuring frontpage...');
+
+  // Set front page to use views or a custom route instead of /node.
+  // For now, we'll just disable the default content message by ensuring
+  // the frontpage doesn't fall back to node listing.
+  $config = \Drupal::configFactory()->getEditable('system.site');
+
+  // Check if there's a specific frontpage node, otherwise use the theme's frontpage.
+  // We set it to a non-existent path that our theme handles.
+  $config->set('page.front', '/frontpage');
+  $config->save();
+
+  $context['results'][] = 'frontpage';
+}
+
+/**
  * Batch operation: Set default theme.
  */
 function constructor_batch_set_default_theme(&$context) {
@@ -426,6 +861,160 @@ function constructor_batch_set_default_theme(&$context) {
   // $config->set('admin', 'constructor_theme')->save();
 
   $context['results'][] = 'theme';
+}
+
+/**
+ * Batch operation: Create full_html text format.
+ */
+function constructor_batch_create_full_html_format(&$context) {
+  $context['message'] = t('Creating Full HTML text format...');
+
+  // Check if filter module is enabled and format doesn't exist.
+  if (!\Drupal::moduleHandler()->moduleExists('filter')) {
+    $context['results'][] = 'full_html_skipped';
+    return;
+  }
+
+  $format_storage = \Drupal::entityTypeManager()->getStorage('filter_format');
+  if ($format_storage->load('full_html')) {
+    \Drupal::logger('constructor')->notice('Full HTML format already exists.');
+    $context['results'][] = 'full_html_exists';
+    return;
+  }
+
+  try {
+    // Create the full_html format.
+    $format = $format_storage->create([
+      'format' => 'full_html',
+      'name' => 'Full HTML',
+      'weight' => 1,
+      'filters' => [
+        'filter_htmlcorrector' => [
+          'status' => TRUE,
+          'weight' => 10,
+        ],
+      ],
+    ]);
+    $format->save();
+
+    // Grant permission to administrator role if it exists.
+    $role_storage = \Drupal::entityTypeManager()->getStorage('user_role');
+    $admin_role = $role_storage->load('administrator');
+    if ($admin_role) {
+      $admin_role->grantPermission('use text format full_html');
+      $admin_role->save();
+    }
+
+    \Drupal::logger('constructor')->notice('Created Full HTML text format.');
+    $context['results'][] = 'full_html';
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to create Full HTML format: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Batch operation: Configure development settings.
+ */
+function constructor_batch_configure_development_settings(&$context) {
+  $context['message'] = t('Configuring development settings...');
+
+  try {
+    // Disable CSS/JS aggregation.
+    $system_performance = \Drupal::configFactory()->getEditable('system.performance');
+    $system_performance->set('css.preprocess', FALSE);
+    $system_performance->set('js.preprocess', FALSE);
+    $system_performance->save();
+    \Drupal::logger('constructor')->notice('Disabled CSS/JS aggregation.');
+
+    // Disable caching (render cache, dynamic page cache, page cache).
+    // Set cache max-age to 0.
+    $system_performance->set('cache.page.max_age', 0);
+    $system_performance->save();
+
+    // Disable render cache and dynamic page cache via settings.
+    // These need to be in settings.php, but we can also use development.services.yml.
+    // For now, we'll create/update the development.services.yml and settings.local.php.
+
+    $sites_path = \Drupal::root() . '/sites/default';
+
+    // Create settings.local.php with development settings.
+    $settings_local_content = <<<'PHP'
+<?php
+
+/**
+ * @file
+ * Local development settings.
+ *
+ * This file is auto-generated by the Constructor installation profile.
+ */
+
+// Disable render caching.
+$settings['cache']['bins']['render'] = 'cache.backend.null';
+
+// Disable Dynamic Page Cache.
+$settings['cache']['bins']['dynamic_page_cache'] = 'cache.backend.null';
+
+// Disable Page Cache.
+$settings['cache']['bins']['page'] = 'cache.backend.null';
+
+// Enable local development services.
+$settings['container_yamls'][] = DRUPAL_ROOT . '/sites/development.services.yml';
+
+// Show all error messages.
+$config['system.logging']['error_level'] = 'verbose';
+
+// Disable CSS/JS aggregation.
+$config['system.performance']['css']['preprocess'] = FALSE;
+$config['system.performance']['js']['preprocess'] = FALSE;
+PHP;
+
+    file_put_contents($sites_path . '/settings.local.php', $settings_local_content);
+    \Drupal::logger('constructor')->notice('Created settings.local.php with development settings.');
+
+    // Enable settings.local.php in settings.php if not already.
+    $settings_php_path = $sites_path . '/settings.php';
+    $settings_content = file_get_contents($settings_php_path);
+
+    // Check if settings.local.php include is already uncommented.
+    if (strpos($settings_content, "include \$app_root . '/' . \$site_path . '/settings.local.php'") === FALSE) {
+      // Add the include at the end.
+      $include_code = <<<'PHP'
+
+// Load local development settings.
+if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+  include $app_root . '/' . $site_path . '/settings.local.php';
+}
+PHP;
+      file_put_contents($settings_php_path, $settings_content . $include_code);
+      \Drupal::logger('constructor')->notice('Added settings.local.php include to settings.php.');
+    }
+
+    // Create/update development.services.yml with twig debug.
+    $dev_services_path = \Drupal::root() . '/sites/development.services.yml';
+    $dev_services_content = <<<'YAML'
+# Local development services.
+#
+# Auto-generated by Constructor installation profile.
+parameters:
+  http.response.debug_cacheability_headers: true
+  twig.config:
+    debug: true
+    auto_reload: true
+    cache: false
+services:
+  cache.backend.null:
+    class: Drupal\Core\Cache\NullBackendFactory
+YAML;
+
+    file_put_contents($dev_services_path, $dev_services_content);
+    \Drupal::logger('constructor')->notice('Created development.services.yml with Twig debug enabled.');
+
+    $context['results'][] = 'development_settings';
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to configure development settings: @message', ['@message' => $e->getMessage()]);
+  }
 }
 
 /**

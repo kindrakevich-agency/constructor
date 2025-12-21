@@ -1,0 +1,158 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Content FAQ module.
+ */
+
+use Drupal\node\Entity\NodeType;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+
+/**
+ * Implements hook_install().
+ */
+function content_faq_install() {
+  // Create FAQ content type.
+  _content_faq_create_content_type();
+
+  // Create fields.
+  _content_faq_create_fields();
+
+  // Configure form display.
+  _content_faq_configure_form_display();
+
+  // Configure view display.
+  _content_faq_configure_view_display();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function content_faq_uninstall() {
+  // Delete all FAQ nodes.
+  $storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nodes = $storage->loadByProperties(['type' => 'faq']);
+  $storage->delete($nodes);
+
+  // Delete field configs.
+  $fields = ['field_faq_answer'];
+  foreach ($fields as $field_name) {
+    $field_config = FieldConfig::loadByName('node', 'faq', $field_name);
+    if ($field_config) {
+      $field_config->delete();
+    }
+  }
+
+  // Delete field storage.
+  foreach ($fields as $field_name) {
+    $field_storage = FieldStorageConfig::loadByName('node', $field_name);
+    if ($field_storage) {
+      $field_storage->delete();
+    }
+  }
+
+  // Delete content type.
+  $content_type = NodeType::load('faq');
+  if ($content_type) {
+    $content_type->delete();
+  }
+}
+
+/**
+ * Create the FAQ content type.
+ */
+function _content_faq_create_content_type() {
+  // Check if content type already exists.
+  if (NodeType::load('faq')) {
+    return;
+  }
+
+  $type = NodeType::create([
+    'type' => 'faq',
+    'name' => 'FAQ',
+    'description' => 'Frequently Asked Questions with question and answer fields.',
+  ]);
+  $type->save();
+
+  // Create body field instance for this content type (Drupal handles this automatically for new types).
+}
+
+/**
+ * Create FAQ fields.
+ */
+function _content_faq_create_fields() {
+  // Note: Title field is used as the Question (no separate question field needed).
+
+  // Field: Answer.
+  if (!FieldStorageConfig::loadByName('node', 'field_faq_answer')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_faq_answer',
+      'entity_type' => 'node',
+      'type' => 'text_long',
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'faq', 'field_faq_answer')) {
+    FieldConfig::create([
+      'field_name' => 'field_faq_answer',
+      'entity_type' => 'node',
+      'bundle' => 'faq',
+      'label' => 'Answer',
+      'required' => TRUE,
+      'settings' => [],
+    ])->save();
+  }
+}
+
+/**
+ * Configure form display for FAQ content type.
+ */
+function _content_faq_configure_form_display() {
+  $form_display = EntityFormDisplay::load('node.faq.default');
+  if (!$form_display) {
+    $form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'faq',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $form_display->setComponent('field_faq_answer', [
+    'type' => 'text_textarea',
+    'weight' => 0,
+    'settings' => [
+      'rows' => 5,
+      'placeholder' => '',
+    ],
+  ]);
+
+  $form_display->save();
+}
+
+/**
+ * Configure view display for FAQ content type.
+ */
+function _content_faq_configure_view_display() {
+  $view_display = EntityViewDisplay::load('node.faq.default');
+  if (!$view_display) {
+    $view_display = EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'faq',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $view_display->setComponent('field_faq_answer', [
+    'type' => 'text_default',
+    'weight' => 0,
+    'label' => 'hidden',
+  ]);
+
+  $view_display->save();
+}

@@ -57,6 +57,20 @@ class SiteBasicsForm extends InstallerFormBase {
       $this->t('This email will be used for system notifications.')
     );
 
+    $form['site_description'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Site Description'),
+      '#default_value' => $saved_values['site_description'] ?? '',
+      '#required' => FALSE,
+      '#rows' => 3,
+      '#attributes' => [
+        'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg', 'resize-none'],
+        'placeholder' => $this->t('Describe what this site is for, e.g., "This is a website for a law firm specializing in corporate law"'),
+      ],
+      '#wrapper_attributes' => ['class' => ['mb-6']],
+      '#description' => $this->t('This description will be used by AI to generate relevant content for your site.'),
+    ];
+
     // Admin Account Section
     $form['admin_section'] = $this->createSectionHeader(
       $this->t('Administrator Account'),
@@ -94,6 +108,7 @@ class SiteBasicsForm extends InstallerFormBase {
       'site_name' => $form_state->getValue('site_name'),
       'site_slogan' => $form_state->getValue('site_slogan'),
       'site_email' => $form_state->getValue('site_email'),
+      'site_description' => $form_state->getValue('site_description'),
       'account_name' => $form_state->getValue('account_name'),
       'account_email' => $form_state->getValue('account_email'),
       'account_pass' => $form_state->getValue('account_pass'),

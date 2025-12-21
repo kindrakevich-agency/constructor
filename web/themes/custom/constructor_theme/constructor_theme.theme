@@ -5,6 +5,41 @@
  * Constructor theme functions.
  */
 
+use Drupal\Core\Template\Attribute;
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function constructor_theme_preprocess_page(&$variables) {
+  // Pass site name to page templates.
+  $config = \Drupal::config('system.site');
+  $variables['site_name'] = $config->get('name');
+}
+
+/**
+ * Implements hook_theme_suggestions_page_alter().
+ */
+function constructor_theme_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  // Use page--front template for /frontpage route.
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if ($route_name === 'constructor.frontpage') {
+    $suggestions[] = 'page__front';
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function constructor_theme_theme_registry_alter(&$theme_registry) {
+  // Get the theme path.
+  $theme_path = \Drupal::service('extension.list.theme')->getPath('constructor_theme');
+
+  // Add partials path to the theme registry for includes.
+  if (isset($theme_registry['page'])) {
+    $theme_registry['page']['path'] = $theme_path . '/templates/layout';
+  }
+}
+
 /**
  * Implements hook_css_alter().
  *

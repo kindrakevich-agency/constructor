@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Contains content_faq.module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function content_faq_theme($existing, $type, $theme, $path) {
+  return [
+    'faq_block_content' => [
+      'variables' => [
+        'faqs' => [],
+        'title' => 'Frequently Asked Questions',
+        'subtitle' => 'FAQs',
+        'button_text' => 'Contact Us',
+        'button_url' => '/contact',
+      ],
+      'template' => 'faq-block-content',
+      'path' => $path . '/templates',
+    ],
+  ];
+}

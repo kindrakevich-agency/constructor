@@ -72,12 +72,17 @@ class CustomUrlsForm extends FormBase {
       ],
     ];
 
-    // Load domains for mapping.
-    $domain_storage = $this->entityTypeManager->getStorage('domain');
-    $domains = $domain_storage->loadMultipleSorted();
+    // Load domains for mapping (only if domain module is installed).
     $domain_names = [];
-    foreach ($domains as $domain) {
-      $domain_names[$domain->id()] = $domain->label();
+    if (\Drupal::moduleHandler()->moduleExists('domain')) {
+      $domain_storage = $this->entityTypeManager->getStorage('domain');
+      $domains = $domain_storage->loadMultipleSorted();
+      foreach ($domains as $domain) {
+        $domain_names[$domain->id()] = $domain->label();
+      }
+    }
+    else {
+      $domain_names['default'] = $this->t('Default');
     }
 
     // Load custom URLs.

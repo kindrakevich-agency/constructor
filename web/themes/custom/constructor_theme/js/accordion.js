@@ -75,11 +75,18 @@
         }
       });
 
-      // FAQ Accordion
-      once('faq-accordion', '.faq-accordion-btn', context).forEach(function (btn) {
+      // FAQ Accordion (fallback for example page when content_faq module is not installed)
+      // The content_faq module provides its own enhanced version of this functionality.
+      once('faq-accordion-theme', '.faq-accordion-btn', context).forEach(function (btn) {
+        // Skip if module's JS already handled this
+        if (btn.hasAttribute('data-faq-initialized')) {
+          return;
+        }
+
         btn.addEventListener('click', function () {
-          const content = btn.nextElementSibling;
-          const icon = btn.querySelector('.accordion-icon');
+          const accordion = btn.closest('.faq-accordion');
+          const content = accordion.querySelector('.faq-accordion-content');
+          const icon = btn.querySelector('svg');
 
           if (content) {
             content.classList.toggle('hidden');
@@ -87,10 +94,6 @@
           if (icon) {
             icon.classList.toggle('rotate-180');
           }
-
-          // Toggle aria-expanded
-          const isExpanded = content && !content.classList.contains('hidden');
-          btn.setAttribute('aria-expanded', isExpanded);
         });
       });
     }
