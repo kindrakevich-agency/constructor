@@ -14,6 +14,21 @@ function constructor_theme_preprocess_page(&$variables) {
   // Pass site name to page templates.
   $config = \Drupal::config('system.site');
   $variables['site_name'] = $config->get('name');
+
+  // Get theme settings from constructor_theme config.
+  $theme_settings_config = \Drupal::config('constructor_theme.settings');
+  $variables['theme_settings'] = [
+    'enable_dark_mode' => $theme_settings_config->get('enable_dark_mode') ?? FALSE,
+    'color_scheme' => $theme_settings_config->get('color_scheme') ?? 'blue',
+  ];
+
+  // Attach dark mode library if enabled.
+  if ($variables['theme_settings']['enable_dark_mode']) {
+    $variables['#attached']['library'][] = 'constructor_theme/dark-mode';
+  }
+
+  // Always attach mobile menu JS.
+  $variables['#attached']['library'][] = 'constructor_theme/mobile-menu';
 }
 
 /**

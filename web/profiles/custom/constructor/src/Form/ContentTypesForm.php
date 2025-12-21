@@ -58,8 +58,9 @@ class ContentTypesForm extends InstallerFormBase {
       ],
       'team_member' => [
         'name' => 'Team Member',
-        'description' => 'Staff profiles with photo, bio, and contact info.',
+        'description' => 'Staff profiles with photo and position. Includes Team carousel block.',
         'default' => FALSE,
+        'module' => 'content_team',
       ],
       'faq' => [
         'name' => 'FAQ',
@@ -292,24 +293,7 @@ class ContentTypesForm extends InstallerFormBase {
       'team_member' => [
         'name' => 'Team Member',
         'description' => 'Staff profiles.',
-        'extra_fields' => [
-          'field_position' => [
-            'field_name' => 'field_position',
-            'type' => 'string',
-            'label' => 'Position',
-            'widget' => 'string_textfield',
-            'formatter' => 'string',
-            'required' => FALSE,
-          ],
-          'field_email' => [
-            'field_name' => 'field_email',
-            'type' => 'email',
-            'label' => 'Email',
-            'widget' => 'email_default',
-            'formatter' => 'email_mailto',
-            'required' => FALSE,
-          ],
-        ],
+        'module' => 'content_team',
       ],
       'faq' => [
         'name' => 'FAQ',

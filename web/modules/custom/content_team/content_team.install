@@ -1,0 +1,355 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the content_team module.
+ */
+
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\node\Entity\NodeType;
+
+/**
+ * Implements hook_install().
+ */
+function content_team_install() {
+  // Create the Team Member content type.
+  _content_team_create_content_type();
+
+  // Create fields for the Team Member content type.
+  _content_team_create_fields();
+
+  // Configure form display.
+  _content_team_configure_form_display();
+
+  // Configure view display.
+  _content_team_configure_view_display();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function content_team_uninstall() {
+  // Delete all team_member nodes first.
+  $storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = $storage->getQuery()
+    ->condition('type', 'team_member')
+    ->accessCheck(FALSE)
+    ->execute();
+
+  if (!empty($nids)) {
+    $nodes = $storage->loadMultiple($nids);
+    $storage->delete($nodes);
+  }
+
+  // Delete fields.
+  $fields_to_delete = [
+    'node.team_member.field_team_position',
+    'node.team_member.field_team_photo',
+    'node.team_member.field_team_image_url',
+    'node.team_member.field_team_gradient',
+  ];
+
+  foreach ($fields_to_delete as $field_id) {
+    $field = FieldConfig::load($field_id);
+    if ($field) {
+      $field->delete();
+    }
+  }
+
+  // Delete field storages.
+  $storages_to_delete = [
+    'node.field_team_position',
+    'node.field_team_photo',
+    'node.field_team_image_url',
+    'node.field_team_gradient',
+  ];
+
+  foreach ($storages_to_delete as $storage_id) {
+    $storage = FieldStorageConfig::load($storage_id);
+    if ($storage) {
+      $storage->delete();
+    }
+  }
+
+  // Delete the content type.
+  $node_type = NodeType::load('team_member');
+  if ($node_type) {
+    $node_type->delete();
+  }
+}
+
+/**
+ * Creates the Team Member content type.
+ */
+function _content_team_create_content_type() {
+  // Check if content type already exists.
+  if (NodeType::load('team_member')) {
+    return;
+  }
+
+  $node_type = NodeType::create([
+    'type' => 'team_member',
+    'name' => 'Team Member',
+    'description' => 'A team member profile for the team carousel.',
+    'new_revision' => FALSE,
+    'display_submitted' => FALSE,
+  ]);
+  $node_type->save();
+
+  // Set the title label.
+  $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('node', 'team_member');
+  if (isset($fields['title'])) {
+    $fields['title']->getConfig('team_member')
+      ->setLabel('Name')
+      ->save();
+  }
+}
+
+/**
+ * Creates fields for the Team Member content type.
+ */
+function _content_team_create_fields() {
+  // Field: Position.
+  if (!FieldStorageConfig::loadByName('node', 'field_team_position')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_team_position',
+      'entity_type' => 'node',
+      'type' => 'string',
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'team_member', 'field_team_position')) {
+    FieldConfig::create([
+      'field_name' => 'field_team_position',
+      'entity_type' => 'node',
+      'bundle' => 'team_member',
+      'label' => 'Position',
+      'description' => 'The job position or role of the team member.',
+      'required' => TRUE,
+    ])->save();
+  }
+
+  // Field: Photo (actual image upload).
+  if (!FieldStorageConfig::loadByName('node', 'field_team_photo')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_team_photo',
+      'entity_type' => 'node',
+      'type' => 'image',
+      'cardinality' => 1,
+      'settings' => [
+        'uri_scheme' => 'public',
+        'default_image' => [
+          'uuid' => NULL,
+          'alt' => '',
+          'title' => '',
+          'width' => NULL,
+          'height' => NULL,
+        ],
+      ],
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'team_member', 'field_team_photo')) {
+    FieldConfig::create([
+      'field_name' => 'field_team_photo',
+      'entity_type' => 'node',
+      'bundle' => 'team_member',
+      'label' => 'Photo',
+      'description' => 'Upload a photo of the team member.',
+      'required' => FALSE,
+      'settings' => [
+        'file_directory' => 'team-photos',
+        'file_extensions' => 'png gif jpg jpeg webp',
+        'max_filesize' => '5 MB',
+        'max_resolution' => '2000x2000',
+        'min_resolution' => '200x200',
+        'alt_field' => TRUE,
+        'alt_field_required' => TRUE,
+        'title_field' => FALSE,
+        'title_field_required' => FALSE,
+        'handler' => 'default:file',
+        'handler_settings' => [],
+      ],
+    ])->save();
+  }
+
+  // Field: Image URL (fallback URL).
+  if (!FieldStorageConfig::loadByName('node', 'field_team_image_url')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_team_image_url',
+      'entity_type' => 'node',
+      'type' => 'string',
+      'cardinality' => 1,
+      'settings' => [
+        'max_length' => 500,
+      ],
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'team_member', 'field_team_image_url')) {
+    FieldConfig::create([
+      'field_name' => 'field_team_image_url',
+      'entity_type' => 'node',
+      'bundle' => 'team_member',
+      'label' => 'Image URL',
+      'description' => 'URL to the team member photo (e.g., Unsplash image). Used as fallback if no photo is uploaded.',
+      'required' => FALSE,
+    ])->save();
+  }
+
+  // Field: Gradient (background gradient CSS).
+  if (!FieldStorageConfig::loadByName('node', 'field_team_gradient')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_team_gradient',
+      'entity_type' => 'node',
+      'type' => 'string',
+      'cardinality' => 1,
+      'settings' => [
+        'max_length' => 255,
+      ],
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'team_member', 'field_team_gradient')) {
+    FieldConfig::create([
+      'field_name' => 'field_team_gradient',
+      'entity_type' => 'node',
+      'bundle' => 'team_member',
+      'label' => 'Background Gradient',
+      'description' => 'CSS gradient for the card background (optional).',
+      'required' => FALSE,
+    ])->save();
+  }
+}
+
+/**
+ * Configures the form display for Team Member content type.
+ */
+function _content_team_configure_form_display() {
+  // Get or create the form display.
+  $form_display = EntityFormDisplay::load('node.team_member.default');
+  if (!$form_display) {
+    $form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'team_member',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  // Configure field widgets.
+  $form_display->setComponent('title', [
+    'type' => 'string_textfield',
+    'weight' => 0,
+    'region' => 'content',
+    'settings' => [
+      'size' => 60,
+      'placeholder' => '',
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  $form_display->setComponent('field_team_position', [
+    'type' => 'string_textfield',
+    'weight' => 1,
+    'region' => 'content',
+    'settings' => [
+      'size' => 60,
+      'placeholder' => 'e.g., CEO, Developer, Designer',
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  $form_display->setComponent('field_team_photo', [
+    'type' => 'image_image',
+    'weight' => 2,
+    'region' => 'content',
+    'settings' => [
+      'progress_indicator' => 'throbber',
+      'preview_image_style' => 'thumbnail',
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  $form_display->setComponent('field_team_image_url', [
+    'type' => 'string_textfield',
+    'weight' => 3,
+    'region' => 'content',
+    'settings' => [
+      'size' => 60,
+      'placeholder' => 'https://images.unsplash.com/...',
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  $form_display->setComponent('field_team_gradient', [
+    'type' => 'string_textfield',
+    'weight' => 4,
+    'region' => 'content',
+    'settings' => [
+      'size' => 60,
+      'placeholder' => 'linear-gradient(180deg, #fde4cf 0%, #ffcfd2 100%)',
+    ],
+    'third_party_settings' => [],
+  ]);
+
+  // Hide status by default for simpler form.
+  $form_display->setComponent('status', [
+    'type' => 'boolean_checkbox',
+    'weight' => 120,
+    'region' => 'content',
+    'settings' => [
+      'display_label' => TRUE,
+    ],
+  ]);
+
+  $form_display->save();
+}
+
+/**
+ * Configures the view display for Team Member content type.
+ */
+function _content_team_configure_view_display() {
+  // Get or create the view display.
+  $view_display = EntityViewDisplay::load('node.team_member.default');
+  if (!$view_display) {
+    $view_display = EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'team_member',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  // Configure field formatters.
+  $view_display->setComponent('field_team_position', [
+    'type' => 'string',
+    'weight' => 1,
+    'region' => 'content',
+    'label' => 'above',
+    'settings' => [
+      'link_to_entity' => FALSE,
+    ],
+  ]);
+
+  $view_display->setComponent('field_team_photo', [
+    'type' => 'image',
+    'weight' => 0,
+    'region' => 'content',
+    'label' => 'hidden',
+    'settings' => [
+      'image_style' => 'large',
+      'image_link' => '',
+    ],
+  ]);
+
+  // Hide image URL and gradient from display (they're for internal use).
+  $view_display->removeComponent('field_team_image_url');
+  $view_display->removeComponent('field_team_gradient');
+
+  $view_display->save();
+}

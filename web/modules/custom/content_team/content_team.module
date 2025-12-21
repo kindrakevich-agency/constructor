@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Contains content_team.module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function content_team_theme($existing, $type, $theme, $path) {
+  return [
+    'team_block_content' => [
+      'variables' => [
+        'team_members' => [],
+        'title' => 'Your Career, Your Connection',
+        'subtitle' => 'Join us',
+        'description' => '',
+        'button_text' => 'View Open Positions',
+        'button_url' => '/careers',
+      ],
+      'template' => 'team-block-content',
+      'path' => $path . '/templates',
+    ],
+    'team_page' => [
+      'variables' => [
+        'team_members' => [],
+      ],
+      'template' => 'team-page',
+      'path' => $path . '/templates',
+    ],
+  ];
+}

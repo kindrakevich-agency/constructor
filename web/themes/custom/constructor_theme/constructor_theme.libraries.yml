@@ -93,6 +93,15 @@ video:
     - core/drupal
     - core/once
 
+# Mobile menu
+mobile-menu:
+  version: 1.0
+  js:
+    js/mobile-menu.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 # Example page - includes all components
 example-page:
   version: 1.0

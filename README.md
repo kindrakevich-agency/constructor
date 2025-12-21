@@ -23,6 +23,8 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
   - Simple Sitemap Generator: XML sitemaps (domain module optional)
   - OpenAI Provider: AI content generation
   - Content FAQ: FAQ content type with accordion block
+  - Content Team: Team member content type with carousel block
+  - Language Switcher: Custom language switching dropdown
 
 - **Development-Ready**:
   - CSS/JS aggregation disabled by default
@@ -133,8 +135,11 @@ constructor/
 ├── web/
 │   ├── modules/
 │   │   └── custom/
+│   │       ├── content_faq/              # FAQ content type module
+│   │       ├── content_team/             # Team member content type module
+│   │       ├── language_switcher/        # Language switcher block
 │   │       ├── simple_metatag/           # SEO module
-│   │       └── simple_sitemap_generator/  # Sitemap module
+│   │       └── simple_sitemap_generator/ # Sitemap module
 │   ├── profiles/
 │   │   └── custom/
 │   │       └── constructor/              # Installation profile
@@ -156,6 +161,7 @@ constructor/
 │                   ├── layout/
 │                   ├── misc/
 │                   ├── navigation/
+│                   ├── partials/
 │                   ├── user/
 │                   └── views/
 └── README.md
@@ -217,6 +223,24 @@ Toggle dark mode by adding/removing the `dark` class on the `<html>` element:
 ```javascript
 document.documentElement.classList.toggle('dark');
 ```
+
+## Post-Installation Steps
+
+After the installation wizard completes, you may want to configure the following:
+
+### Block Placement
+Blocks are not automatically placed during installation. Visit `/admin/structure/block` to place:
+- **FAQ Block**: Place in the Content region for frontpage
+- **Team Block**: Place in the Content region for frontpage
+- **Language Switcher**: Place in Secondary Menu region (if multilingual)
+- **Main Navigation**: Place in Primary Menu region
+- **Site Branding**: Place in Header region
+
+### Content Translation (Optional)
+Content translation is not enabled during installation to ensure stability. To enable:
+1. Go to `/admin/modules`
+2. Enable "Content Translation" module
+3. Configure at `/admin/config/regional/content-language`
 
 ## Configuration
 

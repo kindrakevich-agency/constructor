@@ -2,7 +2,7 @@
 /**
  * @file
  * Header partial template.
- * Includes mobile menu, language/booking modals, and main header.
+ * Uses Drupal blocks for navigation and language switcher.
  */
 #}
 
@@ -29,110 +29,19 @@
 
     <!-- Mobile Menu Content (Scrollable) -->
     <div class="flex-1 overflow-y-auto px-4 py-4">
-        <!-- Mobile Search -->
-        <div class="relative mb-6">
-            <input type="text" placeholder="{{ 'Search...'|t }}" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400">
-            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-        </div>
-
-        <!-- Mobile Navigation -->
-        <nav class="space-y-1 mb-6">
-            <a href="{{ path('<front>') }}" class="block py-3 px-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl font-medium transition-colors dark:text-white">{{ 'Home'|t }}</a>
-            <a href="#" class="block py-3 px-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl font-medium transition-colors dark:text-white">{{ 'About us'|t }}</a>
-            <a href="#" class="block py-3 px-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl font-medium transition-colors dark:text-white">{{ 'Services'|t }}</a>
-            <a href="#" class="block py-3 px-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl font-medium transition-colors dark:text-white">{{ 'Blog'|t }}</a>
-            <a href="#" class="block py-3 px-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl font-medium transition-colors dark:text-white">{{ 'Contact'|t }}</a>
+        <!-- Mobile Navigation - Uses Drupal menu block -->
+        <nav class="mobile-nav space-y-1 mb-6">
+            {% if page.primary_menu %}
+                {{ page.primary_menu }}
+            {% endif %}
         </nav>
 
-        <!-- Mobile CTA -->
-        <div class="flex flex-col gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
-            <button class="open-booking-modal w-full py-3 px-6 bg-blue-500 text-white text-center font-medium rounded-lg hover:bg-blue-600 transition-colors">
-                {{ 'Book a demo'|t }}
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Language Modal Overlay -->
-<div id="language-modal-overlay" class="language-modal-overlay fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] hidden"></div>
-
-<!-- Language Modal - Desktop -->
-<div id="language-modal-desktop" class="language-modal-desktop fixed inset-0 z-[70] hidden lg:flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700">
-            <div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ 'Select Language'|t }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ 'Choose your preferred language'|t }}</p>
+        <!-- Mobile Language Switcher -->
+        {% if page.secondary_menu %}
+            <div class="pt-4 border-t border-gray-100 dark:border-slate-700">
+                {{ page.secondary_menu }}
             </div>
-            <button class="close-language-modal w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
-            <button class="language-option w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors" data-lang="English">
-                <span class="text-2xl">&#127482;&#127480;</span>
-                <div class="flex-1 text-left">
-                    <div class="font-medium text-gray-900 dark:text-white">English</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">United States</div>
-                </div>
-                <svg class="w-5 h-5 text-blue-500 opacity-0 language-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-            </button>
-            <button class="language-option w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors" data-lang="Ukrainian">
-                <span class="text-2xl">&#127482;&#127462;</span>
-                <div class="flex-1 text-left">
-                    <div class="font-medium text-gray-900 dark:text-white">Українська</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Ukraine</div>
-                </div>
-                <svg class="w-5 h-5 text-blue-500 opacity-0 language-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Booking Modal Overlay -->
-<div id="booking-modal-overlay" class="booking-modal-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden"></div>
-
-<!-- Booking Modal - Desktop -->
-<div id="booking-modal-desktop" class="booking-modal-desktop fixed inset-0 z-[70] hidden lg:flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700">
-            <div>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ 'Book a Demo'|t }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ 'Schedule a personalized walkthrough'|t }}</p>
-            </div>
-            <button class="close-booking-modal w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        <div class="p-6">
-            <form id="booking-form-desktop" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ 'Full Name'|t }}</label>
-                    <input type="text" placeholder="{{ 'John Doe'|t }}" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ 'Email Address'|t }}</label>
-                    <input type="email" placeholder="john@example.com" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ 'Company'|t }}</label>
-                    <input type="text" placeholder="{{ 'Your company name'|t }}" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400">
-                </div>
-                <button type="submit" class="w-full py-3.5 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
-                    {{ 'Schedule Demo'|t }}
-                </button>
-            </form>
-        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -142,36 +51,43 @@
         <div class="flex items-center justify-between h-16 lg:h-20">
             <!-- Logo -->
             <a href="{{ path('<front>') }}" class="flex items-center gap-2">
-                <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 4L4 10v12l12 6 12-6V10L16 4z" stroke="currentColor" stroke-width="2" fill="none"/>
-                    <path d="M16 16l12-6M16 16v12M16 16L4 10" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <span class="text-xl font-bold">{{ site_name|default('Constructor') }}</span>
+                {% if page.header %}
+                    {{ page.header }}
+                {% else %}
+                    <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 4L4 10v12l12 6 12-6V10L16 4z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M16 16l12-6M16 16v12M16 16L4 10" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span class="text-xl font-bold">{{ site_name|default('Constructor') }}</span>
+                {% endif %}
             </a>
 
-            <!-- Desktop Navigation -->
+            <!-- Desktop Navigation - Uses Drupal menu block -->
             <nav class="hidden lg:flex items-center gap-1">
-                <a href="{{ path('<front>') }}" class="px-4 py-2 3xl:px-5 3xl:text-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">{{ 'Home'|t }}</a>
-                <a href="#" class="px-4 py-2 3xl:px-5 3xl:text-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">{{ 'About us'|t }}</a>
-                <a href="#" class="px-4 py-2 3xl:px-5 3xl:text-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">{{ 'Services'|t }}</a>
-                <a href="#" class="px-4 py-2 3xl:px-5 3xl:text-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">{{ 'Blog'|t }}</a>
-                <a href="#" class="px-4 py-2 3xl:px-5 3xl:text-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">{{ 'Contact'|t }}</a>
+                {% if page.primary_menu %}
+                    {{ page.primary_menu }}
+                {% endif %}
             </nav>
 
             <!-- Right Section -->
             <div class="flex items-center gap-4">
                 <!-- Theme Toggle -->
-                <button id="theme-toggle" class="theme-toggle hidden lg:block" aria-label="{{ 'Toggle dark mode'|t }}">
-                    <svg class="theme-toggle-icon sun text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
-                    </svg>
-                    <svg class="theme-toggle-icon moon text-indigo-300" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-                    </svg>
-                </button>
-                <button class="open-booking-modal hidden lg:inline-flex items-center justify-center px-5 py-2.5 3xl:px-6 3xl:py-3 3xl:text-lg bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
-                    {{ 'Book a demo'|t }}
-                </button>
+                {% if theme_settings.enable_dark_mode %}
+                    <button id="theme-toggle" class="theme-toggle hidden lg:flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" aria-label="{{ 'Toggle dark mode'|t }}">
+                        <svg class="theme-toggle-icon sun w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg class="theme-toggle-icon moon w-5 h-5 text-indigo-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                        </svg>
+                    </button>
+                {% endif %}
+
+                <!-- Language Switcher - Uses Drupal block -->
+                {% if page.secondary_menu %}
+                    {{ page.secondary_menu }}
+                {% endif %}
+
                 <!-- Mobile Menu Button -->
                 <button id="open-mobile-menu" class="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

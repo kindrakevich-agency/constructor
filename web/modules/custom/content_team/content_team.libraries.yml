@@ -1,0 +1,8 @@
+team-carousel:
+  version: 1.x
+  js:
+    js/team-carousel.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - constructor_theme/swiper

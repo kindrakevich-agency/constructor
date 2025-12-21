@@ -1,0 +1,7 @@
+content_team.team_page:
+  path: '/team'
+  defaults:
+    _controller: '\Drupal\content_team\Controller\TeamPageController::content'
+    _title: 'Our Team'
+  requirements:
+    _permission: 'access content'

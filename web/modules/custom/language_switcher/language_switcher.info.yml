@@ -1,0 +1,7 @@
+name: Language Switcher
+type: module
+description: 'Provides a customizable language switcher block with modal and drawer UI.'
+core_version_requirement: ^10 || ^11
+package: Custom
+dependencies:
+  - drupal:language

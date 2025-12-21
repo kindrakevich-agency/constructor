@@ -21,5 +21,12 @@ function content_faq_theme($existing, $type, $theme, $path) {
       'template' => 'faq-block-content',
       'path' => $path . '/templates',
     ],
+    'faq_page' => [
+      'variables' => [
+        'faqs' => [],
+      ],
+      'template' => 'faq-page',
+      'path' => $path . '/templates',
+    ],
   ];
 }

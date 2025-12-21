@@ -1,0 +1,9 @@
+name: Team Members Content
+type: module
+description: 'Provides Team Member content type and block for displaying team carousel.'
+core_version_requirement: ^10 || ^11
+package: Constructor Content
+dependencies:
+  - drupal:node
+  - drupal:text
+  - drupal:field

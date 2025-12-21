@@ -2,151 +2,57 @@
 /**
  * @file
  * Constructor Theme's implementation of page.html.twig.
+ * Uses header and footer partials for consistency.
  */
 #}
-<div class="page">
-  <a href="#main-content" class="skip-link">
-    {{ 'Skip to main content'|t }}
-  </a>
 
-  <header class="header" role="banner">
-    <div class="container">
-      <div class="header__inner">
-        <div class="header__branding">
-          {% if page.header %}
-            {{ page.header }}
-          {% endif %}
-        </div>
+{% include directory ~ '/templates/partials/header.html.twig' %}
 
-        <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">
-          <span class="visually-hidden">{{ 'Menu'|t }}</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-
-        <nav class="main-nav" id="main-nav" role="navigation" aria-label="{{ 'Main navigation'|t }}">
-          {% if page.primary_menu %}
-            {{ page.primary_menu }}
-          {% endif %}
-        </nav>
-
-        {% if page.secondary_menu %}
-          <div class="header__secondary">
-            {{ page.secondary_menu }}
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </header>
-
+<main id="main-content" class="main-content min-h-screen bg-white dark:bg-slate-900 transition-colors" role="main">
   {% if page.hero %}
     <section class="hero">
-      <div class="container">
-        {{ page.hero }}
-      </div>
+      {{ page.hero }}
     </section>
   {% endif %}
 
   {% if page.highlighted %}
     <div class="highlighted">
-      <div class="container">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {{ page.highlighted }}
       </div>
     </div>
   {% endif %}
 
   {% if page.breadcrumb %}
-    <div class="breadcrumb-wrapper">
-      <div class="container">
+    <div class="breadcrumb-wrapper py-4">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {{ page.breadcrumb }}
       </div>
     </div>
   {% endif %}
 
-  <main id="main-content" class="main-content" role="main">
-    <div class="container">
-      {% if page.help %}
-        <div class="help">
-          {{ page.help }}
-        </div>
-      {% endif %}
-
-      {% if page.sidebar_first or page.sidebar_second %}
-        <div class="layout-two-column{% if page.sidebar_first %} layout-two-column--sidebar-left{% endif %}">
-          {% if page.sidebar_first %}
-            <aside class="sidebar sidebar--first" role="complementary">
-              {{ page.sidebar_first }}
-            </aside>
-          {% endif %}
-
-          <div class="content">
-            {{ page.content }}
-          </div>
-
-          {% if page.sidebar_second %}
-            <aside class="sidebar sidebar--second" role="complementary">
-              {{ page.sidebar_second }}
-            </aside>
-          {% endif %}
-        </div>
-      {% else %}
-        <div class="content">
-          {{ page.content }}
-        </div>
-      {% endif %}
+  {% if page.help %}
+    <div class="help py-4">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {{ page.help }}
+      </div>
     </div>
-  </main>
+  {% endif %}
+
+  {# Main content area #}
+  {{ page.content }}
 
   {% if page.featured_top %}
     <section class="featured-top">
-      <div class="container">
-        {{ page.featured_top }}
-      </div>
+      {{ page.featured_top }}
     </section>
   {% endif %}
 
   {% if page.featured_bottom %}
     <section class="featured-bottom">
-      <div class="container">
-        {{ page.featured_bottom }}
-      </div>
+      {{ page.featured_bottom }}
     </section>
   {% endif %}
+</main>
 
-  <footer class="footer" role="contentinfo">
-    <div class="container">
-      <div class="footer__inner">
-        {% if page.footer_first or page.footer_second or page.footer_third %}
-          <div class="footer__grid">
-            {% if page.footer_first %}
-              <div class="footer__section">
-                {{ page.footer_first }}
-              </div>
-            {% endif %}
-
-            {% if page.footer_second %}
-              <div class="footer__section">
-                {{ page.footer_second }}
-              </div>
-            {% endif %}
-
-            {% if page.footer_third %}
-              <div class="footer__section">
-                {{ page.footer_third }}
-              </div>
-            {% endif %}
-          </div>
-        {% endif %}
-
-        {% if page.footer %}
-          <div class="footer__bottom">
-            {{ page.footer }}
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </footer>
-</div>
+{% include directory ~ '/templates/partials/footer.html.twig' %}

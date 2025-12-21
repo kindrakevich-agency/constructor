@@ -221,8 +221,11 @@
     if (!settingsWrapper) return;
 
     function toggleMultilingualFields() {
-      settingsWrapper.style.display = multilingualCheckbox.checked ? '' : 'none';
+      settingsWrapper.style.display = multilingualCheckbox.checked ? 'block' : 'none';
     }
+
+    // Set initial state on page load
+    toggleMultilingualFields();
 
     // Listen for changes
     multilingualCheckbox.addEventListener('change', toggleMultilingualFields);

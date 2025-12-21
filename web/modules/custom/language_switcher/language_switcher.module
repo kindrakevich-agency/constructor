@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Language Switcher module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function language_switcher_theme($existing, $type, $theme, $path) {
+  return [
+    'language_switcher_block' => [
+      'variables' => [
+        'languages' => [],
+        'current_language' => NULL,
+      ],
+      'template' => 'language-switcher-block',
+      'path' => $path . '/templates',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_help().
+ */
+function language_switcher_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.language_switcher':
+      return '<p>' . t('Provides a customizable language switcher block with modal and drawer UI that matches the Constructor theme design.') . '</p>';
+  }
+}

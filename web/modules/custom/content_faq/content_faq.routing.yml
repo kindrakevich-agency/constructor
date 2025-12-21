@@ -1,0 +1,7 @@
+content_faq.faq_page:
+  path: '/faq'
+  defaults:
+    _controller: '\Drupal\content_faq\Controller\FaqPageController::content'
+    _title: 'Frequently Asked Questions'
+  requirements:
+    _permission: 'access content'

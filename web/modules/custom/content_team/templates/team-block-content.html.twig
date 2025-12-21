@@ -1,0 +1,86 @@
+{#
+/**
+ * @file
+ * Template for Team Block.
+ *
+ * Available variables:
+ * - team_members: Array of team member items with 'name', 'position', 'image_url', 'gradient'.
+ * - title: Block title.
+ * - subtitle: Block subtitle.
+ * - description: Block description.
+ * - button_text: CTA button text.
+ * - button_url: CTA button URL.
+ */
+#}
+<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-white dark:bg-slate-900 transition-colors overflow-hidden" data-block-type="team">
+  <div class="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16">
+    {# Left Side - Content #}
+    <div class="lg:w-[45%] xl:w-[40%] px-4 sm:px-6 lg:pl-[max(2rem,calc((100%-1280px)/2+2rem))] 3xl:pl-[max(3rem,calc((100%-1536px)/2+3rem))] lg:pr-0">
+      {# Subtitle Badge #}
+      <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-6 3xl:mb-8">
+        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+        {{ subtitle }}
+      </span>
+
+      {# Heading #}
+      <h2 class="text-4xl sm:text-5xl lg:text-6xl 3xl:text-7xl 4xl:text-8xl font-bold text-gray-900 dark:text-white leading-tight mb-6 3xl:mb-8">
+        {{ title|raw }}
+      </h2>
+
+      {# Description #}
+      <p class="text-lg 3xl:text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-8 3xl:mb-10">
+        {{ description }}
+      </p>
+
+      {# CTA Button #}
+      {% if button_text and button_url %}
+        <div class="flex items-center gap-4">
+          <a href="{{ button_url }}" class="group inline-flex items-center gap-2 px-6 py-3 3xl:px-8 3xl:py-4 3xl:text-lg border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white font-medium rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+            {{ button_text }}
+            <svg class="w-4 h-4 3xl:w-5 3xl:h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    {# Right Side - Team Swiper (bleeds to right edge) #}
+    <div class="lg:flex-1 min-w-0 pl-4 sm:pl-6 lg:pl-0">
+      {% if team_members|length > 0 %}
+        <div class="swiper team-swiper">
+          <div class="swiper-wrapper">
+            {% for member in team_members %}
+              <div class="swiper-slide">
+                <div class="team-card relative rounded-3xl overflow-hidden aspect-[3/4]" style="background: {{ member.gradient }};">
+                  <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-full h-full object-cover object-top">
+                  <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
+                    <h3 class="text-white font-semibold text-lg">{{ member.name }}</h3>
+                    <p class="text-white/80 text-sm">{{ member.position }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {# Team Swiper Navigation #}
+        <div class="flex items-center justify-start gap-3 mt-8 pl-4 sm:pl-6 lg:pl-0">
+          <button class="team-swiper-prev w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <button class="team-swiper-next w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      {% else %}
+        <div class="flex items-center justify-center h-64 bg-gray-100 dark:bg-slate-800 rounded-3xl mx-4">
+          <p class="text-gray-500 dark:text-gray-400">{{ 'No team members available.'|t }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
