@@ -34,10 +34,10 @@
 </button>
 
 {# Language Modal Overlay #}
-<div class="language-modal-overlay fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] hidden"></div>
+<div class="language-modal-overlay fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"></div>
 
-{# Language Modal - Desktop #}
-<div class="language-modal-desktop fixed inset-0 z-[70] hidden lg:flex items-center justify-center p-4">
+{# Language Modal - Desktop (hidden on mobile via CSS, flex on desktop) #}
+<div class="language-modal-desktop fixed inset-0 z-[70] items-center justify-center p-4">
   <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
     {# Modal Header #}
     <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700">
@@ -70,7 +70,7 @@
 </div>
 
 {# Language Drawer - Mobile #}
-<div class="language-drawer fixed inset-x-0 bottom-0 z-[70] lg:hidden hidden" role="dialog" aria-modal="true">
+<div class="language-drawer fixed inset-x-0 bottom-0 z-[70] lg:hidden" role="dialog" aria-modal="true">
   <div class="language-drawer-content bg-white dark:bg-slate-900 rounded-t-[20px] shadow-2xl max-h-[85vh] flex flex-col">
     {# Drag Handle #}
     <div class="language-drawer-handle flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing">

@@ -10,77 +10,103 @@
  * - description: Block description.
  * - button_text: CTA button text.
  * - button_url: CTA button URL.
+ * - secondary_button_text: Secondary CTA button text.
+ * - secondary_button_url: Secondary CTA button URL.
+ * - rating_text: Rating text (e.g., "1,000+ Happy Employees").
+ * - show_avatars: Whether to show avatar stack.
  */
 #}
-<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-white dark:bg-slate-900 transition-colors overflow-hidden" data-block-type="team">
-  <div class="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16">
-    {# Left Side - Content #}
-    <div class="lg:w-[45%] xl:w-[40%] px-4 sm:px-6 lg:pl-[max(2rem,calc((100%-1280px)/2+2rem))] 3xl:pl-[max(3rem,calc((100%-1536px)/2+3rem))] lg:pr-0">
-      {# Subtitle Badge #}
-      <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-6 3xl:mb-8">
-        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-        {{ subtitle }}
-      </span>
+<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-white dark:bg-slate-900 transition-colors overflow-hidden relative" data-block-type="team_carousel">
+  <!-- Subtle gradient background -->
+  <div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-purple-50/50 via-pink-50/30 to-transparent dark:from-purple-900/10 dark:via-pink-900/5 dark:to-transparent pointer-events-none"></div>
 
-      {# Heading #}
-      <h2 class="text-4xl sm:text-5xl lg:text-6xl 3xl:text-7xl 4xl:text-8xl font-bold text-gray-900 dark:text-white leading-tight mb-6 3xl:mb-8">
-        {{ title|raw }}
-      </h2>
+  <div class="relative">
+    <div class="flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-8">
+      {# Left Content #}
+      <div class="lg:w-[45%] xl:w-[40%] lg:pl-[max(1rem,calc((100vw-80rem)/2+1rem))] px-4 sm:px-6 lg:pr-0 flex-shrink-0">
+        {# Avatar Stack & Rating #}
+        {% if show_avatars|default(true) %}
+          <div class="flex items-center gap-4 mb-6">
+            <div class="flex -space-x-3">
+              {% for member in team_members|slice(0, 4) %}
+                <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 object-cover">
+              {% endfor %}
+            </div>
+            <div>
+              <div class="flex text-amber-400 mb-0.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ rating_text|default('1,000+ Happy Employees') }}</p>
+            </div>
+          </div>
+        {% endif %}
 
-      {# Description #}
-      <p class="text-lg 3xl:text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-8 3xl:mb-10">
-        {{ description }}
-      </p>
+        {# Heading #}
+        <h2 class="text-4xl sm:text-5xl lg:text-6xl 3xl:text-7xl 4xl:text-8xl font-bold text-gray-900 dark:text-white leading-tight mb-6 3xl:mb-8">
+          {{ title|raw }}
+        </h2>
 
-      {# CTA Button #}
-      {% if button_text and button_url %}
-        <div class="flex items-center gap-4">
-          <a href="{{ button_url }}" class="group inline-flex items-center gap-2 px-6 py-3 3xl:px-8 3xl:py-4 3xl:text-lg border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white font-medium rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
-            {{ button_text }}
-            <svg class="w-4 h-4 3xl:w-5 3xl:h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
-          </a>
-        </div>
-      {% endif %}
-    </div>
+        {# Description #}
+        <p class="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-lg">
+          {{ description }}
+        </p>
 
-    {# Right Side - Team Swiper (bleeds to right edge) #}
-    <div class="lg:flex-1 min-w-0 pl-4 sm:pl-6 lg:pl-0">
-      {% if team_members|length > 0 %}
-        <div class="swiper team-swiper">
-          <div class="swiper-wrapper">
-            {% for member in team_members %}
-              <div class="swiper-slide">
-                <div class="team-card relative rounded-3xl overflow-hidden aspect-[3/4]" style="background: {{ member.gradient }};">
-                  <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-full h-full object-cover object-top">
-                  <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
-                    <h3 class="text-white font-semibold text-lg">{{ member.name }}</h3>
-                    <p class="text-white/80 text-sm">{{ member.position }}</p>
+        {# CTA Buttons #}
+        {% if button_text and button_url %}
+          <div class="flex flex-wrap gap-4">
+            <a href="{{ button_url }}" class="px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
+              {{ button_text }}
+            </a>
+            {% if secondary_button_text and secondary_button_url %}
+              <a href="{{ secondary_button_url }}" class="px-6 py-3 border border-blue-500 text-blue-500 font-medium rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors">
+                {{ secondary_button_text }}
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      {# Right Side - Team Swiper (bleeds to right edge) #}
+      <div class="lg:flex-1 min-w-0 pl-4 sm:pl-6 lg:pl-0">
+        {% if team_members|length > 0 %}
+          <div class="swiper team-swiper">
+            <div class="swiper-wrapper">
+              {% for member in team_members %}
+                <div class="swiper-slide">
+                  <div class="team-card relative rounded-3xl overflow-hidden aspect-[3/4]" style="background: {{ member.gradient }};">
+                    <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-full h-full object-cover object-top">
+                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
+                      <h3 class="text-xl font-semibold text-white">{{ member.name }}</h3>
+                      <p class="text-white/80">{{ member.position }}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            {% endfor %}
+              {% endfor %}
+            </div>
           </div>
-        </div>
-        {# Team Swiper Navigation #}
-        <div class="flex items-center justify-start gap-3 mt-8 pl-4 sm:pl-6 lg:pl-0">
-          <button class="team-swiper-prev w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
-          <button class="team-swiper-next w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
-        </div>
-      {% else %}
-        <div class="flex items-center justify-center h-64 bg-gray-100 dark:bg-slate-800 rounded-3xl mx-4">
-          <p class="text-gray-500 dark:text-gray-400">{{ 'No team members available.'|t }}</p>
-        </div>
-      {% endif %}
+          {# Team Swiper Navigation #}
+          <div class="flex items-center justify-start gap-3 mt-8">
+            <button class="team-swiper-prev w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <button class="team-swiper-next w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        {% else %}
+          <div class="flex items-center justify-center h-64 bg-gray-100 dark:bg-slate-800 rounded-3xl mx-4">
+            <p class="text-gray-500 dark:text-gray-400">{{ 'No team members available.'|t }}</p>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </section>

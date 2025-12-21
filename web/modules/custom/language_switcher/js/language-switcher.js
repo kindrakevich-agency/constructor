@@ -8,15 +8,22 @@
 
   Drupal.behaviors.languageSwitcher = {
     attach: function (context) {
-      // Elements
-      const overlay = document.querySelector('.language-modal-overlay');
-      const desktopModal = document.querySelector('.language-modal-desktop');
-      const mobileDrawer = document.querySelector('.language-drawer');
+      // Move modal elements to body to escape header's backdrop-filter containing block
+      // This ensures fixed positioning works relative to viewport
+      once('language-modal-move', '.language-modal-overlay, .language-modal-desktop, .language-drawer', context).forEach(function (el) {
+        document.body.appendChild(el);
+      });
+
+      // Get ALL instances of modals/drawers (there may be duplicates)
+      const overlays = document.querySelectorAll('.language-modal-overlay');
+      const desktopModals = document.querySelectorAll('.language-modal-desktop');
+      const mobileDrawers = document.querySelectorAll('.language-drawer');
 
       // Desktop modal triggers
       once('language-modal-open', '.open-language-modal', context).forEach(function (btn) {
         btn.addEventListener('click', function (e) {
           e.preventDefault();
+          e.stopPropagation();
           openDesktopModal();
         });
       });
@@ -25,6 +32,7 @@
       once('language-drawer-open', '.open-language-drawer', context).forEach(function (btn) {
         btn.addEventListener('click', function (e) {
           e.preventDefault();
+          e.stopPropagation();
           openMobileDrawer();
         });
       });
@@ -57,11 +65,12 @@
         let startY = 0;
         let currentY = 0;
         let isDragging = false;
+        const drawer = handle.closest('.language-drawer');
 
         handle.addEventListener('touchstart', function (e) {
           startY = e.touches[0].clientY;
           isDragging = true;
-          mobileDrawer.classList.add('dragging');
+          if (drawer) drawer.classList.add('dragging');
         }, { passive: true });
 
         document.addEventListener('touchmove', function (e) {
@@ -70,9 +79,9 @@
           currentY = e.touches[0].clientY;
           const diff = currentY - startY;
 
-          if (diff > 0) {
-            const drawerContent = mobileDrawer.querySelector('.language-drawer-content');
-            drawerContent.style.transform = 'translateY(' + diff + 'px)';
+          if (diff > 0 && drawer) {
+            const drawerContent = drawer.querySelector('.language-drawer-content');
+            if (drawerContent) drawerContent.style.transform = 'translateY(' + diff + 'px)';
           }
         }, { passive: true });
 
@@ -80,12 +89,13 @@
           if (!isDragging) return;
 
           isDragging = false;
-          mobileDrawer.classList.remove('dragging');
+          if (drawer) {
+            drawer.classList.remove('dragging');
+            const drawerContent = drawer.querySelector('.language-drawer-content');
+            if (drawerContent) drawerContent.style.transform = '';
+          }
 
           const diff = currentY - startY;
-          const drawerContent = mobileDrawer.querySelector('.language-drawer-content');
-          drawerContent.style.transform = '';
-
           if (diff > 100) {
             closeAll();
           }
@@ -101,42 +111,23 @@
         });
       });
 
-      // Helper functions
+      // Helper functions - apply to ALL instances
       function openDesktopModal() {
-        if (overlay) overlay.classList.add('active');
-        if (overlay) overlay.classList.remove('hidden');
-        if (desktopModal) desktopModal.classList.add('active');
-        if (desktopModal) desktopModal.classList.remove('hidden');
+        overlays.forEach(function (el) { el.classList.add('active'); });
+        desktopModals.forEach(function (el) { el.classList.add('active'); });
         document.body.classList.add('drawer-open');
       }
 
       function openMobileDrawer() {
-        if (overlay) overlay.classList.add('active');
-        if (overlay) overlay.classList.remove('hidden');
-        if (mobileDrawer) mobileDrawer.classList.add('active');
-        if (mobileDrawer) mobileDrawer.classList.remove('hidden');
+        overlays.forEach(function (el) { el.classList.add('active'); });
+        mobileDrawers.forEach(function (el) { el.classList.add('active'); });
         document.body.classList.add('drawer-open', 'drawer-scaled');
       }
 
       function closeAll() {
-        if (overlay) {
-          overlay.classList.remove('active');
-          setTimeout(function () {
-            overlay.classList.add('hidden');
-          }, 300);
-        }
-        if (desktopModal) {
-          desktopModal.classList.remove('active');
-          setTimeout(function () {
-            desktopModal.classList.add('hidden');
-          }, 300);
-        }
-        if (mobileDrawer) {
-          mobileDrawer.classList.remove('active');
-          setTimeout(function () {
-            mobileDrawer.classList.add('hidden');
-          }, 500);
-        }
+        overlays.forEach(function (el) { el.classList.remove('active'); });
+        desktopModals.forEach(function (el) { el.classList.remove('active'); });
+        mobileDrawers.forEach(function (el) { el.classList.remove('active'); });
         document.body.classList.remove('drawer-open', 'drawer-scaled');
       }
     }

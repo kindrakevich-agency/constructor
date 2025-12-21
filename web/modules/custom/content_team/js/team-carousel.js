@@ -15,11 +15,13 @@
           return;
         }
 
-        // Initialize Swiper.
+        // Initialize Swiper - matches example page exactly.
         new Swiper(element, {
-          slidesPerView: 1.2,
+          slidesPerView: 1.3,
           spaceBetween: 16,
           grabCursor: true,
+          loop: true,
+          centeredSlides: false,
           navigation: {
             nextEl: '.team-swiper-next',
             prevEl: '.team-swiper-prev',
@@ -30,24 +32,16 @@
               spaceBetween: 20,
             },
             640: {
-              slidesPerView: 2.2,
+              slidesPerView: 1.8,
+              spaceBetween: 24,
+            },
+            768: {
+              slidesPerView: 2,
               spaceBetween: 24,
             },
             1024: {
-              slidesPerView: 2.5,
-              spaceBetween: 24,
-            },
-            1280: {
-              slidesPerView: 3,
-              spaceBetween: 24,
-            },
-            1536: {
-              slidesPerView: 3.5,
-              spaceBetween: 32,
-            },
-            1920: {
-              slidesPerView: 4,
-              spaceBetween: 32,
+              slidesPerView: 2.2,
+              spaceBetween: 28,
             },
           },
         });
