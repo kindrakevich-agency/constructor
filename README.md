@@ -236,11 +236,14 @@ Blocks are not automatically placed during installation. Visit `/admin/structure
 - **Main Navigation**: Place in Primary Menu region
 - **Site Branding**: Place in Header region
 
-### Content Translation (Optional)
-Content translation is not enabled during installation to ensure stability. To enable:
-1. Go to `/admin/modules`
-2. Enable "Content Translation" module
-3. Configure at `/admin/config/regional/content-language`
+### Content Translation (Automatic)
+When you configure additional languages during installation and provide an OpenAI API key:
+- The `content_translation` module is automatically installed
+- FAQ and Team content types are automatically enabled for translation
+- AI-generated content is automatically translated to all configured languages
+- A post-installation setup runs to complete the translation process
+
+To manually configure content translation later, visit `/admin/config/regional/content-language`
 
 ## Configuration
 

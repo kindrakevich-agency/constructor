@@ -137,12 +137,31 @@ function constructor_install_tasks(&$install_state) {
       'function' => 'constructor_finalize_batch',
     ];
 
-    // Update translations step.
+    // Install content_translation module.
+    // NOTE: We install the module but DON'T enable translation for content types
+    // during this batch. That's done in the post-install controller to avoid
+    // entity hook issues.
+    $tasks['constructor_install_translation_module'] = [
+      'display_name' => t('Installing Translation Module'),
+      'display' => TRUE,
+      'type' => 'batch',
+      'function' => 'constructor_install_translation_module_batch',
+    ];
+
+    // Update interface translations step.
     $tasks['constructor_update_translations'] = [
       'display_name' => t('Updating Translations'),
       'display' => TRUE,
       'type' => 'batch',
       'function' => 'constructor_update_translations_batch',
+    ];
+
+    // Set up post-install state for content translation.
+    $tasks['constructor_setup_post_install'] = [
+      'display_name' => t('Finalizing'),
+      'display' => TRUE,
+      'type' => 'normal',
+      'function' => 'constructor_setup_post_install',
     ];
   }
   else {
@@ -323,13 +342,14 @@ function constructor_finalize_batch(&$install_state) {
 
   $operations = [];
 
-  // Apply languages.
+  // ========== PHASE 1: Module Installations ==========
+  // Apply languages (installs language, content_translation, locale modules).
   $operations[] = ['constructor_batch_apply_languages', [$constructor_settings]];
 
   // Install language switcher module if multiple languages.
   $operations[] = ['constructor_batch_install_language_switcher', [$constructor_settings]];
 
-  // Apply content type modules (like content_faq).
+  // Apply content type modules (like content_faq, content_team).
   $operations[] = ['constructor_batch_apply_content_type_modules', [$constructor_settings]];
 
   // Apply content types.
@@ -338,36 +358,28 @@ function constructor_finalize_batch(&$install_state) {
   // Apply modules.
   $operations[] = ['constructor_batch_apply_modules', [$constructor_settings]];
 
+  // ========== PHASE 2: Container Rebuild ==========
   // CRITICAL: Rebuild container after all module installations.
-  // This ensures entity types are properly registered before using them.
   $operations[] = ['constructor_batch_rebuild_container', []];
 
+  // ========== PHASE 3: Basic Configuration ==========
   // Apply layout.
   $operations[] = ['constructor_batch_apply_layout', [$constructor_settings]];
 
   // Apply AI settings.
   $operations[] = ['constructor_batch_apply_ai_settings', [$constructor_settings]];
 
-  // Set default theme FIRST (before placing blocks).
+  // Set default theme.
   $operations[] = ['constructor_batch_set_default_theme', []];
 
   // Configure theme settings (dark mode, color scheme).
   $operations[] = ['constructor_batch_configure_theme_settings', [$constructor_settings]];
 
-  // Create main menu links.
+  // Create main menu links (without block placement).
   $operations[] = ['constructor_batch_create_main_menu', [$constructor_settings]];
 
-  // Create full_html text format (needed before AI content).
+  // Create full_html text format.
   $operations[] = ['constructor_batch_create_full_html_format', []];
-
-  // Generate AI content (FAQ nodes).
-  $operations[] = ['constructor_batch_generate_ai_content', [$constructor_settings]];
-
-  // Place content blocks on frontpage (after theme is set).
-  $operations[] = ['constructor_batch_place_content_blocks', [$constructor_settings]];
-
-  // Place language switcher block in header (after theme is set).
-  $operations[] = ['constructor_batch_place_language_switcher_block', [$constructor_settings]];
 
   // Configure frontpage.
   $operations[] = ['constructor_batch_configure_frontpage', [$constructor_settings]];
@@ -375,14 +387,143 @@ function constructor_finalize_batch(&$install_state) {
   // Configure development settings.
   $operations[] = ['constructor_batch_configure_development_settings', []];
 
-  // Clear caches.
-  $operations[] = ['constructor_batch_clear_caches', []];
+  // ========== PHASE 4: Final Cache Clear ==========
+  // Clear all caches to ensure entity types are fully registered.
+  $operations[] = ['constructor_batch_final_cache_clear', []];
+
+  // ========== PHASE 5: AI Content (WITHOUT translations) ==========
+  // Generate AI content (FAQ and Team nodes) - NO translations yet.
+  $operations[] = ['constructor_batch_generate_ai_content_no_translation', [$constructor_settings]];
+
+  // Place all blocks (FAQ, Team, Language Switcher, Main Menu, Branding).
+  $operations[] = ['constructor_batch_place_all_blocks', [$constructor_settings]];
+
+  // NOTE: Content translation is handled in a SEPARATE install task
+  // (constructor_content_translation_batch) that runs as a new HTTP request.
+  // This ensures entity types are fully registered before any translation ops.
 
   return [
     'title' => t('Applying Configuration'),
     'operations' => $operations,
     'finished' => 'constructor_finalize_batch_finished',
   ];
+}
+
+/**
+ * Setup post-install redirect for content translation.
+ *
+ * This sets state variables that the CompleteSetupController will use
+ * to run content translations in a fresh HTTP request.
+ */
+function constructor_setup_post_install(&$install_state) {
+  // Get constructor settings from key_value storage.
+  $key_value = \Drupal::keyValue('constructor_install');
+  $constructor_settings = [
+    'site_basics' => $key_value->get('site_basics', []),
+    'languages' => $key_value->get('languages', []),
+    'content_type_modules' => $key_value->get('content_type_modules', []),
+    'ai_settings' => $key_value->get('ai_settings', []),
+  ];
+
+  $languages = $constructor_settings['languages'] ?? [];
+  $additional_languages = $languages['additional_languages'] ?? [];
+
+  // Filter additional_languages.
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  // Only set up post-install if we have additional languages and API key.
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  if (!empty($additional_languages) && !empty($ai_settings['api_key'])) {
+    // Set state for post-install controller.
+    $state = \Drupal::state();
+    $state->set('constructor.needs_post_install_setup', TRUE);
+    $state->set('constructor.post_install_settings', $constructor_settings);
+
+    \Drupal::logger('constructor')->notice('Post-install translation setup configured.');
+
+    // Set the redirect destination.
+    $install_state['parameters']['destination'] = '/admin/constructor/complete-setup';
+  }
+  else {
+    \Drupal::logger('constructor')->notice('Post-install translation not needed (no additional languages or no API key).');
+  }
+}
+
+/**
+ * Batch callback: Install translation module.
+ *
+ * This runs as a SEPARATE install task - installs ONLY the module.
+ * The actual translation happens in the NEXT task (new HTTP request).
+ */
+function constructor_install_translation_module_batch(&$install_state) {
+  // Get constructor settings from key_value storage.
+  $key_value = \Drupal::keyValue('constructor_install');
+  $constructor_settings = [
+    'languages' => $key_value->get('languages', []),
+  ];
+
+  $operations = [];
+
+  // Install content_translation module ONLY.
+  $operations[] = ['constructor_batch_install_content_translation', [$constructor_settings]];
+
+  return [
+    'title' => t('Installing Translation Module'),
+    'operations' => $operations,
+    'finished' => 'constructor_install_translation_finished',
+  ];
+}
+
+/**
+ * Batch finished callback for translation module installation.
+ */
+function constructor_install_translation_finished($success, $results, $operations) {
+  if ($success) {
+    \Drupal::messenger()->addStatus(t('Translation module installed.'));
+  }
+}
+
+/**
+ * Batch callback: Translate content.
+ *
+ * This runs as a SEPARATE install task AFTER the module is installed.
+ * Running as a new HTTP request ensures entity types are fully registered.
+ */
+function constructor_translate_content_batch(&$install_state) {
+  // Get constructor settings from key_value storage.
+  $key_value = \Drupal::keyValue('constructor_install');
+  $constructor_settings = [
+    'site_basics' => $key_value->get('site_basics', []),
+    'languages' => $key_value->get('languages', []),
+    'content_type_modules' => $key_value->get('content_type_modules', []),
+    'ai_settings' => $key_value->get('ai_settings', []),
+  ];
+
+  $operations = [];
+
+  // Translate existing content - NOW in a new HTTP request.
+  $operations[] = ['constructor_batch_translate_existing_content', [$constructor_settings]];
+
+  return [
+    'title' => t('Translating Content'),
+    'operations' => $operations,
+    'finished' => 'constructor_translate_content_finished',
+  ];
+}
+
+/**
+ * Batch finished callback for content translation.
+ */
+function constructor_translate_content_finished($success, $results, $operations) {
+  if ($success) {
+    \Drupal::messenger()->addStatus(t('Content translation completed.'));
+  }
+  else {
+    \Drupal::messenger()->addWarning(t('Content translation had some issues.'));
+  }
 }
 
 /**
@@ -565,25 +706,12 @@ function constructor_batch_apply_ai_settings($constructor_settings, &$context) {
 /**
  * Batch operation: Place content blocks on frontpage.
  *
- * Note: Block placement during installation can cause issues with
- * content_translation module hooks. We skip automatic block placement
- * and let users place blocks manually via the Block Layout UI.
+ * @deprecated Use constructor_batch_place_all_blocks() instead.
  */
 function constructor_batch_place_content_blocks($constructor_settings, &$context) {
   $context['message'] = t('Registering content blocks...');
-
-  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
-
-  \Drupal::logger('constructor')->notice('Content type modules for blocks: @modules', [
-    '@modules' => implode(', ', $content_type_modules),
-  ]);
-
-  // Skip block placement during installation to avoid entity type issues.
-  // Blocks will be available in Block Layout UI for manual placement.
-  // This avoids the content_translation hook triggering before entity types are ready.
-  \Drupal::logger('constructor')->notice('Block placement skipped during installation. Use Block Layout UI to place FAQ and Team blocks.');
-
-  $context['results'][] = 'content_blocks_registered';
+  // This function is now replaced by constructor_batch_place_all_blocks().
+  $context['results'][] = 'content_blocks_deprecated';
 }
 
 /**
@@ -647,12 +775,6 @@ function constructor_batch_generate_ai_content($constructor_settings, &$context)
       // Create FAQ nodes.
       $node_storage = \Drupal::entityTypeManager()->getStorage('node');
 
-      // Enable translation for FAQ content type if we have additional languages.
-      $translation_enabled = FALSE;
-      if ($has_translations) {
-        $translation_enabled = _constructor_enable_faq_translation();
-      }
-
       // Get or create a Content Editor user for AI-generated content.
       $content_editor_uid = _constructor_get_content_editor_user();
 
@@ -675,10 +797,8 @@ function constructor_batch_generate_ai_content($constructor_settings, &$context)
         ]);
         $node->save();
 
-        // Create translations if we have additional languages and translation was enabled.
-        if ($has_translations && $translation_enabled) {
-          _constructor_translate_faq_node($node, $additional_languages, $site_description, $ai_settings);
-        }
+        // NOTE: Translation is handled by CompleteSetupController in a fresh HTTP request
+        // to avoid entity hook issues during installation batch.
       }
 
       \Drupal::logger('constructor')->notice('Generated @count FAQ nodes with AI.', ['@count' => count($faqs)]);
@@ -701,14 +821,80 @@ function constructor_batch_generate_ai_content($constructor_settings, &$context)
 
 /**
  * Enable translation for FAQ content type.
- *
- * NOTE: Content translation is disabled during installation to avoid
- * entity type registration issues. This function is kept for future use.
  */
 function _constructor_enable_faq_translation() {
-  // Content translation is not enabled during installation.
-  \Drupal::logger('constructor')->notice('FAQ translation setup skipped during installation.');
-  return FALSE;
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping FAQ translation setup.');
+    return FALSE;
+  }
+
+  // Check if language module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('language')) {
+    \Drupal::logger('constructor')->notice('Language module not enabled, skipping FAQ translation setup.');
+    return FALSE;
+  }
+
+  try {
+    // Enable translation for the FAQ content type.
+    $config = \Drupal::configFactory()->getEditable('language.content_settings.node.faq');
+    // IMPORTANT: The 'id' key is required by ContentLanguageSettings entity.
+    $config->set('id', 'node.faq');
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'node');
+    $config->set('target_bundle', 'faq');
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for FAQ content type.');
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable FAQ translation: @message', ['@message' => $e->getMessage()]);
+    return FALSE;
+  }
+}
+
+/**
+ * Enable translation for Team content type.
+ */
+function _constructor_enable_team_translation() {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping Team translation setup.');
+    return FALSE;
+  }
+
+  // Check if language module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('language')) {
+    \Drupal::logger('constructor')->notice('Language module not enabled, skipping Team translation setup.');
+    return FALSE;
+  }
+
+  try {
+    // Enable translation for the Team content type.
+    $config = \Drupal::configFactory()->getEditable('language.content_settings.node.team_member');
+    // IMPORTANT: The 'id' key is required by ContentLanguageSettings entity.
+    $config->set('id', 'node.team_member');
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'node');
+    $config->set('target_bundle', 'team_member');
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for Team content type.');
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable Team translation: @message', ['@message' => $e->getMessage()]);
+    return FALSE;
+  }
 }
 
 /**
@@ -920,19 +1106,26 @@ function _constructor_get_content_editor_user() {
 }
 
 /**
- * Translate FAQ node to additional languages.
- *
- * NOTE: Content translation is disabled during installation to avoid
- * entity type registration issues. This function is kept for future use.
+ * Translate FAQ node to additional languages using AI.
  */
 function _constructor_translate_faq_node($node, $languages, $site_description, $ai_settings) {
-  // Content translation is not enabled during installation.
-  \Drupal::logger('constructor')->notice('FAQ node translation skipped during installation.');
-  return;
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping FAQ translation.');
+    return;
+  }
 
-  // The code below is kept for future reference but not executed.
-  $unused_code = FALSE;
-  if ($unused_code) {
+  // Check if node is translatable.
+  try {
+    if (!$node->isTranslatable()) {
+      \Drupal::logger('constructor')->notice('Node @nid is not translatable, skipping.', ['@nid' => $node->id()]);
+      return;
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->warning('Could not check translatability: @message', ['@message' => $e->getMessage()]);
+    return;
+  }
 
   $api_key = $ai_settings['api_key'];
   $model = $ai_settings['text_model'] ?? 'gpt-4';
@@ -950,10 +1143,23 @@ function _constructor_translate_faq_node($node, $languages, $site_description, $
     'de' => 'German',
     'fr' => 'French',
     'es' => 'Spanish',
+    'it' => 'Italian',
+    'pl' => 'Polish',
+    'pt-pt' => 'Portuguese',
+    'nl' => 'Dutch',
+    'ru' => 'Russian',
+    'ja' => 'Japanese',
+    'zh-hans' => 'Chinese (Simplified)',
+    'ar' => 'Arabic',
   ];
 
   foreach ($languages as $langcode) {
     if ($langcode === $node->language()->getId()) {
+      continue;
+    }
+
+    // Skip if translation already exists.
+    if ($node->hasTranslation($langcode)) {
       continue;
     }
 
@@ -1002,6 +1208,10 @@ Return as JSON with 'question' and 'answer' keys. Only return the JSON, no other
           ],
         ]);
         $node->save();
+        \Drupal::logger('constructor')->notice('Added @lang translation for FAQ: @title', [
+          '@lang' => $langcode,
+          '@title' => $original_question,
+        ]);
       }
     }
     catch (\Exception $e) {
@@ -1011,29 +1221,124 @@ Return as JSON with 'question' and 'answer' keys. Only return the JSON, no other
       ]);
     }
   }
-  } // End of unused code block.
+}
+
+/**
+ * Translate Team node to additional languages using AI.
+ */
+function _constructor_translate_team_node($node, $languages, $site_description, $ai_settings) {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    return;
+  }
+
+  // Check if node is translatable.
+  try {
+    if (!$node->isTranslatable()) {
+      return;
+    }
+  }
+  catch (\Exception $e) {
+    return;
+  }
+
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $original_name = $node->getTitle();
+  $original_position = $node->get('field_team_position')->value ?? '';
+
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+    'it' => 'Italian',
+    'pl' => 'Polish',
+    'pt-pt' => 'Portuguese',
+    'nl' => 'Dutch',
+    'ru' => 'Russian',
+    'ja' => 'Japanese',
+    'zh-hans' => 'Chinese (Simplified)',
+    'ar' => 'Arabic',
+  ];
+
+  foreach ($languages as $langcode) {
+    if ($langcode === $node->language()->getId()) {
+      continue;
+    }
+
+    // Skip if translation already exists.
+    if ($node->hasTranslation($langcode)) {
+      continue;
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      // For team members, we only translate the position (name stays the same).
+      $prompt = "Translate the following job position to $language_name:
+
+Position: $original_position
+
+Return as JSON with 'position' key. Only return the JSON, no other text.";
+
+      $client = \Drupal::httpClient();
+      $response = $client->post('https://api.openai.com/v1/chat/completions', [
+        'headers' => [
+          'Authorization' => 'Bearer ' . $api_key,
+          'Content-Type' => 'application/json',
+        ],
+        'json' => [
+          'model' => $model,
+          'messages' => [
+            ['role' => 'user', 'content' => $prompt],
+          ],
+          'temperature' => 0.3,
+          'max_tokens' => 200,
+        ],
+        'timeout' => 30,
+      ]);
+
+      $data = json_decode($response->getBody()->getContents(), TRUE);
+      $content = $data['choices'][0]['message']['content'] ?? '';
+
+      $content = trim($content);
+      $content = preg_replace('/^```json\s*/', '', $content);
+      $content = preg_replace('/\s*```$/', '', $content);
+
+      $translation_data = json_decode($content, TRUE);
+
+      if (!empty($translation_data['position'])) {
+        $node->addTranslation($langcode, [
+          'title' => $original_name,
+          'field_team_position' => $translation_data['position'],
+        ]);
+        $node->save();
+        \Drupal::logger('constructor')->notice('Added @lang translation for Team member: @name', [
+          '@lang' => $langcode,
+          '@name' => $original_name,
+        ]);
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Team translation error for @lang: @message', [
+        '@lang' => $langcode,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
 }
 
 /**
  * Batch operation: Place language switcher block in header.
  *
- * Note: Block placement during installation can cause issues with
- * content_translation module hooks. We skip automatic block placement.
+ * @deprecated Use constructor_batch_place_all_blocks() instead.
  */
 function constructor_batch_place_language_switcher_block($constructor_settings, &$context) {
   $context['message'] = t('Registering language switcher...');
-
-  // Check if language_switcher module is installed.
-  if (!\Drupal::moduleHandler()->moduleExists('language_switcher')) {
-    \Drupal::logger('constructor')->notice('Language switcher module not installed.');
-    $context['results'][] = 'language_switcher_block_skipped';
-    return;
-  }
-
-  // Skip block placement during installation to avoid entity type issues.
-  \Drupal::logger('constructor')->notice('Language switcher block placement skipped during installation. Use Block Layout UI to place it.');
-
-  $context['results'][] = 'language_switcher_block';
+  // This function is now replaced by constructor_batch_place_all_blocks().
+  $context['results'][] = 'language_switcher_deprecated';
 }
 
 /**
@@ -1296,14 +1601,12 @@ function constructor_batch_configure_development_settings(&$context) {
 }
 
 /**
- * Batch operation: Clear caches.
+ * Batch operation: Clear caches (simple version).
  */
 function constructor_batch_clear_caches(&$context) {
   $context['message'] = t('Clearing caches...');
 
   try {
-    // Use a simpler cache clear that doesn't trigger route rebuilding.
-    // Full cache flush can cause issues with content_translation hooks.
     \Drupal::cache()->deleteAll();
     \Drupal::cache('render')->deleteAll();
     \Drupal::cache('discovery')->deleteAll();
@@ -1315,6 +1618,367 @@ function constructor_batch_clear_caches(&$context) {
   }
 
   $context['results'][] = 'caches';
+}
+
+/**
+ * Batch operation: Final cache clear with full flush.
+ *
+ * This runs after all modules are installed and configured.
+ * It ensures all entity types are properly registered before
+ * AI content generation and block placement.
+ */
+function constructor_batch_final_cache_clear(&$context) {
+  $context['message'] = t('Preparing for content generation...');
+
+  try {
+    // Full cache flush to ensure everything is properly registered.
+    drupal_flush_all_caches();
+    \Drupal::logger('constructor')->notice('Final cache flush completed.');
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->warning('Final cache flush had issues: @message', ['@message' => $e->getMessage()]);
+    // Try simpler cache clear as fallback.
+    try {
+      \Drupal::cache()->deleteAll();
+      \Drupal::cache('render')->deleteAll();
+      \Drupal::cache('discovery')->deleteAll();
+      \Drupal::cache('config')->deleteAll();
+    }
+    catch (\Exception $e2) {
+      // Ignore secondary errors.
+    }
+  }
+
+  $context['results'][] = 'final_cache_clear';
+}
+
+/**
+ * Batch operation: Place all blocks.
+ *
+ * This runs at the very end after all entity types are registered.
+ */
+function constructor_batch_place_all_blocks($constructor_settings, &$context) {
+  $context['message'] = t('Placing blocks...');
+
+  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  try {
+    $block_storage = \Drupal::entityTypeManager()->getStorage('block');
+
+    // Place site branding block in header region.
+    if (!$block_storage->load('constructor_theme_branding')) {
+      $branding_block = $block_storage->create([
+        'id' => 'constructor_theme_branding',
+        'theme' => 'constructor_theme',
+        'region' => 'header',
+        'weight' => 0,
+        'status' => TRUE,
+        'plugin' => 'system_branding_block',
+        'settings' => [
+          'id' => 'system_branding_block',
+          'label' => 'Site branding',
+          'label_display' => '0',
+          'provider' => 'system',
+          'use_site_logo' => TRUE,
+          'use_site_name' => TRUE,
+          'use_site_slogan' => FALSE,
+        ],
+      ]);
+      $branding_block->save();
+      \Drupal::logger('constructor')->notice('Created site branding block.');
+    }
+
+    // Place main menu block in primary_menu region.
+    if (!$block_storage->load('constructor_theme_main_menu')) {
+      $main_menu_block = $block_storage->create([
+        'id' => 'constructor_theme_main_menu',
+        'theme' => 'constructor_theme',
+        'region' => 'primary_menu',
+        'weight' => 0,
+        'status' => TRUE,
+        'plugin' => 'system_menu_block:main',
+        'settings' => [
+          'id' => 'system_menu_block:main',
+          'label' => 'Main navigation',
+          'label_display' => '0',
+          'provider' => 'system',
+          'level' => 1,
+          'depth' => 1,
+          'expand_all_items' => FALSE,
+        ],
+      ]);
+      $main_menu_block->save();
+      \Drupal::logger('constructor')->notice('Created main menu block.');
+    }
+
+    // Place FAQ block if content_faq module is installed.
+    if (in_array('content_faq', $content_type_modules) &&
+        \Drupal::moduleHandler()->moduleExists('content_faq')) {
+      if (!$block_storage->load('constructor_theme_faq_block')) {
+        $faq_block = $block_storage->create([
+          'id' => 'constructor_theme_faq_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 10,
+          'status' => TRUE,
+          'plugin' => 'faq_block',
+          'settings' => [
+            'id' => 'faq_block',
+            'label' => 'FAQ Block',
+            'label_display' => '0',
+            'provider' => 'content_faq',
+            'title' => 'Frequently Asked Questions',
+            'subtitle' => 'FAQs',
+            'button_text' => 'Contact Us',
+            'button_url' => '/contact',
+            'limit' => 5,
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $faq_block->save();
+        \Drupal::logger('constructor')->notice('Created FAQ block.');
+      }
+    }
+
+    // Place Team block if content_team module is installed.
+    if (in_array('content_team', $content_type_modules) &&
+        \Drupal::moduleHandler()->moduleExists('content_team')) {
+      if (!$block_storage->load('constructor_theme_team_block')) {
+        $team_block = $block_storage->create([
+          'id' => 'constructor_theme_team_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 5,
+          'status' => TRUE,
+          'plugin' => 'team_block',
+          'settings' => [
+            'id' => 'team_block',
+            'label' => 'Team Block',
+            'label_display' => '0',
+            'provider' => 'content_team',
+            'title' => 'Your Career,<br>Your Connection',
+            'subtitle' => 'Join us',
+            'description' => "We're always looking for passionate individuals to join our team.",
+            'button_text' => 'View Open Positions',
+            'button_url' => '/careers',
+            'limit' => 10,
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $team_block->save();
+        \Drupal::logger('constructor')->notice('Created Team block.');
+      }
+    }
+
+    // Place language switcher block if language_switcher module is installed.
+    if (\Drupal::moduleHandler()->moduleExists('language_switcher') &&
+        !empty($languages['enable_multilingual'])) {
+      if (!$block_storage->load('constructor_theme_language_switcher')) {
+        $lang_block = $block_storage->create([
+          'id' => 'constructor_theme_language_switcher',
+          'theme' => 'constructor_theme',
+          'region' => 'secondary_menu',
+          'weight' => 10,
+          'status' => TRUE,
+          'plugin' => 'language_switcher_block',
+          'settings' => [
+            'id' => 'language_switcher_block',
+            'label' => 'Language Switcher',
+            'label_display' => '0',
+            'provider' => 'language_switcher',
+          ],
+          'visibility' => [],
+        ]);
+        $lang_block->save();
+        \Drupal::logger('constructor')->notice('Created language switcher block.');
+      }
+    }
+
+    \Drupal::logger('constructor')->notice('All blocks placed successfully.');
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to place blocks: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'blocks_placed';
+}
+
+/**
+ * Batch operation: Generate AI content WITHOUT translation.
+ *
+ * This creates FAQ and Team nodes but skips translation.
+ * Translation is done in a separate batch after content_translation is installed.
+ */
+function constructor_batch_generate_ai_content_no_translation($constructor_settings, &$context) {
+  $context['message'] = t('Generating AI content...');
+
+  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  // Check if FAQ module is enabled.
+  if (!in_array('content_faq', $content_type_modules)) {
+    \Drupal::logger('constructor')->notice('AI content skipped: FAQ module not selected.');
+    $context['results'][] = 'ai_content_skipped';
+    return;
+  }
+
+  // Check if AI has API key configured.
+  if (empty($ai_settings['api_key'])) {
+    \Drupal::logger('constructor')->notice('AI content skipped: No API key configured.');
+    $context['results'][] = 'ai_content_no_api';
+    return;
+  }
+
+  // Get site description.
+  $site_description = $site_basics['site_description'] ?? '';
+  $site_name = $site_basics['site_name'] ?? 'Website';
+
+  if (empty($site_description)) {
+    $site_description = "A professional website for $site_name";
+  }
+
+  // Get main language.
+  $main_language = $languages['default_language'] ?? 'en';
+
+  \Drupal::logger('constructor')->notice('Starting AI FAQ generation for site: @desc, language: @lang (translations deferred)', [
+    '@desc' => $site_description,
+    '@lang' => $main_language,
+  ]);
+
+  try {
+    // Generate FAQ content using OpenAI.
+    $faqs = _constructor_generate_faq_with_ai($site_description, $main_language, $ai_settings);
+
+    \Drupal::logger('constructor')->notice('AI returned @count FAQs.', ['@count' => count($faqs)]);
+
+    if (!empty($faqs)) {
+      // Create FAQ nodes WITHOUT translation.
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+      // Get or create a Content Editor user for AI-generated content.
+      $content_editor_uid = _constructor_get_content_editor_user();
+
+      foreach ($faqs as $index => $faq) {
+        \Drupal::logger('constructor')->notice('Creating FAQ @num: @question', [
+          '@num' => $index + 1,
+          '@question' => $faq['question'],
+        ]);
+
+        $node = $node_storage->create([
+          'type' => 'faq',
+          'title' => $faq['question'],
+          'field_faq_answer' => [
+            'value' => $faq['answer'],
+            'format' => 'full_html',
+          ],
+          'status' => 1,
+          'langcode' => $main_language,
+          'uid' => $content_editor_uid,
+        ]);
+        $node->save();
+      }
+
+      \Drupal::logger('constructor')->notice('Generated @count FAQ nodes (translations deferred).', ['@count' => count($faqs)]);
+    }
+    else {
+      \Drupal::logger('constructor')->warning('AI returned empty FAQ list.');
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to generate AI content: @message', ['@message' => $e->getMessage()]);
+  }
+
+  // Generate Team Members if content_team module is enabled.
+  if (in_array('content_team', $content_type_modules)) {
+    _constructor_generate_team_members_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid ?? 1);
+  }
+
+  $context['results'][] = 'ai_content_no_translation';
+}
+
+/**
+ * Batch operation: Install content_translation module.
+ *
+ * This runs AFTER all content is created to avoid entityBundleInfoAlter errors.
+ */
+function constructor_batch_install_content_translation($constructor_settings, &$context) {
+  $context['message'] = t('Installing content translation module...');
+
+  $language_settings = $constructor_settings['languages'] ?? [];
+  $additional_languages = $language_settings['additional_languages'] ?? [];
+  $default_language = $language_settings['default_language'] ?? 'en';
+
+  // Filter additional_languages to only valid langcodes.
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  // Only install if we have additional languages or content translation was explicitly requested.
+  $needs_content_translation = !empty($additional_languages) || !empty($language_settings['enable_content_translation']);
+
+  if (!$needs_content_translation) {
+    \Drupal::logger('constructor')->notice('Content translation module not needed - skipping.');
+    $context['results'][] = 'content_translation_skipped';
+    return;
+  }
+
+  // Check if already installed.
+  if (\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module already installed.');
+    $context['results'][] = 'content_translation_exists';
+    return;
+  }
+
+  try {
+    /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */
+    $module_installer = \Drupal::service('module_installer');
+    $module_installer->install(['content_translation']);
+
+    \Drupal::logger('constructor')->notice('Content translation module installed successfully.');
+
+    // Rebuild container to register the module.
+    \Drupal::service('kernel')->rebuildContainer();
+
+    // Clear caches.
+    drupal_flush_all_caches();
+
+    $context['results'][] = 'content_translation_installed';
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to install content_translation module: @message', ['@message' => $e->getMessage()]);
+    $context['results'][] = 'content_translation_failed';
+  }
+}
+
+/**
+ * Batch operation: Translate existing content.
+ *
+ * NOTE: Translation is now handled by CompleteSetupController in a fresh
+ * HTTP request to avoid entity hook issues during installation batch.
+ * This function is kept for backwards compatibility but does nothing.
+ */
+function constructor_batch_translate_existing_content($constructor_settings, &$context) {
+  $context['message'] = t('Preparing translations...');
+
+  // Translation is deferred to post-install controller to avoid
+  // entity hook issues during the installation batch.
+  \Drupal::logger('constructor')->notice('Content translation will be completed in post-install setup.');
+  $context['results'][] = 'translations_deferred';
 }
 
 /**
@@ -1428,22 +2092,21 @@ function constructor_apply_languages(&$context, array $constructor_settings = []
   if ($needs_multilingual) {
     \Drupal::logger('constructor')->notice('Entering multilingual setup block...');
     try {
+      // NOTE: We only install 'language' and 'locale' here.
+      // 'content_translation' is installed LAST in PHASE 6 to avoid
+      // entityBundleInfoAlter hook errors during content creation.
       $modules_to_enable = ['language'];
-
-      // NOTE: content_translation is NOT enabled during installation to avoid
-      // entity type registration issues. Users can enable it manually after
-      // installation via /admin/modules if needed.
 
       if (!empty($language_settings['enable_interface_translation'])) {
         $modules_to_enable[] = 'locale';
       }
 
-      // Enable language modules.
+      // Enable language modules (NOT content_translation - that comes later).
       /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */
       $module_installer = \Drupal::service('module_installer');
       $module_installer->install($modules_to_enable);
 
-      \Drupal::logger('constructor')->notice('Installed language modules: @modules', [
+      \Drupal::logger('constructor')->notice('Installed language modules (content_translation deferred): @modules', [
         '@modules' => implode(', ', $modules_to_enable),
       ]);
 

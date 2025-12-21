@@ -13,3 +13,11 @@ constructor.frontpage:
     _title: ''
   requirements:
     _access: 'TRUE'
+
+constructor.complete_setup:
+  path: '/admin/constructor/complete-setup'
+  defaults:
+    _controller: '\Drupal\constructor\Controller\CompleteSetupController::completeSetup'
+    _title: 'Completing Setup'
+  requirements:
+    _access: 'TRUE'

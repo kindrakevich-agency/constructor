@@ -1,0 +1,6 @@
+services:
+  constructor.post_install_redirect_subscriber:
+    class: Drupal\constructor\EventSubscriber\PostInstallRedirectSubscriber
+    arguments: ['@state']
+    tags:
+      - { name: event_subscriber }
