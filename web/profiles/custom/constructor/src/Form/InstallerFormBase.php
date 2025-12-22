@@ -43,16 +43,11 @@ abstract class InstallerFormBase extends FormBase {
         'description' => $this->t('Define your content structure'),
       ],
       4 => [
-        'id' => 'modules',
-        'title' => $this->t('Modules'),
-        'description' => $this->t('Enable additional functionality'),
-      ],
-      5 => [
         'id' => 'design_layout',
         'title' => $this->t('Design & Layout'),
         'description' => $this->t('Configure your site appearance'),
       ],
-      6 => [
+      5 => [
         'id' => 'ai_integration',
         'title' => $this->t('AI Integration'),
         'description' => $this->t('Set up AI content generation'),

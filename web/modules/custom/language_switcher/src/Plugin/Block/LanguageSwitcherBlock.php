@@ -89,6 +89,12 @@ class LanguageSwitcherBlock extends BlockBase implements ContainerFactoryPluginI
         'library' => [
           'language_switcher/language-switcher',
         ],
+        'drupalSettings' => [
+          'languageSwitcher' => [
+            'languages' => $language_links,
+            'currentLanguage' => $current_language->getId(),
+          ],
+        ],
       ],
       '#cache' => [
         'contexts' => ['languages:language_interface', 'url.path'],

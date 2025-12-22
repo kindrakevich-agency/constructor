@@ -399,3 +399,21 @@ input[type="radio"] {
   font-weight: 600;
   margin-bottom: var(--spacing-md);
 }
+
+/* Language Switcher in Footer */
+.footer-language-switcher .language-switcher-header {
+  display: none !important;
+}
+
+.footer-language-switcher .language-switcher-footer {
+  display: flex !important;
+}
+
+.footer-language-switcher .language-switcher-btn-mobile {
+  display: none !important;
+}
+
+/* Hide footer version in header (secondary_menu region outside footer) */
+.region-secondary-menu .language-switcher-footer {
+  display: none !important;
+}

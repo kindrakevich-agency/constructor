@@ -3,19 +3,33 @@
  * @file
  * Language Switcher block template.
  *
+ * This template only renders the trigger buttons.
+ * The modal and drawer are rendered once in the page template.
+ *
  * Variables:
  * - languages: Array of available languages.
  * - current_language: Current active language info.
  */
 #}
 
-{# Desktop Language Button #}
-<button class="language-switcher-btn open-language-modal hidden lg:flex items-center gap-2 3xl:gap-3 3xl:text-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors cursor-pointer">
+{# Desktop Language Button - Header version #}
+<button class="language-switcher-btn language-switcher-header open-language-modal hidden lg:flex items-center gap-2 3xl:gap-3 3xl:text-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors cursor-pointer">
   <svg class="w-5 h-5 3xl:w-6 3xl:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
   </svg>
   <span class="selected-language-desktop">{{ current_language.native_name }}</span>
   <svg class="w-4 h-4 3xl:w-5 3xl:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+  </svg>
+</button>
+
+{# Footer Language Button - Select-like style #}
+<button class="language-switcher-btn language-switcher-footer open-language-modal hidden items-center gap-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-white font-medium transition-colors cursor-pointer text-sm">
+  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+  </svg>
+  <span class="selected-language-footer flex-1 text-left">{{ current_language.native_name }}</span>
+  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
   </svg>
 </button>
@@ -32,74 +46,3 @@
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
   </svg>
 </button>
-
-{# Language Modal Overlay #}
-<div class="language-modal-overlay fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"></div>
-
-{# Language Modal - Desktop (hidden on mobile via CSS, flex on desktop) #}
-<div class="language-modal-desktop fixed inset-0 z-[70] items-center justify-center p-4">
-  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-    {# Modal Header #}
-    <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700">
-      <div>
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ 'Select Language'|t }}</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ 'Choose your preferred language'|t }}</p>
-      </div>
-      <button class="close-language-modal w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
-        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-    {# Modal Body #}
-    <div class="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
-      {% for langcode, lang in languages %}
-        <a href="{{ lang.url }}" class="language-option w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors {{ lang.is_current ? 'selected bg-blue-50 dark:bg-blue-900/20' : '' }}" data-lang="{{ langcode }}">
-          <span class="text-2xl">{{ lang.flag }}</span>
-          <div class="flex-1 text-left">
-            <div class="font-medium text-gray-900 dark:text-white">{{ lang.native_name }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">{{ lang.country }}</div>
-          </div>
-          <svg class="w-5 h-5 text-blue-500 {{ lang.is_current ? 'opacity-100' : 'opacity-0' }} language-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-        </a>
-      {% endfor %}
-    </div>
-  </div>
-</div>
-
-{# Language Drawer - Mobile #}
-<div class="language-drawer fixed inset-x-0 bottom-0 z-[70] lg:hidden" role="dialog" aria-modal="true">
-  <div class="language-drawer-content bg-white dark:bg-slate-900 rounded-t-[20px] shadow-2xl max-h-[85vh] flex flex-col">
-    {# Drag Handle #}
-    <div class="language-drawer-handle flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing">
-      <div class="w-12 h-1.5 bg-gray-300 dark:bg-slate-600 rounded-full"></div>
-    </div>
-
-    {# Drawer Header #}
-    <div class="px-6 pb-4 border-b border-gray-100 dark:border-slate-700">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ 'Select Language'|t }}</h3>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ 'Choose your preferred language'|t }}</p>
-    </div>
-
-    {# Language Options #}
-    <div class="p-4 space-y-2 overflow-y-auto">
-      {% for langcode, lang in languages %}
-        <a href="{{ lang.url }}" class="language-option w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors {{ lang.is_current ? 'selected bg-blue-50 dark:bg-blue-900/20' : '' }}" data-lang="{{ langcode }}">
-          <span class="text-2xl">{{ lang.flag }}</span>
-          <div class="flex-1 text-left">
-            <div class="font-medium text-gray-900 dark:text-white">{{ lang.native_name }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">{{ lang.country }}</div>
-          </div>
-          <svg class="w-5 h-5 text-blue-500 {{ lang.is_current ? 'opacity-100' : 'opacity-0' }} language-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-        </a>
-      {% endfor %}
-    </div>
-
-    {# Safe area padding for iOS #}
-    <div class="h-6 bg-white dark:bg-slate-900"></div>
-  </div>
-</div>

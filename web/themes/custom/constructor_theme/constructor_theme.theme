@@ -8,6 +8,27 @@
 use Drupal\Core\Template\Attribute;
 
 /**
+ * Implements hook_preprocess_block__system_branding_block().
+ *
+ * Ensure logo uses inline SVG fallback when no custom logo is uploaded.
+ */
+function constructor_theme_preprocess_block__system_branding_block(&$variables) {
+  // Get theme settings.
+  $theme_settings = theme_get_setting('logo', 'constructor_theme');
+
+  // Only use site_logo if a custom logo was specifically uploaded.
+  // Check if use_default is false and there's a path set.
+  if (empty($theme_settings['use_default']) && !empty($theme_settings['path'])) {
+    // Custom logo is configured - keep it.
+    $variables['site_logo'] = \Drupal::service('file_url_generator')->generateString($theme_settings['path']);
+  }
+  else {
+    // No custom logo - use inline SVG fallback.
+    $variables['site_logo'] = FALSE;
+  }
+}
+
+/**
  * Implements hook_preprocess_page().
  */
 function constructor_theme_preprocess_page(&$variables) {

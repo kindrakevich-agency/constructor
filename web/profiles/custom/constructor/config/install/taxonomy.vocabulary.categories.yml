@@ -1,7 +1,0 @@
-langcode: en
-status: true
-dependencies: {  }
-name: Categories
-vid: categories
-description: 'Use categories to organize content hierarchically.'
-weight: 0

@@ -132,13 +132,17 @@
               if (check) check.style.opacity = '0';
             }
           });
-          // Update both mobile and desktop language displays
+          // Update all language displays (mobile, desktop header, and footer)
           if (selectedLanguageEl) {
             selectedLanguageEl.textContent = lang;
           }
           if (selectedLanguageDesktopEl) {
             selectedLanguageDesktopEl.textContent = lang;
           }
+          // Update footer language button
+          document.querySelectorAll('.selected-language-footer').forEach(function (el) {
+            el.textContent = lang;
+          });
           localStorage.setItem('selectedLanguage', lang);
         }
 

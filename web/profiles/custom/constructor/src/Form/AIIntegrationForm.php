@@ -8,7 +8,7 @@ use Drupal\openai_provider\Service\OpenAIClient;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Step 6: AI Integration form.
+ * Step 5: AI Integration form.
  */
 class AIIntegrationForm extends InstallerFormBase {
 
@@ -53,7 +53,7 @@ class AIIntegrationForm extends InstallerFormBase {
    * {@inheritdoc}
    */
   protected function getStepNumber(): int {
-    return 6;
+    return 5;
   }
 
   /**
@@ -189,41 +189,6 @@ class AIIntegrationForm extends InstallerFormBase {
       $this->t('Quality setting for DALL-E 3 images.')
     );
 
-    // Content Generation Section
-    $form['content_section'] = $this->createSectionHeader(
-      $this->t('Content Generation Features'),
-      $this->t('Enable AI-powered features for content creation.')
-    );
-
-    $form['features_grid'] = [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['space-y-4', 'mb-6']],
-    ];
-
-    $form['features_grid']['enable_auto_generate'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Enable AI content suggestions'),
-      '#default_value' => $saved_values['enable_auto_generate'] ?? TRUE,
-      '#description' => $this->t('Show AI generation button on content edit forms.'),
-      '#wrapper_attributes' => ['class' => ['p-4', 'border', 'border-gray-200', 'rounded-lg']],
-    ];
-
-    $form['features_grid']['enable_seo_generation'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Enable AI SEO generation'),
-      '#default_value' => $saved_values['enable_seo_generation'] ?? TRUE,
-      '#description' => $this->t('Allow AI to generate meta descriptions and SEO content.'),
-      '#wrapper_attributes' => ['class' => ['p-4', 'border', 'border-gray-200', 'rounded-lg']],
-    ];
-
-    $form['features_grid']['enable_image_generation'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Enable AI image generation'),
-      '#default_value' => $saved_values['enable_image_generation'] ?? TRUE,
-      '#description' => $this->t('Allow AI to generate images using DALL-E.'),
-      '#wrapper_attributes' => ['class' => ['p-4', 'border', 'border-gray-200', 'rounded-lg']],
-    ];
-
     // Note: Test connection feature can be added after installation in OpenAI settings.
     $form['test_info'] = [
       '#type' => 'container',
@@ -324,9 +289,6 @@ class AIIntegrationForm extends InstallerFormBase {
       'max_tokens' => $form_state->getValue('max_tokens'),
       'image_size' => $form_state->getValue('image_size'),
       'image_quality' => $form_state->getValue('image_quality'),
-      'enable_auto_generate' => $form_state->getValue('enable_auto_generate'),
-      'enable_seo_generation' => $form_state->getValue('enable_seo_generation'),
-      'enable_image_generation' => $form_state->getValue('enable_image_generation'),
     ];
 
     $this->saveToState('ai_settings', $values);

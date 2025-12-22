@@ -38,7 +38,7 @@ function content_services_uninstall() {
   $storage->delete($nodes);
 
   // Delete field configs.
-  $fields = ['field_service_description', 'field_service_image_url'];
+  $fields = ['field_service_description', 'field_service_image_url', 'field_service_body'];
   foreach ($fields as $field_name) {
     $field_config = FieldConfig::loadByName('node', 'service', $field_name);
     if ($field_config) {
@@ -126,6 +126,27 @@ function _content_services_create_fields() {
       'settings' => [],
     ])->save();
   }
+
+  // Field: Body.
+  if (!FieldStorageConfig::loadByName('node', 'field_service_body')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_service_body',
+      'entity_type' => 'node',
+      'type' => 'text_long',
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'service', 'field_service_body')) {
+    FieldConfig::create([
+      'field_name' => 'field_service_body',
+      'entity_type' => 'node',
+      'bundle' => 'service',
+      'label' => 'Body',
+      'required' => FALSE,
+      'settings' => [],
+    ])->save();
+  }
 }
 
 /**
@@ -160,6 +181,15 @@ function _content_services_configure_form_display() {
     ],
   ]);
 
+  $form_display->setComponent('field_service_body', [
+    'type' => 'text_textarea',
+    'weight' => 2,
+    'settings' => [
+      'rows' => 9,
+      'placeholder' => '',
+    ],
+  ]);
+
   $form_display->save();
 }
 
@@ -186,6 +216,12 @@ function _content_services_configure_view_display() {
   $view_display->setComponent('field_service_image_url', [
     'type' => 'string',
     'weight' => 1,
+    'label' => 'hidden',
+  ]);
+
+  $view_display->setComponent('field_service_body', [
+    'type' => 'text_default',
+    'weight' => 2,
     'label' => 'hidden',
   ]);
 

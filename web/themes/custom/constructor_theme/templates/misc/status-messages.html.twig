@@ -4,7 +4,8 @@
  * Theme override for status messages.
  */
 #}
-<div data-drupal-messages class="space-y-4 mb-6">
+<div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12 py-6">
+<div data-drupal-messages class="space-y-4">
 {% for type, messages in message_list %}
   {%
     set classes = [
@@ -46,4 +47,5 @@
     </div>
   </div>
 {% endfor %}
+</div>
 </div>

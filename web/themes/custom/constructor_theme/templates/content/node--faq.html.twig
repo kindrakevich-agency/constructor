@@ -1,0 +1,21 @@
+{#
+/**
+ * @file
+ * Theme override for FAQ node.
+ */
+#}
+<article{{ attributes.addClass('node', 'node--faq') }}>
+  <div class="max-w-4xl 3xl:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {# Question (Title) #}
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
+      {{ label }}
+    </h1>
+
+    {# Answer (Body) #}
+    {% if content.field_faq_answer %}
+      <div class="prose prose-lg dark:prose-invert max-w-none">
+        {{ content.field_faq_answer }}
+      </div>
+    {% endif %}
+  </div>
+</article>

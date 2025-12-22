@@ -105,15 +105,7 @@ function constructor_install_tasks(&$install_state) {
       'function' => 'Drupal\constructor\Form\ContentTypesForm',
     ];
 
-    // Step 8: Modules.
-    $tasks['constructor_install_modules'] = [
-      'display_name' => t('Modules'),
-      'display' => TRUE,
-      'type' => 'form',
-      'function' => 'Drupal\constructor\Form\ModulesForm',
-    ];
-
-    // Step 9: Design & Layout.
+    // Step 8: Design & Layout.
     $tasks['constructor_install_design_layout'] = [
       'display_name' => t('Design & Layout'),
       'display' => TRUE,
@@ -1004,13 +996,13 @@ function _constructor_generate_team_members_with_ai($site_name, $site_descriptio
 
 Please respond in $language_name language.
 
-Return the response as a JSON array with objects containing 'name' and 'position' keys. Example format:
+Return the response as a JSON array with objects containing 'name', 'position', and 'bio' keys. Example format:
 [
-  {\"name\": \"Full Name\", \"position\": \"Job Title\"},
+  {\"name\": \"Full Name\", \"position\": \"Job Title\", \"bio\": \"A detailed biography paragraph about this person's background, expertise, and role in the company.\"},
   ...
 ]
 
-Make the names and positions realistic and diverse. Only return the JSON array, no other text.";
+Make the names, positions and bios realistic and diverse. The bio should be HTML formatted with <p> tags. Only return the JSON array, no other text.";
 
   try {
     $client = \Drupal::httpClient();
@@ -1048,6 +1040,10 @@ Make the names and positions realistic and diverse. Only return the JSON array, 
           'type' => 'team_member',
           'title' => $member['name'],
           'field_team_position' => $member['position'],
+          'field_team_bio' => [
+            'value' => $member['bio'] ?? '',
+            'format' => 'full_html',
+          ],
           'field_team_image_url' => $unsplash_images[$index % count($unsplash_images)],
           'field_team_gradient' => $gradients[$index % count($gradients)],
           'status' => 1,
@@ -1099,13 +1095,13 @@ function _constructor_generate_services_with_ai($site_name, $site_description, $
 
 Please respond in $language_name language.
 
-Return the response as a JSON array with objects containing 'name' and 'description' keys. Example format:
+Return the response as a JSON array with objects containing 'name', 'description', and 'body' keys. Example format:
 [
-  {\"name\": \"Service Name\", \"description\": \"Brief description of the service (1-2 sentences)\"},
+  {\"name\": \"Service Name\", \"description\": \"Brief description (1-2 sentences)\", \"body\": \"Detailed description with 2-3 paragraphs about the service, its benefits, and how it helps clients.\"},
   ...
 ]
 
-Make the services realistic and relevant to the business. Only return the JSON array, no other text.";
+Make the services realistic and relevant to the business. The body should be HTML formatted with <p> tags. Only return the JSON array, no other text.";
 
   try {
     $client = \Drupal::httpClient();
@@ -1144,6 +1140,10 @@ Make the services realistic and relevant to the business. Only return the JSON a
           'title' => $service['name'],
           'field_service_description' => [
             'value' => $service['description'],
+            'format' => 'full_html',
+          ],
+          'field_service_body' => [
+            'value' => $service['body'] ?? '',
             'format' => 'full_html',
           ],
           'field_service_image_url' => $unsplash_images[$index % count($unsplash_images)],
@@ -1978,6 +1978,36 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
         $services_block->save();
         \Drupal::logger('constructor')->notice('Created Services block.');
       }
+
+      // Also place Service Methods block.
+      if (!$block_storage->load('constructor_theme_service_methods_block')) {
+        $methods_block = $block_storage->create([
+          'id' => 'constructor_theme_service_methods_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 4,
+          'status' => TRUE,
+          'plugin' => 'service_methods_block',
+          'settings' => [
+            'id' => 'service_methods_block',
+            'label' => 'Our Methods',
+            'label_display' => '0',
+            'provider' => 'content_services',
+            'title' => 'Our Methods',
+            'subtitle' => 'We blend innovation with expertise to create sustainable solutions that work for your needs',
+            'image_url' => 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=600&h=500&fit=crop&q=80',
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $methods_block->save();
+        \Drupal::logger('constructor')->notice('Created Service Methods block.');
+      }
     }
 
     // Place language switcher block if language_switcher module is installed.
@@ -2412,19 +2442,24 @@ function constructor_apply_content_types(&$context, array $constructor_settings 
 function constructor_apply_modules(&$context, array $constructor_settings = []) {
   $context['message'] = t('Enabling modules...');
 
-  // Get the flat array of module names to enable.
-  $modules = $constructor_settings['modules_to_enable'] ?? [];
+  // Always install these modules by default (except contact and media_library).
+  $default_modules = [
+    'search',
+    'media',
+    'responsive_image',
+    'menu_link_content',
+    'openai_provider',
+    'simple_metatag',
+    'simple_sitemap_generator',
+  ];
 
-  if (!empty($modules) && is_array($modules)) {
-    // Filter to only string values (module names).
-    $modules = array_filter($modules, 'is_string');
+  /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */
+  $module_installer = \Drupal::service('module_installer');
+  $module_installer->install($default_modules);
 
-    if (!empty($modules)) {
-      /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */
-      $module_installer = \Drupal::service('module_installer');
-      $module_installer->install($modules);
-    }
-  }
+  \Drupal::logger('constructor')->notice('Installed default modules: @modules', [
+    '@modules' => implode(', ', $default_modules),
+  ]);
 
   $context['results'][] = 'modules';
 }

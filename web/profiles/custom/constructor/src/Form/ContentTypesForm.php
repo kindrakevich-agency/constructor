@@ -93,103 +93,7 @@ class ContentTypesForm extends InstallerFormBase {
       ];
     }
 
-    // Custom Content Type Section
-    $form['custom_section'] = $this->createSectionHeader(
-      $this->t('Add Custom Content Type'),
-      $this->t('Optionally create a custom content type during installation.')
-    );
-
-    $form['custom_type'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Custom Content Type'),
-      '#open' => FALSE,
-      '#attributes' => ['class' => ['mb-6', 'border', 'border-gray-200', 'rounded-lg', 'p-4']],
-    ];
-
-    $form['custom_type']['custom_machine_name'] = [
-      '#type' => 'machine_name',
-      '#title' => $this->t('Machine Name'),
-      '#machine_name' => [
-        'exists' => [$this, 'contentTypeExists'],
-      ],
-      '#required' => FALSE,
-      '#attributes' => [
-        'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg'],
-      ],
-      '#wrapper_attributes' => ['class' => ['mb-4']],
-    ];
-
-    $form['custom_type']['custom_name'] = $this->createTextField(
-      $this->t('Display Name'),
-      '',
-      FALSE,
-      $this->t('e.g., Portfolio Item')
-    );
-
-    $form['custom_type']['custom_description'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Description'),
-      '#rows' => 2,
-      '#required' => FALSE,
-      '#attributes' => [
-        'class' => ['w-full', 'px-4', 'py-3', 'border', 'border-gray-200', 'rounded-lg', 'resize-none'],
-        'placeholder' => $this->t('Brief description of this content type...'),
-      ],
-      '#wrapper_attributes' => ['class' => ['mb-4']],
-    ];
-
-    // Default Fields Info Section
-    $form['fields_section'] = $this->createSectionHeader(
-      $this->t('Default Fields'),
-      ''
-    );
-
-    $form['fields_info'] = [
-      '#type' => 'container',
-      '#attributes' => ['class' => ['p-4', 'bg-gray-50', 'rounded-lg', 'mb-6']],
-    ];
-
-    $form['fields_info']['content'] = [
-      '#markup' => '<p class="text-sm text-gray-600 mb-3">' . $this->t('Each content type will include these base fields by default:') . '</p>
-        <ul class="space-y-2 text-sm text-gray-600">
-          <li class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <strong class="text-gray-900">Title</strong> — The content title
-          </li>
-          <li class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <strong class="text-gray-900">Body</strong> — Main content area with WYSIWYG editor
-          </li>
-          <li class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <strong class="text-gray-900">Image</strong> — Featured image with multi-upload support
-          </li>
-          <li class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <strong class="text-gray-900">Tags</strong> — Taxonomy reference for categorization <span class="text-gray-400">(Article only)</span>
-          </li>
-        </ul>
-        <p class="text-sm text-gray-500 mt-3">' . $this->t('You can customize fields for each content type after installation.') . '</p>',
-    ];
-
     return $form;
-  }
-
-  /**
-   * Check if a content type exists.
-   */
-  public function contentTypeExists($value) {
-    return (bool) \Drupal::entityTypeManager()
-      ->getStorage('node_type')
-      ->load($value);
   }
 
   /**
@@ -298,19 +202,6 @@ class ContentTypesForm extends InstallerFormBase {
           'fields' => $fields,
         ];
       }
-    }
-
-    // Handle custom content type.
-    $custom_machine_name = $form_state->getValue('custom_machine_name');
-    $custom_name = $form_state->getValue('custom_name');
-    if (!empty($custom_machine_name) && !empty($custom_name)) {
-      $content_types[$custom_machine_name] = [
-        'type' => $custom_machine_name,
-        'name' => $custom_name,
-        'description' => $form_state->getValue('custom_description') ?? '',
-        'enabled' => TRUE,
-        'fields' => $default_fields,
-      ];
     }
 
     $this->saveToState('content_types', $content_types);

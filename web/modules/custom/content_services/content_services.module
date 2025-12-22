@@ -28,5 +28,20 @@ function content_services_theme($existing, $type, $theme, $path) {
       'template' => 'services-page',
       'path' => $path . '/templates',
     ],
+    'service_methods_block' => [
+      'variables' => [
+        'title' => NULL,
+        'subtitle' => NULL,
+        'image_url' => NULL,
+        'methods' => [],
+      ],
+      'template' => 'service-methods-block',
+      'path' => $path . '/templates',
+      'attached' => [
+        'library' => [
+          'constructor_theme/accordion',
+        ],
+      ],
+    ],
   ];
 }

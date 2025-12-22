@@ -1,0 +1,35 @@
+{#
+/**
+ * @file
+ * Theme override for Service node.
+ */
+#}
+<article{{ attributes.addClass('node', 'node--service') }}>
+  <div class="max-w-4xl 3xl:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    {# Title #}
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+      {{ label }}
+    </h1>
+
+    {# Image #}
+    {% if content.field_service_image_url[0]['#context'].value %}
+      <div class="mb-8 rounded-2xl overflow-hidden">
+        <img src="{{ content.field_service_image_url[0]['#context'].value }}" alt="{{ label }}" class="w-full h-auto object-cover aspect-video">
+      </div>
+    {% endif %}
+
+    {# Description (short intro) #}
+    {% if content.field_service_description %}
+      <div class="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+        {{ content.field_service_description }}
+      </div>
+    {% endif %}
+
+    {# Body (main content) #}
+    {% if content.field_service_body %}
+      <div class="prose prose-lg dark:prose-invert max-w-none">
+        {{ content.field_service_body }}
+      </div>
+    {% endif %}
+  </div>
+</article>
