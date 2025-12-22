@@ -4,14 +4,8 @@ simple_metatag.path_metatags:
   base_route: simple_metatag.path_metatags_list
   weight: 0
 
-simple_metatag.openai_settings:
-  route_name: simple_metatag.openai_settings
-  title: 'OpenAI SEO Generator'
-  base_route: simple_metatag.path_metatags_list
-  weight: 1
-
 simple_metatag.gtag_settings:
   route_name: simple_metatag.gtag_settings
   title: 'Settings'
   base_route: simple_metatag.path_metatags_list
-  weight: 2
+  weight: 1

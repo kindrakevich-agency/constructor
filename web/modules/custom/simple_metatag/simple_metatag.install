@@ -132,60 +132,6 @@ function simple_metatag_schema() {
 }
 
 /**
- * Initialize OpenAI settings for existing installations.
- */
-function simple_metatag_update_9001() {
-  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
-
-  // Only set if config doesn't exist yet.
-  if ($config->isNew()) {
-    $config->set('api_key', '');
-    $config->set('model', 'gpt-4o-mini');
-    $config->set('vocabulary', '');
-    $config->set('term_id', '');
-    $config->save();
-  }
-
-  return t('OpenAI settings initialized.');
-}
-
-/**
- * Add vocabulary and term_id to OpenAI settings.
- */
-function simple_metatag_update_9002() {
-  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
-
-  // Add new fields if they don't exist.
-  if ($config->get('vocabulary') === NULL) {
-    $config->set('vocabulary', '');
-  }
-  if ($config->get('term_id') === NULL) {
-    $config->set('term_id', '');
-  }
-  $config->save();
-
-  return t('Added vocabulary and term_id fields to OpenAI settings.');
-}
-
-/**
- * Add node_count and seo_length to OpenAI settings.
- */
-function simple_metatag_update_9003() {
-  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
-
-  // Add new fields with defaults if they don't exist.
-  if ($config->get('node_count') === NULL) {
-    $config->set('node_count', 1);
-  }
-  if ($config->get('seo_length') === NULL) {
-    $config->set('seo_length', 1000);
-  }
-  $config->save();
-
-  return t('Added node_count and seo_length fields to OpenAI settings.');
-}
-
-/**
  * Add langcode field to simple_metatag_entity table for multilanguage support.
  */
 function simple_metatag_update_9004() {
@@ -230,19 +176,4 @@ function simple_metatag_update_9004() {
   }
 
   return t('Added langcode field to simple_metatag_entity table for multilanguage support.');
-}
-
-/**
- * Add regenerate_existing setting to OpenAI settings.
- */
-function simple_metatag_update_9005() {
-  $config = \Drupal::configFactory()->getEditable('simple_metatag.openai_settings');
-
-  // Add regenerate_existing field with default FALSE if it doesn't exist.
-  if ($config->get('regenerate_existing') === NULL) {
-    $config->set('regenerate_existing', FALSE);
-  }
-  $config->save();
-
-  return t('Added regenerate_existing setting to OpenAI settings.');
 }

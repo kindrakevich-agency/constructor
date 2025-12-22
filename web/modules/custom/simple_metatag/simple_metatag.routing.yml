@@ -32,14 +32,6 @@ simple_metatag.path_metatags_delete:
     _permission: 'administer simple metatag'
     id: \d+
 
-simple_metatag.openai_settings:
-  path: '/admin/config/search/simple-metatag/openai'
-  defaults:
-    _form: '\Drupal\simple_metatag\Form\OpenAISettingsForm'
-    _title: 'OpenAI SEO Generator'
-  requirements:
-    _permission: 'administer simple metatag'
-
 simple_metatag.gtag_settings:
   path: '/admin/config/search/simple-metatag/settings'
   defaults:
