@@ -1,0 +1,92 @@
+{#
+/**
+ * @file
+ * Template for Hero Block.
+ */
+#}
+<section class="hero-block py-16 lg:py-24 3xl:py-32 4xl:py-40 overflow-hidden" data-block-type="hero">
+  <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 3xl:gap-28 4xl:gap-32 items-center">
+      {# Left Content #}
+      <div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl 3xl:text-7xl 4xl:text-8xl font-bold leading-tight mb-6 3xl:mb-8 text-gray-900 dark:text-white">
+          {{ title }} {% if title_highlight %}<span class="underline-sketch">{{ title_highlight }}</span>{% endif %} {{ title_suffix }}
+        </h1>
+
+        {% if description %}
+          <p class="text-lg lg:text-xl 3xl:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-lg">
+            {{ description }}
+          </p>
+        {% endif %}
+
+        {# Email Input + CTA #}
+        {% if show_email_form %}
+          <div class="flex flex-col sm:flex-row gap-3 mb-12">
+            <div class="flex-1 relative">
+              <input type="email" placeholder="{{ email_placeholder }}" class="w-full px-4 py-3.5 3xl:px-6 3xl:py-4 3xl:text-lg border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-gray-400">
+            </div>
+            <button class="open-booking-modal px-6 py-3.5 3xl:px-8 3xl:py-4 3xl:text-lg bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap cursor-pointer">
+              {{ button_text }}
+            </button>
+          </div>
+        {% endif %}
+
+        {# Stats #}
+        {% if show_stats and stats %}
+          <div class="flex flex-wrap gap-8 lg:gap-12 3xl:gap-16 mb-8">
+            {% for stat in stats %}
+              <div class="{{ not loop.last ? 'border-r border-gray-200 dark:border-slate-600 pr-8 lg:pr-12' : '' }}">
+                <div class="text-3xl lg:text-4xl 3xl:text-5xl font-bold text-gray-900 dark:text-white">{{ stat.value }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">{{ stat.label }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# Rating #}
+        {% if show_rating %}
+          <div class="flex items-center gap-3">
+            <div class="flex">
+              {% set rating_int = rating_value|round(0, 'floor') %}
+              {% for i in 1..5 %}
+                {% if i <= rating_int %}
+                  <svg class="w-5 h-5 text-gray-900 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                {% else %}
+                  <svg class="w-5 h-5 text-gray-300 dark:text-slate-600" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <span class="font-semibold text-gray-900 dark:text-white">{{ rating_value }}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ rating_text }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      {# Right Image #}
+      {% if image_url %}
+        <div class="relative">
+          <div class="rounded-3xl overflow-hidden aspect-square lg:aspect-auto lg:h-[500px] border border-gray-200/50 dark:border-slate-700/50 shadow-2xl">
+            <img src="{{ image_url }}" alt="{{ image_alt }}" class="w-full h-full object-cover">
+          </div>
+
+          {# Floating Card #}
+          {% if show_floating_card %}
+            <div class="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-4 border border-gray-100 dark:border-slate-700 hidden lg:block">
+              <div class="flex items-center gap-3">
+                <div class="flex -space-x-2">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&q=80" alt="User" class="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&q=80" alt="User" class="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800">
+                  <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=40&h=40&fit=crop&q=80" alt="User" class="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800">
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ floating_card_value }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">{{ floating_card_text }}</div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>

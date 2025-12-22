@@ -1,0 +1,47 @@
+/**
+ * @file
+ * Styles for Booking Modal.
+ */
+
+/* Modal Overlay - hidden by default */
+.booking-modal-overlay {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.booking-modal-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Desktop Modal - hidden by default */
+.booking-modal-desktop {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.booking-modal-desktop.active {
+  display: flex;
+  opacity: 1;
+}
+
+/* Mobile Drawer - hidden by default */
+.booking-drawer {
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.booking-drawer.active {
+  transform: translateY(0);
+}
+
+.booking-drawer.dragging .booking-drawer-content {
+  transition: none;
+}
+
+/* Prevent body scroll when modal is open */
+body.booking-modal-open {
+  overflow: hidden;
+}

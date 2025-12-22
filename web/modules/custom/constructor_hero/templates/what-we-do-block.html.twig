@@ -1,0 +1,48 @@
+{#
+/**
+ * @file
+ * Template for What We Do Block.
+ */
+#}
+<section class="what-we-do-block py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-gray-50 dark:bg-slate-800 transition-colors" data-block-type="what_we_do">
+  <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      {# Badge #}
+      {% if badge_text %}
+        <span class="inline-block px-4 py-1.5 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-full mb-6">{{ badge_text }}</span>
+      {% endif %}
+
+      {# Title #}
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl 3xl:text-6xl 4xl:text-7xl font-bold mb-6 3xl:mb-8 leading-tight text-gray-900 dark:text-white">
+        {{ title }} {% if title_highlight %}<span class="underline-sketch">{{ title_highlight }}</span>{% endif %} {{ title_suffix }}
+      </h2>
+
+      {# Description #}
+      {% if description %}
+        <p class="text-lg lg:text-xl 3xl:text-2xl text-gray-600 dark:text-gray-300">
+          {{ description }}
+        </p>
+      {% endif %}
+    </div>
+
+    {# CTA Buttons #}
+    {% if show_primary_button or show_secondary_link %}
+      <div class="flex flex-wrap justify-center gap-4 mb-16">
+        {% if show_primary_button %}
+          <button class="open-booking-modal px-8 py-3.5 3xl:px-10 3xl:py-4 3xl:text-lg bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors cursor-pointer">
+            {{ primary_button_text }}
+          </button>
+        {% endif %}
+
+        {% if show_secondary_link %}
+          <a href="{{ secondary_link_url }}" class="inline-flex items-center gap-2 px-8 py-3.5 text-gray-900 dark:text-white font-medium hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+            {{ secondary_link_text }}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</section>

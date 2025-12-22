@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Constructor Hero Blocks module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function constructor_hero_theme($existing, $type, $theme, $path) {
+  return [
+    'hero_block' => [
+      'variables' => [
+        'title' => NULL,
+        'title_highlight' => NULL,
+        'title_suffix' => NULL,
+        'description' => NULL,
+        'show_email_form' => TRUE,
+        'email_placeholder' => NULL,
+        'button_text' => NULL,
+        'show_stats' => TRUE,
+        'stats' => [],
+        'show_rating' => TRUE,
+        'rating_value' => NULL,
+        'rating_text' => NULL,
+        'image_url' => NULL,
+        'image_alt' => NULL,
+        'show_floating_card' => TRUE,
+        'floating_card_value' => NULL,
+        'floating_card_text' => NULL,
+        'floating_card_images' => [],
+      ],
+      'template' => 'hero-block',
+      'path' => $path . '/templates',
+    ],
+    'what_we_do_block' => [
+      'variables' => [
+        'badge_text' => NULL,
+        'title' => NULL,
+        'title_highlight' => NULL,
+        'title_suffix' => NULL,
+        'description' => NULL,
+        'show_primary_button' => TRUE,
+        'primary_button_text' => NULL,
+        'primary_button_url' => NULL,
+        'show_secondary_link' => TRUE,
+        'secondary_link_text' => NULL,
+        'secondary_link_url' => NULL,
+      ],
+      'template' => 'what-we-do-block',
+      'path' => $path . '/templates',
+    ],
+    'booking_modal' => [
+      'variables' => [
+        'title' => NULL,
+        'description' => NULL,
+        'fields' => [],
+        'submit_text' => NULL,
+      ],
+      'template' => 'booking-modal',
+      'path' => $path . '/templates',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function constructor_hero_page_attachments(array &$attachments) {
+  // Always attach booking modal library if it exists.
+  $attachments['#attached']['library'][] = 'constructor_hero/booking-modal';
+}

@@ -1874,6 +1874,139 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
       \Drupal::logger('constructor')->notice('Created main menu block.');
     }
 
+    // Place Hero block if constructor_hero module is installed.
+    if (\Drupal::moduleHandler()->moduleExists('constructor_hero')) {
+      if (!$block_storage->load('constructor_theme_hero_block')) {
+        $hero_block = $block_storage->create([
+          'id' => 'constructor_theme_hero_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => -10,
+          'status' => TRUE,
+          'plugin' => 'hero_block',
+          'settings' => [
+            'id' => 'hero_block',
+            'label' => 'Hero Block',
+            'label_display' => '0',
+            'provider' => 'constructor_hero',
+            'title_prefix' => 'Put',
+            'title_highlight' => 'people',
+            'title_suffix' => 'first',
+            'description' => 'Maximize your potential and simplify your work with our productivity-focused management platform.',
+            'show_email_form' => TRUE,
+            'email_placeholder' => 'Enter your email',
+            'email_button_text' => 'Get Started',
+            'show_stats' => TRUE,
+            'stats_number' => '200+',
+            'stats_label' => 'Happy Clients',
+            'show_rating' => TRUE,
+            'rating_score' => '5.0',
+            'rating_count' => '8k',
+            'rating_label' => 'Ratings',
+            'image_url' => 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop&q=80',
+            'image_alt' => 'Team collaboration',
+            'show_floating_card' => TRUE,
+            'floating_card_title' => 'Team Management',
+            'floating_card_subtitle' => 'Efficient workflow',
+            'floating_card_image' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=80&h=80&fit=crop&q=80',
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $hero_block->save();
+        \Drupal::logger('constructor')->notice('Created Hero block.');
+      }
+
+      // Place What We Do block.
+      if (!$block_storage->load('constructor_theme_what_we_do_block')) {
+        $what_we_do_block = $block_storage->create([
+          'id' => 'constructor_theme_what_we_do_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => -5,
+          'status' => TRUE,
+          'plugin' => 'what_we_do_block',
+          'settings' => [
+            'id' => 'what_we_do_block',
+            'label' => 'What We Do Block',
+            'label_display' => '0',
+            'provider' => 'constructor_hero',
+            'badge_text' => 'Our Services',
+            'title_prefix' => 'What We',
+            'title_highlight' => 'Do',
+            'title_suffix' => '',
+            'description' => 'We provide innovative solutions that help businesses grow and thrive in today\'s competitive market.',
+            'show_primary_button' => TRUE,
+            'primary_button_text' => 'Our Services',
+            'primary_button_url' => '/services',
+            'show_secondary_link' => TRUE,
+            'secondary_link_text' => 'Learn More',
+            'secondary_link_url' => '/about',
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $what_we_do_block->save();
+        \Drupal::logger('constructor')->notice('Created What We Do block.');
+      }
+
+      // Place Booking Modal block.
+      if (!$block_storage->load('constructor_theme_booking_modal_block')) {
+        $booking_modal_block = $block_storage->create([
+          'id' => 'constructor_theme_booking_modal_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 100,
+          'status' => TRUE,
+          'plugin' => 'booking_modal_block',
+          'settings' => [
+            'id' => 'booking_modal_block',
+            'label' => 'Booking Modal',
+            'label_display' => '0',
+            'provider' => 'constructor_hero',
+            'modal_title' => 'Book a Consultation',
+            'modal_subtitle' => 'Fill out the form below and we will get back to you shortly.',
+            'show_header_button' => TRUE,
+            'header_button_text' => 'Book Now',
+            'show_name_field' => TRUE,
+            'name_label' => 'Full Name',
+            'name_placeholder' => 'Enter your full name',
+            'name_required' => TRUE,
+            'show_email_field' => TRUE,
+            'email_label' => 'Email',
+            'email_placeholder' => 'Enter your email address',
+            'email_required' => TRUE,
+            'show_company_field' => TRUE,
+            'company_label' => 'Company',
+            'company_placeholder' => 'Enter your company name',
+            'company_required' => FALSE,
+            'show_phone_field' => TRUE,
+            'phone_label' => 'Phone',
+            'phone_placeholder' => 'Enter your phone number',
+            'phone_required' => FALSE,
+            'show_message_field' => TRUE,
+            'message_label' => 'Message',
+            'message_placeholder' => 'Tell us about your project...',
+            'message_required' => FALSE,
+            'submit_button_text' => 'Submit Request',
+          ],
+          'visibility' => [],
+        ]);
+        $booking_modal_block->save();
+        \Drupal::logger('constructor')->notice('Created Booking Modal block.');
+      }
+    }
+
     // Place FAQ block if content_faq module is installed.
     if (in_array('content_faq', $content_type_modules) &&
         \Drupal::moduleHandler()->moduleExists('content_faq')) {
@@ -2451,6 +2584,7 @@ function constructor_apply_modules(&$context, array $constructor_settings = []) 
     'openai_provider',
     'simple_metatag',
     'simple_sitemap_generator',
+    'constructor_hero',
   ];
 
   /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */

@@ -1,0 +1,7 @@
+name: Constructor Hero Blocks
+type: module
+description: 'Provides configurable Hero and What We Do blocks for the Constructor theme.'
+package: Constructor
+core_version_requirement: ^11
+dependencies:
+  - drupal:block
