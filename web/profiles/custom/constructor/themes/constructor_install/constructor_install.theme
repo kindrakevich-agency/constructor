@@ -14,10 +14,13 @@ function constructor_install_theme_suggestions_install_page_alter(array &$sugges
 
   // Use batch template for finalization tasks.
   $batch_tasks = [
+    'constructor_import_translations',
     'constructor_finalize_installation',
     'constructor_apply_configuration',
     'constructor_install_translation_module',
     'constructor_update_translations',
+    'constructor_setup_post_install',
+    'constructor_cli_setup',
     'install_finished',
   ];
 
