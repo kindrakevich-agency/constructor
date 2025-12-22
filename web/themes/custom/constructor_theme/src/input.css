@@ -388,6 +388,25 @@
     opacity: 1;
   }
 
+  /* ===== FOOTER LANGUAGE SWITCHER ===== */
+  .footer-language-switcher .language-switcher-btn,
+  .footer-language-switcher .language-switcher-btn-mobile {
+    @apply w-full py-2.5 px-4 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm cursor-pointer;
+  }
+
+  .footer-language-switcher .language-switcher-btn:hover,
+  .footer-language-switcher .language-switcher-btn-mobile:hover {
+    @apply bg-gray-700 border-gray-600;
+  }
+
+  .footer-language-switcher .language-switcher-btn {
+    @apply flex lg:flex;
+  }
+
+  .footer-language-switcher .language-switcher-btn-mobile {
+    @apply hidden;
+  }
+
   /* ===== LANGUAGE DRAWER (Vaul-style) ===== */
   .language-modal-overlay {
     opacity: 0;

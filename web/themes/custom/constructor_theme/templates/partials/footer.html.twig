@@ -21,7 +21,16 @@
                     {% endif %}
                     <span class="text-xl 3xl:text-2xl font-bold">{{ site_name|default('Constructor') }}</span>
                 </a>
-                <p class="text-gray-400 text-sm 3xl:text-base">{{ 'Build your digital experience with our powerful tools.'|t }}</p>
+                <p class="text-gray-400 text-sm 3xl:text-base mb-6">{{ 'Build your digital experience with our powerful tools.'|t }}</p>
+
+                <!-- Language Select -->
+                {% if page.secondary_menu %}
+                    <div class="footer-language-switcher">
+                        <h5 class="font-semibold text-sm mb-2">{{ 'Select Language'|t }}</h5>
+                        <p class="text-gray-400 text-xs mb-3">{{ 'Choose your preferred language'|t }}</p>
+                        {{ page.secondary_menu }}
+                    </div>
+                {% endif %}
             </div>
 
             <!-- Product -->
