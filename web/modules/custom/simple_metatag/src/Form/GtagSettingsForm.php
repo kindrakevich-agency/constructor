@@ -59,39 +59,65 @@ class GtagSettingsForm extends ConfigFormBase {
     $config = $this->config('simple_metatag.gtag_settings');
     $gtag_codes = $config->get('gtag_codes') ?: [];
 
-    $form['description'] = [
-      '#type' => 'markup',
-      '#markup' => '<p>' . $this->t('Configure Google Tag (gtag.js) codes for different domains. The appropriate tag will be automatically injected into your site\'s &lt;head&gt; section based on the current domain.') . '</p>',
-    ];
+    // Check if Domain module is available.
+    $domain_module_exists = $this->moduleHandler->moduleExists('domain');
 
-    // Get available domains.
-    $domains = $this->getAvailableDomains();
+    if ($domain_module_exists) {
+      $form['description'] = [
+        '#type' => 'markup',
+        '#markup' => '<p>' . $this->t('Configure Google Tag (gtag.js) codes for different domains. The appropriate tag will be automatically injected into your site\'s &lt;head&gt; section based on the current domain.') . '</p>',
+      ];
 
-    $form['gtag_codes'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Google Tag Codes'),
-      '#tree' => TRUE,
-    ];
+      // Get available domains.
+      $domains = $this->getAvailableDomains();
 
-    // Add a field for each domain.
-    foreach ($domains as $domain_id => $domain_label) {
-      $form['gtag_codes'][$domain_id] = [
+      $form['gtag_codes'] = [
+        '#type' => 'fieldset',
+        '#title' => $this->t('Google Tag Codes'),
+        '#tree' => TRUE,
+      ];
+
+      // Add a field for each domain.
+      foreach ($domains as $domain_id => $domain_label) {
+        $form['gtag_codes'][$domain_id] = [
+          '#type' => 'textarea',
+          '#title' => $this->t('Google Tag for @domain', ['@domain' => $domain_label]),
+          '#default_value' => $gtag_codes[$domain_id] ?? '',
+          '#rows' => 8,
+          '#description' => $this->t('Paste your complete Google Tag (gtag.js) code here, including the &lt;script&gt; tags.'),
+        ];
+      }
+
+      // Add option for a global fallback.
+      $form['gtag_codes']['_default'] = [
         '#type' => 'textarea',
-        '#title' => $this->t('Google Tag for @domain', ['@domain' => $domain_label]),
-        '#default_value' => $gtag_codes[$domain_id] ?? '',
+        '#title' => $this->t('Default Google Tag (All Domains)'),
+        '#default_value' => $gtag_codes['_default'] ?? '',
+        '#rows' => 8,
+        '#description' => $this->t('This Google Tag will be used as a fallback for domains not specifically configured above.'),
+      ];
+    }
+    else {
+      // Single Google Tag Code field when Domain module is not installed.
+      $form['description'] = [
+        '#type' => 'markup',
+        '#markup' => '<p>' . $this->t('Configure Google Tag (gtag.js) code. The tag will be automatically injected into your site\'s &lt;head&gt; section.') . '</p>',
+      ];
+
+      $form['gtag_codes'] = [
+        '#type' => 'fieldset',
+        '#title' => $this->t('Google Tag Code'),
+        '#tree' => TRUE,
+      ];
+
+      $form['gtag_codes']['_default'] = [
+        '#type' => 'textarea',
+        '#title' => $this->t('Google Tag Code'),
+        '#default_value' => $gtag_codes['_default'] ?? '',
         '#rows' => 8,
         '#description' => $this->t('Paste your complete Google Tag (gtag.js) code here, including the &lt;script&gt; tags. Example:<br><code>&lt;script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"&gt;&lt;/script&gt;<br>&lt;script&gt;<br>window.dataLayer = window.dataLayer || [];<br>function gtag(){dataLayer.push(arguments);}<br>gtag(\'js\', new Date());<br>gtag(\'config\', \'G-XXXXXXXXXX\');<br>&lt;/script&gt;</code>'),
       ];
     }
-
-    // Add option for a global fallback.
-    $form['gtag_codes']['_default'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Default Google Tag (All Domains)'),
-      '#default_value' => $gtag_codes['_default'] ?? '',
-      '#rows' => 8,
-      '#description' => $this->t('This Google Tag will be used as a fallback for domains not specifically configured above.'),
-    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -123,7 +149,7 @@ class GtagSettingsForm extends ConfigFormBase {
   protected function getAvailableDomains() {
     $domains = [];
 
-    // Check if Domain module is available.
+    // Only return domains if Domain module is available.
     if ($this->moduleHandler->moduleExists('domain')) {
       $domain_storage = \Drupal::entityTypeManager()->getStorage('domain');
       $domain_entities = $domain_storage->loadMultiple();
@@ -131,12 +157,6 @@ class GtagSettingsForm extends ConfigFormBase {
       foreach ($domain_entities as $domain) {
         $domains[$domain->id()] = $domain->label() . ' (' . $domain->getHostname() . ')';
       }
-    }
-    else {
-      // Fallback: Use current request hostname.
-      $request = \Drupal::request();
-      $current_host = $request->getHost();
-      $domains[$current_host] = $current_host;
     }
 
     return $domains;

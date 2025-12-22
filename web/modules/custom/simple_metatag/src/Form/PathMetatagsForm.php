@@ -72,20 +72,22 @@ class PathMetatagsForm extends FormBase {
       '#default_value' => $override ? $override->path : '',
     ];
 
-    // Get all available domains from Domain module.
-    $domain_options = $this->getAvailableDomains();
-    $selected_domains = [];
-    if ($override && $override->domains) {
-      $selected_domains = unserialize($override->domains);
-    }
+    // Get all available domains from Domain module (only if module exists).
+    if (\Drupal::moduleHandler()->moduleExists('domain')) {
+      $domain_options = $this->getAvailableDomains();
+      $selected_domains = [];
+      if ($override && $override->domains) {
+        $selected_domains = unserialize($override->domains);
+      }
 
-    $form['domains'] = [
-      '#type' => 'checkboxes',
-      '#title' => $this->t('Domains'),
-      '#description' => $this->t('Select domains. Leave empty to apply to all domains.'),
-      '#options' => $domain_options,
-      '#default_value' => $selected_domains,
-    ];
+      $form['domains'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Domains'),
+        '#description' => $this->t('Select domains. Leave empty to apply to all domains.'),
+        '#options' => $domain_options,
+        '#default_value' => $selected_domains,
+      ];
+    }
 
     // Get available languages.
     $language_options = $this->getAvailableLanguages();
@@ -144,8 +146,11 @@ class PathMetatagsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Process domains from checkboxes.
-    $domains = array_filter($form_state->getValue('domains'));
+    // Process domains from checkboxes (only if Domain module exists).
+    $domains = [];
+    if (\Drupal::moduleHandler()->moduleExists('domain')) {
+      $domains = array_filter($form_state->getValue('domains') ?: []);
+    }
 
     // Handle file upload.
     $image_fid = NULL;
@@ -202,7 +207,7 @@ class PathMetatagsForm extends FormBase {
   protected function getAvailableDomains() {
     $domains = [];
 
-    // Check if Domain module is installed and get all domains.
+    // Only return domains if Domain module is installed.
     if (\Drupal::moduleHandler()->moduleExists('domain')) {
       $domain_storage = \Drupal::entityTypeManager()->getStorage('domain');
       $domain_entities = $domain_storage->loadMultiple();
@@ -211,11 +216,6 @@ class PathMetatagsForm extends FormBase {
         $hostname = $domain->getHostname();
         $domains[$hostname] = $domain->label() . ' (' . $hostname . ')';
       }
-    }
-    else {
-      // Fallback: Use current domain if Domain module not installed.
-      $current_domain = \Drupal::request()->getHost();
-      $domains[$current_domain] = $current_domain;
     }
 
     return $domains;
