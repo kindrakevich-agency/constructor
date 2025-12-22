@@ -29,7 +29,7 @@
       <div class="space-y-4">
         {% for faq in faqs %}
           <div class="faq-accordion border-b border-gray-200 dark:border-slate-600 pb-4">
-            <button class="faq-accordion-btn w-full flex items-center justify-between py-3 text-left"{% if loop.first %} data-active="true"{% endif %}>
+            <button class="faq-accordion-btn w-full flex items-center justify-between py-3 text-left cursor-pointer"{% if loop.first %} data-active="true"{% endif %}>
               <span class="font-semibold text-gray-900 dark:text-white pr-4">{{ faq.question }}</span>
               <svg class="w-5 h-5 text-gray-500 transition-transform{% if loop.first %} rotate-180{% endif %} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {% if loop.first %}
