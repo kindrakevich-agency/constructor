@@ -23,6 +23,17 @@ function content_article_theme($existing, $type, $theme, $path) {
       'template' => 'articles-block-content',
       'path' => $path . '/templates',
     ],
+    'article_video_block' => [
+      'variables' => [
+        'title' => 'Cultivating success together',
+        'subtitle' => 'Watch how we help farmers achieve bigger and better harvests',
+        'youtube_id' => '',
+        'article_title' => '',
+        'article_url' => '',
+      ],
+      'template' => 'article-video-block',
+      'path' => $path . '/templates',
+    ],
     'articles_page' => [
       'variables' => [
         'articles' => [],
