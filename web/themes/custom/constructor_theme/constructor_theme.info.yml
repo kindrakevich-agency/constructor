@@ -4,6 +4,9 @@ description: 'Custom theme for Constructor installation profile.'
 core_version_requirement: ^11
 base theme: false
 
+# Disable default logo - use inline SVG fallback instead
+logo: false
+
 libraries:
   - constructor_theme/global
 
