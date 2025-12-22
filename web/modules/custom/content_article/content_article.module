@@ -92,6 +92,12 @@ function content_article_preprocess_node(&$variables) {
   if ($node && $node->bundle() === 'article') {
     // Extract YouTube video ID for use in templates.
     $video_url = $node->get('field_article_video_url')->value ?? '';
-    $variables['youtube_video_id'] = content_article_extract_youtube_id($video_url);
+    $youtube_id = content_article_extract_youtube_id($video_url);
+    $variables['youtube_video_id'] = $youtube_id;
+
+    // Attach video library if article has video.
+    if ($youtube_id) {
+      $variables['#attached']['library'][] = 'constructor_theme/video';
+    }
   }
 }

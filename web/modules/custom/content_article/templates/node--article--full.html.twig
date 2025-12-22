@@ -40,7 +40,7 @@
     {% if youtube_video_id %}
       <div class="mb-12 rounded-2xl overflow-hidden shadow-2xl">
         <div class="relative aspect-video bg-black plyr-container">
-          <div id="plyr-player-{{ node.id }}" data-plyr-provider="youtube" data-plyr-embed-id="{{ youtube_video_id }}"></div>
+          <div class="plyr-embed" data-plyr-provider="youtube" data-plyr-embed-id="{{ youtube_video_id }}"></div>
         </div>
       </div>
     {% elseif node.field_article_image.entity %}
