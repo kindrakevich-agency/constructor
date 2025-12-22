@@ -24,7 +24,11 @@ function constructor_install_theme_suggestions_install_page_alter(array &$sugges
     'install_finished',
   ];
 
-  if (in_array($active_task, $batch_tasks)) {
+  // Check if we're in batch mode or running finalization tasks.
+  $batch = batch_get();
+  $is_batch_running = !empty($batch['running']) || !empty($batch['sets']);
+
+  if (in_array($active_task, $batch_tasks) || $is_batch_running) {
     $suggestions[] = 'install_page__batch';
   }
 }
