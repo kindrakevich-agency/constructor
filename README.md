@@ -2,29 +2,32 @@
 
 A customizable Drupal 11 installation profile with a multi-step setup wizard for configuring languages, content types, modules, layout, and AI content integration.
 
-![Constructor Installation Wizard](installer.png)
-
 ## Features
 
-- **Multi-step Installation Wizard**: 8-step guided setup process
+- **Multi-step Installation Wizard**: 7-step guided setup process
   - Choose Language: Select installation language
   - Database Setup: Configure database connection
   - Site Basics: Site name, admin account, email, site description
   - Languages: Multi-language support with content and interface translation
-  - Content Types: Pre-configured types with customizable fields (FAQ, Article, etc.)
-  - Modules: Core and custom module selection
+  - Content Types: Pre-configured types with customizable fields
   - Design & Layout: Theme settings and block configuration
-  - AI Integration: OpenAI-powered content generation with automatic FAQ creation
+  - AI Integration: OpenAI-powered content generation
 
-- **Pre-configured Modules**:
+- **Custom Modules**:
+  - **OpenAI Provider**: AI content generation with GPT and DALL-E support
+  - **Simple Metatag**: SEO metatags with path-based overrides and Google Tag support
+  - **Simple Sitemap Generator**: XML sitemaps with multi-domain support
+  - **Content FAQ**: FAQ content type with accordion block
+  - **Content Team**: Team member content type with block display
+  - **Content Services**: Services content type with methods block
+  - **Language Switcher**: Custom language switching modal/drawer
+  - **Constructor Hero**: Configurable Hero, What We Do, and Booking Modal blocks
+
+- **Pre-configured Core Modules**:
   - Pathauto: Automatic URL alias generation
   - Views: Content listing and display
-  - Simple Metatag: SEO metatags with path-based overrides
-  - Simple Sitemap Generator: XML sitemaps (domain module optional)
-  - OpenAI Provider: AI content generation
-  - Content FAQ: FAQ content type with accordion block
-  - Content Team: Team member content type with carousel block
-  - Language Switcher: Custom language switching dropdown
+  - Media: Media library management
+  - Content Translation: Multilingual content support
 
 - **Development-Ready**:
   - CSS/JS aggregation disabled by default
@@ -36,7 +39,15 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
   - Dark mode support (class-based toggle)
   - Full template override for clean HTML output
   - Plyr video player integration
+  - Swiper.js carousels
+  - PhotoSwipe lightbox
   - Mobile-first responsive design
+  - Custom breakpoints (3xl: 1920px, 4xl: 2560px, 5xl: 3200px)
+
+- **Multilingual Support**:
+  - Ukrainian translations included for all custom modules
+  - Interface translation
+  - Content translation with AI-powered automatic translation
 
 ## Requirements
 
@@ -66,12 +77,12 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
    lando composer install
    ```
 
-4. Install Drupal with the Constructor profile:
+4. Access your site at: https://constructor.lndo.site and follow the installation wizard
+
+   Or install via CLI:
    ```bash
    lando drush site:install constructor --yes --account-name=admin --account-pass=admin
    ```
-
-5. Access your site at: https://constructor.lndo.site
 
 ### Theme Development
 
@@ -85,8 +96,9 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
    npm install
    ```
 
-3. Build CSS:
+3. Build CSS (use Node 22+):
    ```bash
+   nvm use 22
    npm run build
    ```
 
@@ -94,6 +106,91 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
    ```bash
    npm run watch
    ```
+
+## Project Structure
+
+```
+constructor/
+├── .lando.yml                    # Lando configuration
+├── composer.json                 # PHP dependencies
+├── web/
+│   ├── modules/
+│   │   └── custom/
+│   │       ├── constructor_hero/         # Hero blocks module
+│   │       ├── content_faq/              # FAQ content type module
+│   │       ├── content_services/         # Services content type module
+│   │       ├── content_team/             # Team member content type module
+│   │       ├── language_switcher/        # Language switcher block
+│   │       ├── openai_provider/          # OpenAI integration
+│   │       ├── simple_metatag/           # SEO module
+│   │       └── simple_sitemap_generator/ # Sitemap module
+│   ├── profiles/
+│   │   └── custom/
+│   │       └── constructor/              # Installation profile
+│   │           ├── config/install/       # Default configurations
+│   │           ├── themes/
+│   │           │   └── constructor_install/  # Installer theme
+│   │           ├── translations/         # Profile translations
+│   │           └── src/Form/             # Wizard form classes
+│   └── themes/
+│       └── custom/
+│           └── constructor_theme/        # Custom frontend theme
+│               ├── css/                  # Compiled CSS
+│               ├── js/                   # JavaScript files
+│               ├── src/input.css         # Tailwind source
+│               ├── translations/         # Theme translations
+│               └── templates/            # Twig templates
+└── README.md
+```
+
+## Custom Modules
+
+### Constructor Hero
+Provides configurable hero blocks:
+- **Hero Block**: Full-width hero with title, description, email form, stats, rating, image
+- **What We Do Block**: Section with badge, title, description, CTA buttons
+- **Booking Modal Block**: Configurable booking form modal/drawer
+
+All elements are configurable via block settings in the admin UI.
+
+### Content FAQ
+- FAQ content type with question/answer fields
+- FAQ Block with accordion display
+- FAQ page with contact CTA
+
+### Content Services
+- Service content type with description and icon
+- Services Block for listing services
+- Service Methods Block with image and features
+
+### Content Team
+- Team Member content type with photo, position, bio
+- Team Block with carousel display
+- Team page listing
+
+### Language Switcher
+- Language selection modal (desktop)
+- Language selection drawer (mobile)
+- Automatic placement in header and footer
+
+### OpenAI Provider
+- GPT text generation
+- DALL-E image generation
+- Settings form for API configuration
+- Test form for API validation
+
+### Simple Metatag
+- Automatic metatag generation for nodes and terms
+- Path-based metatag overrides
+- Google Tag (gtag.js) integration
+- Multi-domain support (with Domain module)
+
+### Simple Sitemap Generator
+- XML sitemap generation
+- Multi-domain support
+- Custom URLs
+- Configurable content types
+- Cache management
 
 ## Lando Commands
 
@@ -126,79 +223,41 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
 | Username | `drupal` |
 | Password | `drupal` |
 
-## Project Structure
-
-```
-constructor/
-├── .lando.yml                    # Lando configuration
-├── composer.json                 # PHP dependencies
-├── web/
-│   ├── modules/
-│   │   └── custom/
-│   │       ├── content_faq/              # FAQ content type module
-│   │       ├── content_team/             # Team member content type module
-│   │       ├── language_switcher/        # Language switcher block
-│   │       ├── simple_metatag/           # SEO module
-│   │       └── simple_sitemap_generator/ # Sitemap module
-│   ├── profiles/
-│   │   └── custom/
-│   │       └── constructor/              # Installation profile
-│   │           ├── config/install/       # Default configurations
-│   │           ├── themes/
-│   │           │   └── constructor_install/  # Installer theme
-│   │           └── src/Form/             # Wizard form classes
-│   └── themes/
-│       └── custom/
-│           └── constructor_theme/        # Custom frontend theme
-│               ├── css/                  # Compiled CSS
-│               ├── js/                   # JavaScript files
-│               ├── src/input.css         # Tailwind source
-│               └── templates/            # Twig templates
-│                   ├── block/
-│                   ├── content/
-│                   ├── field/
-│                   ├── form/
-│                   ├── layout/
-│                   ├── misc/
-│                   ├── navigation/
-│                   ├── partials/
-│                   ├── user/
-│                   └── views/
-└── README.md
-```
-
 ## Installation Wizard Steps
 
-### Step 1: Site Basics
+### Step 1: Choose Language
+- Select installation language (English, Ukrainian, etc.)
+
+### Step 2: Database Setup
+- Configure database connection
+
+### Step 3: Site Basics
 - Site name and slogan
 - Site email
 - Administrator account (username, email, password)
 
-### Step 2: Languages
-- Default language selection
+### Step 4: Languages
 - Enable multilingual support
 - Add additional languages
+- Configure content translation
 
-### Step 3: Content Types
-- Select from pre-configured content types (all enabled by default):
+### Step 5: Content Types
+- Select from pre-configured content types:
   - Basic Page
   - Article
-  - Team Member (with carousel block)
-  - FAQ (with accordion block)
+  - Team Member
+  - FAQ
+  - Service
 
-### Step 4: Modules
-- Core modules: Contact, Search, Media, etc.
-- Custom modules: Simple Metatag, Simple Sitemap Generator
-
-### Step 5: Design & Layout
-- Color scheme selection
-- Dark mode toggle (enabled by default)
+### Step 6: Design & Layout
+- Dark mode toggle
 - Front page configuration
+- Block placement
 
-### Step 6: AI Integration
+### Step 7: AI Integration
 - OpenAI API configuration
 - Model selection (GPT-4o, GPT-4, etc.)
-- Default prompts per content type
+- Automatic content generation
 
 ## Theme Features
 
@@ -207,6 +266,7 @@ The theme uses Tailwind CSS v4 with the standalone CLI:
 - CSS nesting support
 - Class-based dark mode via `@variant dark`
 - Custom component styles
+- Custom breakpoints for large screens
 
 ### Template Structure
 All Drupal templates are overridden for clean HTML output:
@@ -215,51 +275,27 @@ All Drupal templates are overridden for clean HTML output:
 - Tailwind utility classes
 
 ### Dark Mode
-Toggle dark mode by adding/removing the `dark` class on the `<html>` element:
-```javascript
-document.documentElement.classList.toggle('dark');
+Toggle dark mode by adding/removing the `dark` class on the `<html>` element.
+Theme toggle button included in header.
+
+## Translations
+
+Ukrainian translations are included for:
+- All custom modules
+- Constructor theme
+- Installation profile
+
+Import translations:
+```bash
+lando drush locale:import uk /app/web/modules/custom/MODULE_NAME/translations/uk.po --override=all
 ```
-
-## Post-Installation Steps
-
-After the installation wizard completes, you may want to configure the following:
-
-### Block Placement
-Blocks are not automatically placed during installation. Visit `/admin/structure/block` to place:
-- **FAQ Block**: Place in the Content region for frontpage
-- **Team Block**: Place in the Content region for frontpage
-- **Language Switcher**: Place in Secondary Menu region (if multilingual)
-- **Main Navigation**: Place in Primary Menu region
-- **Site Branding**: Place in Header region
-
-### Content Translation (Automatic)
-When you configure additional languages during installation and provide an OpenAI API key:
-- The `content_translation` module is automatically installed
-- FAQ and Team content types are automatically enabled for translation
-- AI-generated content is automatically translated to all configured languages
-- A post-installation setup runs to complete the translation process
-- FAQ and Team blocks/pages automatically display content in the current language
-
-To manually configure content translation later, visit `/admin/config/regional/content-language`
-
-## Configuration
-
-### OpenAI Settings
-After installation, configure OpenAI at `/admin/config/services/openai`:
-- API Key (required)
-- Default model
-- Temperature and max tokens
-
-### Pathauto Patterns
-Default patterns are configured:
-- Content: `[node:content-type]/[node:title]`
-- Taxonomy terms: `[term:vocabulary]/[term:name]`
 
 ## Development
 
 ### Building Theme CSS
 ```bash
 cd web/themes/custom/constructor_theme
+nvm use 22
 npm run build
 ```
 
