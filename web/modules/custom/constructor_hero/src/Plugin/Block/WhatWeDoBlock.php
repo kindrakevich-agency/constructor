@@ -172,6 +172,11 @@ class WhatWeDoBlock extends BlockBase {
       '#show_secondary_link' => $this->configuration['show_secondary_link'],
       '#secondary_link_text' => $this->configuration['secondary_link_text'],
       '#secondary_link_url' => $this->configuration['secondary_link_url'],
+      '#attached' => [
+        'library' => [
+          'constructor_hero/hero-block',
+        ],
+      ],
     ];
   }
 
