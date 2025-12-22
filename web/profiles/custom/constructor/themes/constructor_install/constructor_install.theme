@@ -6,6 +6,27 @@
  */
 
 /**
+ * Implements hook_theme_suggestions_install_page_alter().
+ */
+function constructor_install_theme_suggestions_install_page_alter(array &$suggestions, array $variables) {
+  $install_state = $GLOBALS['install_state'] ?? [];
+  $active_task = $install_state['active_task'] ?? '';
+
+  // Use batch template for finalization tasks.
+  $batch_tasks = [
+    'constructor_finalize_installation',
+    'constructor_apply_configuration',
+    'constructor_install_translation_module',
+    'constructor_update_translations',
+    'install_finished',
+  ];
+
+  if (in_array($active_task, $batch_tasks)) {
+    $suggestions[] = 'install_page__batch';
+  }
+}
+
+/**
  * Implements hook_preprocess_install_page().
  */
 function constructor_install_preprocess_install_page(&$variables) {
@@ -15,7 +36,7 @@ function constructor_install_preprocess_install_page(&$variables) {
 
   // Map Drupal install tasks to our 8-step wizard.
   // Steps: 1-Language, 2-Database, 3-Site Basics, 4-Languages,
-  //        5-Content Types, 6-Modules, 7-Design, 8-AI
+  //        5-Content Types, 6-Design, 7-AI
   $step_mapping = [
     // Step 1: Language selection.
     'install_select_language' => 1,
@@ -32,15 +53,14 @@ function constructor_install_preprocess_install_page(&$variables) {
     'install_profile_themes' => 2,
     'install_install_profile' => 2,
     'install_configure_form' => 2,
-    // Constructor custom wizard steps (steps 3-8).
+    // Constructor custom wizard steps (steps 3-7).
     'constructor_install_site_basics' => 3,
     'constructor_install_languages' => 4,
     'constructor_install_content_types' => 5,
-    'constructor_install_modules' => 6,
-    'constructor_install_design_layout' => 7,
-    'constructor_install_ai_integration' => 8,
-    'constructor_finalize_installation' => 8,
-    'install_finished' => 8,
+    'constructor_install_design_layout' => 6,
+    'constructor_install_ai_integration' => 7,
+    'constructor_finalize_installation' => 7,
+    'install_finished' => 7,
   ];
 
   $variables['current_step'] = $step_mapping[$active_task] ?? 1;
