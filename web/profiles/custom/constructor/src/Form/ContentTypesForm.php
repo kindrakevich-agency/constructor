@@ -30,6 +30,7 @@ class ContentTypesForm extends InstallerFormBase {
     $saved_values = $this->getFromState('content_types', []);
 
     // Default content types to suggest.
+    // Only core types + custom module types. All checked by default.
     $default_types = [
       'page' => [
         'name' => 'Basic Page',
@@ -41,37 +42,17 @@ class ContentTypesForm extends InstallerFormBase {
         'description' => 'Use articles for time-sensitive content like news, blog posts.',
         'default' => TRUE,
       ],
-      'landing_page' => [
-        'name' => 'Landing Page',
-        'description' => 'Flexible landing pages with customizable sections.',
-        'default' => FALSE,
-      ],
-      'event' => [
-        'name' => 'Event',
-        'description' => 'Events with date, location, and registration.',
-        'default' => FALSE,
-      ],
-      'service' => [
-        'name' => 'Service',
-        'description' => 'Services or products your organization offers.',
-        'default' => FALSE,
-      ],
       'team_member' => [
         'name' => 'Team Member',
         'description' => 'Staff profiles with photo and position. Includes Team carousel block.',
-        'default' => FALSE,
+        'default' => TRUE,
         'module' => 'content_team',
       ],
       'faq' => [
         'name' => 'FAQ',
         'description' => 'Frequently asked questions with answers. Includes FAQ block.',
-        'default' => FALSE,
+        'default' => TRUE,
         'module' => 'content_faq',
-      ],
-      'testimonial' => [
-        'name' => 'Testimonial',
-        'description' => 'Customer testimonials and reviews.',
-        'default' => FALSE,
       ],
     ];
 
@@ -251,6 +232,7 @@ class ContentTypesForm extends InstallerFormBase {
     ];
 
     // Type-specific configurations.
+    // Only core types + custom module types.
     $type_configs = [
       'page' => [
         'name' => 'Basic Page',
@@ -259,36 +241,6 @@ class ContentTypesForm extends InstallerFormBase {
       'article' => [
         'name' => 'Article',
         'description' => 'Use articles for time-sensitive content.',
-      ],
-      'landing_page' => [
-        'name' => 'Landing Page',
-        'description' => 'Flexible landing pages with sections.',
-      ],
-      'event' => [
-        'name' => 'Event',
-        'description' => 'Events with date and location.',
-        'extra_fields' => [
-          'field_event_date' => [
-            'field_name' => 'field_event_date',
-            'type' => 'datetime',
-            'label' => 'Event Date',
-            'widget' => 'datetime_default',
-            'formatter' => 'datetime_default',
-            'required' => TRUE,
-          ],
-          'field_location' => [
-            'field_name' => 'field_location',
-            'type' => 'string',
-            'label' => 'Location',
-            'widget' => 'string_textfield',
-            'formatter' => 'string',
-            'required' => FALSE,
-          ],
-        ],
-      ],
-      'service' => [
-        'name' => 'Service',
-        'description' => 'Services your organization offers.',
       ],
       'team_member' => [
         'name' => 'Team Member',
@@ -299,28 +251,6 @@ class ContentTypesForm extends InstallerFormBase {
         'name' => 'FAQ',
         'description' => 'Frequently asked questions.',
         'module' => 'content_faq',
-      ],
-      'testimonial' => [
-        'name' => 'Testimonial',
-        'description' => 'Customer testimonials.',
-        'extra_fields' => [
-          'field_author_name' => [
-            'field_name' => 'field_author_name',
-            'type' => 'string',
-            'label' => 'Author Name',
-            'widget' => 'string_textfield',
-            'formatter' => 'string',
-            'required' => TRUE,
-          ],
-          'field_company' => [
-            'field_name' => 'field_company',
-            'type' => 'string',
-            'label' => 'Company',
-            'widget' => 'string_textfield',
-            'formatter' => 'string',
-            'required' => FALSE,
-          ],
-        ],
       ],
     ];
 

@@ -4,6 +4,7 @@ namespace Drupal\content_team\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -20,10 +21,18 @@ class TeamPageController extends ControllerBase {
   protected $entityTypeManager;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * Constructs a TeamPageController object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -31,7 +40,8 @@ class TeamPageController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('language_manager')
     );
   }
 
@@ -40,6 +50,7 @@ class TeamPageController extends ControllerBase {
    */
   public function content() {
     $team_members = [];
+    $current_langcode = $this->languageManager->getCurrentLanguage()->getId();
 
     // Default Unsplash images for fallback.
     $default_images = [
@@ -73,6 +84,11 @@ class TeamPageController extends ControllerBase {
 
       $index = 0;
       foreach ($nodes as $node) {
+        // Get translated version if available.
+        if ($node->hasTranslation($current_langcode)) {
+          $node = $node->getTranslation($current_langcode);
+        }
+
         $image_url = '';
 
         // Check for actual photo field first.
@@ -122,6 +138,7 @@ class TeamPageController extends ControllerBase {
       ],
       '#cache' => [
         'tags' => ['node_list:team_member'],
+        'contexts' => ['languages:language_content'],
       ],
     ];
   }

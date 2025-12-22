@@ -180,15 +180,11 @@ constructor/
 - Add additional languages
 
 ### Step 3: Content Types
-- Select from pre-configured content types:
+- Select from pre-configured content types (all enabled by default):
   - Basic Page
   - Article
-  - Landing Page
-  - Event
-  - Service
-  - Team Member
-  - FAQ
-  - Testimonial
+  - Team Member (with carousel block)
+  - FAQ (with accordion block)
 
 ### Step 4: Modules
 - Core modules: Contact, Search, Media, etc.
@@ -196,7 +192,7 @@ constructor/
 
 ### Step 5: Design & Layout
 - Color scheme selection
-- Dark mode toggle
+- Dark mode toggle (enabled by default)
 - Front page configuration
 
 ### Step 6: AI Integration
@@ -242,6 +238,7 @@ When you configure additional languages during installation and provide an OpenA
 - FAQ and Team content types are automatically enabled for translation
 - AI-generated content is automatically translated to all configured languages
 - A post-installation setup runs to complete the translation process
+- FAQ and Team blocks/pages automatically display content in the current language
 
 To manually configure content translation later, visit `/admin/config/regional/content-language`
 

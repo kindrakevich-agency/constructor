@@ -63,7 +63,7 @@ class DesignLayoutForm extends InstallerFormBase {
     $form['theme_grid']['dark_mode_wrapper']['enable_dark_mode'] = [
       '#type' => 'checkbox',
       '#title' => '<span class="font-medium text-gray-900">' . $this->t('Enable dark mode toggle') . '</span>',
-      '#default_value' => $saved_values['enable_dark_mode'] ?? FALSE,
+      '#default_value' => $saved_values['enable_dark_mode'] ?? TRUE,
       '#description' => $this->t('Allow visitors to switch between light and dark themes.'),
     ];
 

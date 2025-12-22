@@ -4,6 +4,7 @@ namespace Drupal\content_faq\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -27,11 +28,19 @@ class FaqBlock extends BlockBase implements ContainerFactoryPluginInterface {
   protected $entityTypeManager;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * Constructs a new FaqBlock instance.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -42,7 +51,8 @@ class FaqBlock extends BlockBase implements ContainerFactoryPluginInterface {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('language_manager')
     );
   }
 
@@ -114,6 +124,7 @@ class FaqBlock extends BlockBase implements ContainerFactoryPluginInterface {
    */
   public function build() {
     $faqs = [];
+    $current_langcode = $this->languageManager->getCurrentLanguage()->getId();
 
     // Load FAQ nodes.
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
@@ -129,6 +140,11 @@ class FaqBlock extends BlockBase implements ContainerFactoryPluginInterface {
       $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($nids);
 
       foreach ($nodes as $node) {
+        // Get translated version if available.
+        if ($node->hasTranslation($current_langcode)) {
+          $node = $node->getTranslation($current_langcode);
+        }
+
         $faqs[] = [
           'question' => $node->getTitle(),
           'answer' => $node->get('field_faq_answer')->value,
@@ -150,6 +166,7 @@ class FaqBlock extends BlockBase implements ContainerFactoryPluginInterface {
       ],
       '#cache' => [
         'tags' => ['node_list:faq'],
+        'contexts' => ['languages:language_content'],
       ],
     ];
   }

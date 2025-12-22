@@ -4,6 +4,7 @@ namespace Drupal\content_faq\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -19,10 +20,18 @@ class FaqPageController extends ControllerBase {
   protected $entityTypeManager;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * Constructs a FaqPageController object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
     $this->entityTypeManager = $entity_type_manager;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -30,7 +39,8 @@ class FaqPageController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('language_manager')
     );
   }
 
@@ -39,6 +49,7 @@ class FaqPageController extends ControllerBase {
    */
   public function content() {
     $faqs = [];
+    $current_langcode = $this->languageManager->getCurrentLanguage()->getId();
 
     // Load all published FAQ nodes.
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
@@ -53,6 +64,11 @@ class FaqPageController extends ControllerBase {
       $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($nids);
 
       foreach ($nodes as $node) {
+        // Get translated version if available.
+        if ($node->hasTranslation($current_langcode)) {
+          $node = $node->getTranslation($current_langcode);
+        }
+
         $faqs[] = [
           'question' => $node->getTitle(),
           'answer' => $node->get('field_faq_answer')->value,
@@ -70,6 +86,7 @@ class FaqPageController extends ControllerBase {
       ],
       '#cache' => [
         'tags' => ['node_list:faq'],
+        'contexts' => ['languages:language_content'],
       ],
     ];
   }

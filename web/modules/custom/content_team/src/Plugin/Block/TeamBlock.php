@@ -4,6 +4,7 @@ namespace Drupal\content_team\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
@@ -28,11 +29,19 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
   protected $entityTypeManager;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * Constructs a new TeamBlock instance.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -43,7 +52,8 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('language_manager')
     );
   }
 
@@ -124,6 +134,7 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
    */
   public function build() {
     $team_members = [];
+    $current_langcode = $this->languageManager->getCurrentLanguage()->getId();
 
     // Default Unsplash images for fallback.
     $default_images = [
@@ -158,6 +169,11 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
       $index = 0;
       foreach ($nodes as $node) {
+        // Get translated version if available.
+        if ($node->hasTranslation($current_langcode)) {
+          $node = $node->getTranslation($current_langcode);
+        }
+
         $image_url = '';
 
         // Check for actual photo field first.
@@ -213,6 +229,7 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
       ],
       '#cache' => [
         'tags' => ['node_list:team_member'],
+        'contexts' => ['languages:language_content'],
       ],
     ];
   }

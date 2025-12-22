@@ -127,12 +127,17 @@ class CompleteSetupController extends ControllerBase {
     }
 
     try {
+      // Reset the node storage to get fresh instances.
+      \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+
       $node_storage = \Drupal::entityTypeManager()->getStorage('node');
       $nids = $node_storage->getQuery()
         ->condition('type', 'team_member')
         ->condition('status', 1)
         ->accessCheck(FALSE)
         ->execute();
+
+      \Drupal::logger('constructor')->notice('Found @count Team nodes to translate.', ['@count' => count($nids)]);
 
       if (empty($nids)) {
         return;
@@ -170,6 +175,12 @@ class CompleteSetupController extends ControllerBase {
       $config->set('third_party_settings.content_translation.enabled', TRUE);
       $config->save();
 
+      // CRITICAL: Clear entity and field definition caches so nodes recognize
+      // they are translatable. Without this, isTranslatable() returns FALSE.
+      \Drupal::entityTypeManager()->clearCachedDefinitions();
+      \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+      \Drupal::cache('config')->deleteAll();
+
       \Drupal::logger('constructor')->notice('Enabled translation for @bundle.', ['@bundle' => $bundle]);
       return TRUE;
     }
@@ -186,9 +197,8 @@ class CompleteSetupController extends ControllerBase {
    * Translates a single FAQ node.
    */
   protected function translateFaqNode($node, array $languages, array $ai_settings): bool {
-    if (!$node->isTranslatable()) {
-      return FALSE;
-    }
+    // Skip isTranslatable() check - we just enabled translation for this bundle
+    // and caches may not be fully updated. Just try to translate.
 
     $api_key = $ai_settings['api_key'];
     $model = $ai_settings['text_model'] ?? 'gpt-4';
@@ -199,8 +209,18 @@ class CompleteSetupController extends ControllerBase {
     $translated = FALSE;
 
     foreach ($languages as $langcode) {
-      if ($langcode === $node->language()->getId() || $node->hasTranslation($langcode)) {
+      if ($langcode === $node->language()->getId()) {
         continue;
+      }
+
+      // Check if translation already exists
+      try {
+        if ($node->hasTranslation($langcode)) {
+          continue;
+        }
+      }
+      catch (\Exception $e) {
+        // If hasTranslation fails, try anyway
       }
 
       $language_name = $language_names[$langcode] ?? $langcode;
@@ -238,9 +258,8 @@ class CompleteSetupController extends ControllerBase {
    * Translates a single Team node.
    */
   protected function translateTeamNode($node, array $languages, array $ai_settings): bool {
-    if (!$node->isTranslatable()) {
-      return FALSE;
-    }
+    // Skip isTranslatable() check - we just enabled translation for this bundle
+    // and caches may not be fully updated. Just try to translate.
 
     $api_key = $ai_settings['api_key'];
     $model = $ai_settings['text_model'] ?? 'gpt-4';
@@ -251,13 +270,28 @@ class CompleteSetupController extends ControllerBase {
     $translated = FALSE;
 
     foreach ($languages as $langcode) {
-      if ($langcode === $node->language()->getId() || $node->hasTranslation($langcode)) {
+      if ($langcode === $node->language()->getId()) {
         continue;
+      }
+
+      // Check if translation already exists
+      try {
+        if ($node->hasTranslation($langcode)) {
+          continue;
+        }
+      }
+      catch (\Exception $e) {
+        // If hasTranslation fails, try anyway
       }
 
       $language_name = $language_names[$langcode] ?? $langcode;
 
       try {
+        \Drupal::logger('constructor')->notice('Starting Team translation for @name to @lang', [
+          '@name' => $original_name,
+          '@lang' => $langcode,
+        ]);
+
         $prompt = "Translate the following job position to $language_name:\n\nPosition: $original_position\n\nReturn as JSON with 'position' key. Only return the JSON.";
 
         $translation_data = $this->callOpenAI($api_key, $model, $prompt);
@@ -274,9 +308,15 @@ class CompleteSetupController extends ControllerBase {
             '@name' => $original_name,
           ]);
         }
+        else {
+          \Drupal::logger('constructor')->warning('No translation returned for Team @name', ['@name' => $original_name]);
+        }
       }
       catch (\Exception $e) {
-        \Drupal::logger('constructor')->error('Team translation error: @message', ['@message' => $e->getMessage()]);
+        \Drupal::logger('constructor')->error('Team translation error for @name: @message', [
+          '@name' => $original_name,
+          '@message' => $e->getMessage(),
+        ]);
       }
     }
 
