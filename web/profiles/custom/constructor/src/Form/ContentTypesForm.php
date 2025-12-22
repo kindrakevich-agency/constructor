@@ -64,7 +64,7 @@ class ContentTypesForm extends InstallerFormBase {
       'product' => [
         'name' => 'Product',
         'description' => 'E-commerce products with images, pricing, and properties. Includes Product blocks.',
-        'default' => FALSE,
+        'default' => TRUE,
         'module' => 'content_commerce',
       ],
     ];

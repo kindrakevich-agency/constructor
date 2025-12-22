@@ -130,14 +130,20 @@ function constructor_install_tasks(&$install_state) {
     ];
 
     // Install content_translation module.
-    // NOTE: We install the module but DON'T enable translation for content types
-    // during this batch. That's done in the post-install controller to avoid
-    // entity hook issues.
     $tasks['constructor_install_translation_module'] = [
       'display_name' => t('Installing Translation Module'),
       'display' => TRUE,
       'type' => 'batch',
       'function' => 'constructor_install_translation_module_batch',
+    ];
+
+    // Translate content using AI.
+    // This runs as a SEPARATE task (new HTTP request) after the module is installed.
+    $tasks['constructor_translate_content'] = [
+      'display_name' => t('Translating Content'),
+      'display' => TRUE,
+      'type' => 'batch',
+      'function' => 'constructor_translate_content_batch',
     ];
 
     // Update interface translations step.
@@ -148,7 +154,7 @@ function constructor_install_tasks(&$install_state) {
       'function' => 'constructor_update_translations_batch',
     ];
 
-    // Set up post-install state for content translation.
+    // Finalize installation.
     $tasks['constructor_setup_post_install'] = [
       'display_name' => t('Finalizing'),
       'display' => TRUE,
@@ -384,8 +390,24 @@ function constructor_finalize_batch(&$install_state) {
   $operations[] = ['constructor_batch_final_cache_clear', []];
 
   // ========== PHASE 5: AI Content (WITHOUT translations) ==========
-  // Generate AI content (FAQ and Team nodes) - NO translations yet.
-  $operations[] = ['constructor_batch_generate_ai_content_no_translation', [$constructor_settings]];
+  // Generate AI content - each content type as a separate batch operation.
+  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
+
+  if (in_array('content_faq', $content_type_modules)) {
+    $operations[] = ['constructor_batch_generate_faq', [$constructor_settings]];
+  }
+  if (in_array('content_team', $content_type_modules)) {
+    $operations[] = ['constructor_batch_generate_team', [$constructor_settings]];
+  }
+  if (in_array('content_services', $content_type_modules)) {
+    $operations[] = ['constructor_batch_generate_services', [$constructor_settings]];
+  }
+  if (in_array('content_article', $content_type_modules)) {
+    $operations[] = ['constructor_batch_generate_articles', [$constructor_settings]];
+  }
+  if (in_array('content_commerce', $content_type_modules)) {
+    $operations[] = ['constructor_batch_generate_products', [$constructor_settings]];
+  }
 
   // Place all blocks (FAQ, Team, Language Switcher, Main Menu, Branding).
   $operations[] = ['constructor_batch_place_all_blocks', [$constructor_settings]];
@@ -426,21 +448,14 @@ function constructor_setup_post_install(&$install_state) {
     return !empty($langcode) && $langcode !== $default_language;
   });
 
-  // Only set up post-install if we have additional languages and API key.
+  // Translation is now handled in the batch process (constructor_translate_content_batch).
+  // No post-install redirect needed.
   $ai_settings = $constructor_settings['ai_settings'] ?? [];
   if (!empty($additional_languages) && !empty($ai_settings['api_key'])) {
-    // Set state for post-install controller.
-    $state = \Drupal::state();
-    $state->set('constructor.needs_post_install_setup', TRUE);
-    $state->set('constructor.post_install_settings', $constructor_settings);
-
-    \Drupal::logger('constructor')->notice('Post-install translation setup configured.');
-
-    // Set the redirect destination.
-    $install_state['parameters']['destination'] = '/admin/constructor/complete-setup';
+    \Drupal::logger('constructor')->notice('Content translation will be handled in batch process.');
   }
   else {
-    \Drupal::logger('constructor')->notice('Post-install translation not needed (no additional languages or no API key).');
+    \Drupal::logger('constructor')->notice('Content translation not needed (no additional languages or no API key).');
   }
 }
 
@@ -496,14 +511,55 @@ function constructor_translate_content_batch(&$install_state) {
 
   $operations = [];
 
-  // Translate existing content - NOW in a new HTTP request.
-  $operations[] = ['constructor_batch_translate_existing_content', [$constructor_settings]];
+  // Check if we have translations to do.
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  // Only add translation operations if we have API key and additional languages.
+  if (!empty($ai_settings['api_key']) && !empty($additional_languages)) {
+    // Each content type gets its own batch operation.
+    if (in_array('content_faq', $content_type_modules)) {
+      $operations[] = ['constructor_batch_translate_faq', [$constructor_settings]];
+    }
+    if (in_array('content_team', $content_type_modules)) {
+      $operations[] = ['constructor_batch_translate_team', [$constructor_settings]];
+    }
+    if (in_array('content_services', $content_type_modules)) {
+      $operations[] = ['constructor_batch_translate_services', [$constructor_settings]];
+    }
+    if (in_array('content_article', $content_type_modules)) {
+      $operations[] = ['constructor_batch_translate_articles', [$constructor_settings]];
+    }
+    if (in_array('content_commerce', $content_type_modules)) {
+      $operations[] = ['constructor_batch_translate_products', [$constructor_settings]];
+    }
+  }
+
+  // Add a placeholder if no operations (batch needs at least one).
+  if (empty($operations)) {
+    $operations[] = ['constructor_batch_translation_skipped', []];
+  }
 
   return [
     'title' => t('Translating Content'),
     'operations' => $operations,
     'finished' => 'constructor_translate_content_finished',
   ];
+}
+
+/**
+ * Batch operation: Translation skipped placeholder.
+ */
+function constructor_batch_translation_skipped(&$context) {
+  $context['message'] = t('Translation skipped (no additional languages or API key).');
+  $context['results'][] = 'translation_skipped';
 }
 
 /**
@@ -1550,113 +1606,6 @@ function _constructor_enable_article_translation() {
 }
 
 /**
- * Translate Article node to additional languages using AI.
- */
-function _constructor_translate_article_node($node, $languages, $site_description, $ai_settings) {
-  // Check if content_translation module is enabled.
-  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
-    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping Article translation.');
-    return;
-  }
-
-  // Check if node is translatable.
-  try {
-    if (!$node->isTranslatable()) {
-      \Drupal::logger('constructor')->notice('Article node is not translatable.');
-      return;
-    }
-  }
-  catch (\Exception $e) {
-    \Drupal::logger('constructor')->warning('Could not check Article translatability: @message', ['@message' => $e->getMessage()]);
-    return;
-  }
-
-  $api_key = $ai_settings['api_key'];
-  $model = $ai_settings['text_model'] ?? 'gpt-4';
-  $original_title = $node->getTitle();
-  $original_body = $node->get('field_article_body')->value ?? '';
-
-  \Drupal::logger('constructor')->notice('Translating Article: @title to @langs', [
-    '@title' => $original_title,
-    '@langs' => implode(', ', $languages),
-  ]);
-
-  $language_names = [
-    'en' => 'English',
-    'uk' => 'Ukrainian',
-    'de' => 'German',
-    'fr' => 'French',
-    'es' => 'Spanish',
-  ];
-
-  foreach ($languages as $langcode) {
-    // Skip if translation already exists.
-    if ($node->hasTranslation($langcode)) {
-      continue;
-    }
-
-    $language_name = $language_names[$langcode] ?? $langcode;
-
-    try {
-      $prompt = "Translate the following article to $language_name:
-
-Title: $original_title
-Body: $original_body
-
-Return as JSON with 'title' and 'body' keys. The body should be HTML formatted. Only return the JSON, no other text.";
-
-      $client = \Drupal::httpClient();
-      $response = $client->post('https://api.openai.com/v1/chat/completions', [
-        'headers' => [
-          'Authorization' => 'Bearer ' . $api_key,
-          'Content-Type' => 'application/json',
-        ],
-        'json' => [
-          'model' => $model,
-          'messages' => [
-            ['role' => 'user', 'content' => $prompt],
-          ],
-          'temperature' => 0.3,
-          'max_tokens' => 1500,
-        ],
-        'timeout' => 60,
-      ]);
-
-      $data = json_decode($response->getBody()->getContents(), TRUE);
-      $content = $data['choices'][0]['message']['content'] ?? '';
-
-      // Parse JSON.
-      $content = trim($content);
-      $content = preg_replace('/^```json\s*/', '', $content);
-      $content = preg_replace('/\s*```$/', '', $content);
-
-      $translation_data = json_decode($content, TRUE);
-
-      if (!empty($translation_data['title']) && !empty($translation_data['body'])) {
-        $node->addTranslation($langcode, [
-          'title' => $translation_data['title'],
-          'field_article_body' => [
-            'value' => $translation_data['body'],
-            'format' => 'full_html',
-          ],
-        ]);
-        $node->save();
-        \Drupal::logger('constructor')->notice('Added @lang translation for Article: @title', [
-          '@lang' => $langcode,
-          '@title' => $original_title,
-        ]);
-      }
-    }
-    catch (\Exception $e) {
-      \Drupal::logger('constructor')->error('Failed to translate Article to @lang: @message', [
-        '@lang' => $langcode,
-        '@message' => $e->getMessage(),
-      ]);
-    }
-  }
-}
-
-/**
  * Get or create a Content Editor user for AI-generated content.
  *
  * @return int
@@ -1689,231 +1638,6 @@ function _constructor_get_content_editor_user() {
   \Drupal::logger('constructor')->notice('Created Content Editor user with uid @uid.', ['@uid' => $user->id()]);
 
   return $user->id();
-}
-
-/**
- * Translate FAQ node to additional languages using AI.
- */
-function _constructor_translate_faq_node($node, $languages, $site_description, $ai_settings) {
-  // Check if content_translation module is enabled.
-  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
-    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping FAQ translation.');
-    return;
-  }
-
-  // Check if node is translatable.
-  try {
-    if (!$node->isTranslatable()) {
-      \Drupal::logger('constructor')->notice('Node @nid is not translatable, skipping.', ['@nid' => $node->id()]);
-      return;
-    }
-  }
-  catch (\Exception $e) {
-    \Drupal::logger('constructor')->warning('Could not check translatability: @message', ['@message' => $e->getMessage()]);
-    return;
-  }
-
-  $api_key = $ai_settings['api_key'];
-  $model = $ai_settings['text_model'] ?? 'gpt-4';
-  $original_question = $node->getTitle();
-  $original_answer = $node->get('field_faq_answer')->value;
-
-  \Drupal::logger('constructor')->notice('Translating FAQ: @title to @langs', [
-    '@title' => $original_question,
-    '@langs' => implode(', ', $languages),
-  ]);
-
-  $language_names = [
-    'en' => 'English',
-    'uk' => 'Ukrainian',
-    'de' => 'German',
-    'fr' => 'French',
-    'es' => 'Spanish',
-    'it' => 'Italian',
-    'pl' => 'Polish',
-    'pt-pt' => 'Portuguese',
-    'nl' => 'Dutch',
-    'ru' => 'Russian',
-    'ja' => 'Japanese',
-    'zh-hans' => 'Chinese (Simplified)',
-    'ar' => 'Arabic',
-  ];
-
-  foreach ($languages as $langcode) {
-    if ($langcode === $node->language()->getId()) {
-      continue;
-    }
-
-    // Skip if translation already exists.
-    if ($node->hasTranslation($langcode)) {
-      continue;
-    }
-
-    $language_name = $language_names[$langcode] ?? $langcode;
-
-    try {
-      $prompt = "Translate the following FAQ to $language_name:
-
-Question: $original_question
-Answer: $original_answer
-
-Return as JSON with 'question' and 'answer' keys. Only return the JSON, no other text.";
-
-      $client = \Drupal::httpClient();
-      $response = $client->post('https://api.openai.com/v1/chat/completions', [
-        'headers' => [
-          'Authorization' => 'Bearer ' . $api_key,
-          'Content-Type' => 'application/json',
-        ],
-        'json' => [
-          'model' => $model,
-          'messages' => [
-            ['role' => 'user', 'content' => $prompt],
-          ],
-          'temperature' => 0.3,
-          'max_tokens' => 500,
-        ],
-        'timeout' => 30,
-      ]);
-
-      $data = json_decode($response->getBody()->getContents(), TRUE);
-      $content = $data['choices'][0]['message']['content'] ?? '';
-
-      $content = trim($content);
-      $content = preg_replace('/^```json\s*/', '', $content);
-      $content = preg_replace('/\s*```$/', '', $content);
-
-      $translation_data = json_decode($content, TRUE);
-
-      if (!empty($translation_data['question']) && !empty($translation_data['answer'])) {
-        $node->addTranslation($langcode, [
-          'title' => $translation_data['question'],
-          'field_faq_answer' => [
-            'value' => $translation_data['answer'],
-            'format' => 'basic_html',
-          ],
-        ]);
-        $node->save();
-        \Drupal::logger('constructor')->notice('Added @lang translation for FAQ: @title', [
-          '@lang' => $langcode,
-          '@title' => $original_question,
-        ]);
-      }
-    }
-    catch (\Exception $e) {
-      \Drupal::logger('constructor')->error('Translation error for @lang: @message', [
-        '@lang' => $langcode,
-        '@message' => $e->getMessage(),
-      ]);
-    }
-  }
-}
-
-/**
- * Translate Team node to additional languages using AI.
- */
-function _constructor_translate_team_node($node, $languages, $site_description, $ai_settings) {
-  // Check if content_translation module is enabled.
-  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
-    return;
-  }
-
-  // Check if node is translatable.
-  try {
-    if (!$node->isTranslatable()) {
-      return;
-    }
-  }
-  catch (\Exception $e) {
-    return;
-  }
-
-  $api_key = $ai_settings['api_key'];
-  $model = $ai_settings['text_model'] ?? 'gpt-4';
-  $original_name = $node->getTitle();
-  $original_position = $node->get('field_team_position')->value ?? '';
-
-  $language_names = [
-    'en' => 'English',
-    'uk' => 'Ukrainian',
-    'de' => 'German',
-    'fr' => 'French',
-    'es' => 'Spanish',
-    'it' => 'Italian',
-    'pl' => 'Polish',
-    'pt-pt' => 'Portuguese',
-    'nl' => 'Dutch',
-    'ru' => 'Russian',
-    'ja' => 'Japanese',
-    'zh-hans' => 'Chinese (Simplified)',
-    'ar' => 'Arabic',
-  ];
-
-  foreach ($languages as $langcode) {
-    if ($langcode === $node->language()->getId()) {
-      continue;
-    }
-
-    // Skip if translation already exists.
-    if ($node->hasTranslation($langcode)) {
-      continue;
-    }
-
-    $language_name = $language_names[$langcode] ?? $langcode;
-
-    try {
-      // For team members, we only translate the position (name stays the same).
-      $prompt = "Translate the following job position to $language_name:
-
-Position: $original_position
-
-Return as JSON with 'position' key. Only return the JSON, no other text.";
-
-      $client = \Drupal::httpClient();
-      $response = $client->post('https://api.openai.com/v1/chat/completions', [
-        'headers' => [
-          'Authorization' => 'Bearer ' . $api_key,
-          'Content-Type' => 'application/json',
-        ],
-        'json' => [
-          'model' => $model,
-          'messages' => [
-            ['role' => 'user', 'content' => $prompt],
-          ],
-          'temperature' => 0.3,
-          'max_tokens' => 200,
-        ],
-        'timeout' => 30,
-      ]);
-
-      $data = json_decode($response->getBody()->getContents(), TRUE);
-      $content = $data['choices'][0]['message']['content'] ?? '';
-
-      $content = trim($content);
-      $content = preg_replace('/^```json\s*/', '', $content);
-      $content = preg_replace('/\s*```$/', '', $content);
-
-      $translation_data = json_decode($content, TRUE);
-
-      if (!empty($translation_data['position'])) {
-        $node->addTranslation($langcode, [
-          'title' => $original_name,
-          'field_team_position' => $translation_data['position'],
-        ]);
-        $node->save();
-        \Drupal::logger('constructor')->notice('Added @lang translation for Team member: @name', [
-          '@lang' => $langcode,
-          '@name' => $original_name,
-        ]);
-      }
-    }
-    catch (\Exception $e) {
-      \Drupal::logger('constructor')->error('Team translation error for @lang: @message', [
-        '@lang' => $langcode,
-        '@message' => $e->getMessage(),
-      ]);
-    }
-  }
 }
 
 /**
@@ -2657,6 +2381,73 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
       }
     }
 
+    // Place Product blocks if content_commerce module is installed.
+    if (in_array('content_commerce', $content_type_modules) &&
+        \Drupal::moduleHandler()->moduleExists('content_commerce')) {
+      // Product Carousel Block.
+      if (!$block_storage->load('constructor_theme_product_carousel_block')) {
+        $product_carousel_block = $block_storage->create([
+          'id' => 'constructor_theme_product_carousel_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 8,
+          'status' => TRUE,
+          'plugin' => 'product_carousel_block',
+          'settings' => [
+            'id' => 'product_carousel_block',
+            'label' => 'Product Carousel',
+            'label_display' => '0',
+            'provider' => 'content_commerce',
+            'limit' => 6,
+            'collection_title' => 'NEW COLLECTION',
+            'collection_subtitle' => 'An iconic collection inspired by the past and reinvented for the future.',
+            'collection_brands' => 'Premium,Classic,Modern',
+            'collection_link_text' => 'Discover the collection',
+            'collection_link_url' => '/products',
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $product_carousel_block->save();
+        \Drupal::logger('constructor')->notice('Created Product Carousel block.');
+      }
+
+      // Product Sale Hero Block.
+      if (!$block_storage->load('constructor_theme_product_sale_hero_block')) {
+        $product_sale_hero_block = $block_storage->create([
+          'id' => 'constructor_theme_product_sale_hero_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 9,
+          'status' => TRUE,
+          'plugin' => 'product_sale_hero_block',
+          'settings' => [
+            'id' => 'product_sale_hero_block',
+            'label' => 'Product Sale Hero',
+            'label_display' => '0',
+            'provider' => 'content_commerce',
+            'badge_text' => 'Hottest Sale',
+            'cta_text' => 'Add to Cart',
+            'product_id' => '',
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $product_sale_hero_block->save();
+        \Drupal::logger('constructor')->notice('Created Product Sale Hero block.');
+      }
+    }
+
     // Place language switcher block if language_switcher module is installed.
     if (\Drupal::moduleHandler()->moduleExists('language_switcher') &&
         !empty($languages['enable_multilingual'])) {
@@ -2691,8 +2482,187 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
 }
 
 /**
+ * Batch operation: Generate FAQ content with AI.
+ */
+function constructor_batch_generate_faq($constructor_settings, &$context) {
+  $context['message'] = t('Generating FAQ content with AI...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  if (empty($ai_settings['api_key'])) {
+    $context['results'][] = 'faq_skipped_no_api';
+    return;
+  }
+
+  $site_description = $site_basics['site_description'] ?? '';
+  $site_name = $site_basics['site_name'] ?? 'Website';
+  $main_language = $languages['default_language'] ?? 'en';
+
+  if (empty($site_description)) {
+    $site_description = "A professional website for $site_name";
+  }
+
+  try {
+    $faqs = _constructor_generate_faq_with_ai($site_description, $main_language, $ai_settings);
+
+    if (!empty($faqs)) {
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+      $content_editor_uid = _constructor_get_content_editor_user();
+
+      foreach ($faqs as $faq) {
+        $node = $node_storage->create([
+          'type' => 'faq',
+          'title' => $faq['question'],
+          'field_faq_answer' => [
+            'value' => $faq['answer'],
+            'format' => 'full_html',
+          ],
+          'status' => 1,
+          'langcode' => $main_language,
+          'uid' => $content_editor_uid,
+        ]);
+        $node->save();
+      }
+      \Drupal::logger('constructor')->notice('Generated @count FAQ nodes.', ['@count' => count($faqs)]);
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('FAQ generation error: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'faq_generated';
+}
+
+/**
+ * Batch operation: Generate Team content with AI.
+ */
+function constructor_batch_generate_team($constructor_settings, &$context) {
+  $context['message'] = t('Generating Team content with AI...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  if (empty($ai_settings['api_key'])) {
+    $context['results'][] = 'team_skipped_no_api';
+    return;
+  }
+
+  $site_description = $site_basics['site_description'] ?? '';
+  $site_name = $site_basics['site_name'] ?? 'Website';
+  $main_language = $languages['default_language'] ?? 'en';
+
+  $content_editor_uid = _constructor_get_content_editor_user();
+
+  try {
+    _constructor_generate_team_members_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Team generation error: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'team_generated';
+}
+
+/**
+ * Batch operation: Generate Services content with AI.
+ */
+function constructor_batch_generate_services($constructor_settings, &$context) {
+  $context['message'] = t('Generating Services content with AI...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  if (empty($ai_settings['api_key'])) {
+    $context['results'][] = 'services_skipped_no_api';
+    return;
+  }
+
+  $site_description = $site_basics['site_description'] ?? '';
+  $site_name = $site_basics['site_name'] ?? 'Website';
+  $main_language = $languages['default_language'] ?? 'en';
+
+  $content_editor_uid = _constructor_get_content_editor_user();
+
+  try {
+    _constructor_generate_services_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Services generation error: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'services_generated';
+}
+
+/**
+ * Batch operation: Generate Articles content with AI.
+ */
+function constructor_batch_generate_articles($constructor_settings, &$context) {
+  $context['message'] = t('Generating Articles content with AI...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  if (empty($ai_settings['api_key'])) {
+    $context['results'][] = 'articles_skipped_no_api';
+    return;
+  }
+
+  $site_description = $site_basics['site_description'] ?? '';
+  $site_name = $site_basics['site_name'] ?? 'Website';
+  $main_language = $languages['default_language'] ?? 'en';
+
+  $content_editor_uid = _constructor_get_content_editor_user();
+
+  try {
+    _constructor_generate_articles_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Articles generation error: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'articles_generated';
+}
+
+/**
+ * Batch operation: Generate Products content with AI.
+ */
+function constructor_batch_generate_products($constructor_settings, &$context) {
+  $context['message'] = t('Generating Products content with AI...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  if (empty($ai_settings['api_key'])) {
+    $context['results'][] = 'products_skipped_no_api';
+    return;
+  }
+
+  $site_description = $site_basics['site_description'] ?? '';
+  $site_name = $site_basics['site_name'] ?? 'Website';
+  $main_language = $languages['default_language'] ?? 'en';
+
+  $content_editor_uid = _constructor_get_content_editor_user();
+
+  try {
+    _constructor_generate_products_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Products generation error: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'products_generated';
+}
+
+/**
  * Batch operation: Generate AI content WITHOUT translation.
  *
+ * @deprecated Use the individual batch functions instead.
  * This creates FAQ and Team nodes but skips translation.
  * Translation is done in a separate batch after content_translation is installed.
  */
@@ -2855,19 +2825,779 @@ function constructor_batch_install_content_translation($constructor_settings, &$
 }
 
 /**
+ * Batch operation: Translate FAQ content.
+ */
+function constructor_batch_translate_faq($constructor_settings, &$context) {
+  $context['message'] = t('Translating FAQ content...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages)) {
+    $context['results'][] = 'faq_translation_skipped';
+    return;
+  }
+
+  _constructor_translate_faq_nodes($additional_languages, '', $ai_settings);
+  $context['results'][] = 'faq_translated';
+}
+
+/**
+ * Batch operation: Translate Team content.
+ */
+function constructor_batch_translate_team($constructor_settings, &$context) {
+  $context['message'] = t('Translating Team content...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages)) {
+    $context['results'][] = 'team_translation_skipped';
+    return;
+  }
+
+  _constructor_translate_team_nodes($additional_languages, '', $ai_settings);
+  $context['results'][] = 'team_translated';
+}
+
+/**
+ * Batch operation: Translate Services content.
+ */
+function constructor_batch_translate_services($constructor_settings, &$context) {
+  $context['message'] = t('Translating Services content...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages)) {
+    $context['results'][] = 'services_translation_skipped';
+    return;
+  }
+
+  _constructor_translate_service_nodes($additional_languages, '', $ai_settings);
+  $context['results'][] = 'services_translated';
+}
+
+/**
+ * Batch operation: Translate Articles content.
+ */
+function constructor_batch_translate_articles($constructor_settings, &$context) {
+  $context['message'] = t('Translating Articles content...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages)) {
+    $context['results'][] = 'articles_translation_skipped';
+    return;
+  }
+
+  _constructor_translate_article_nodes($additional_languages, '', $ai_settings);
+  $context['results'][] = 'articles_translated';
+}
+
+/**
+ * Batch operation: Translate Products content.
+ */
+function constructor_batch_translate_products($constructor_settings, &$context) {
+  $context['message'] = t('Translating Products content...');
+
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages)) {
+    $context['results'][] = 'products_translation_skipped';
+    return;
+  }
+
+  _constructor_translate_product_nodes($additional_languages, '', $ai_settings);
+  $context['results'][] = 'products_translated';
+}
+
+/**
  * Batch operation: Translate existing content.
  *
- * NOTE: Translation is now handled by CompleteSetupController in a fresh
- * HTTP request to avoid entity hook issues during installation batch.
- * This function is kept for backwards compatibility but does nothing.
+ * @deprecated Use the individual translation batch functions instead.
  */
 function constructor_batch_translate_existing_content($constructor_settings, &$context) {
-  $context['message'] = t('Preparing translations...');
+  $context['message'] = t('Translating content...');
 
-  // Translation is deferred to post-install controller to avoid
-  // entity hook issues during the installation batch.
-  \Drupal::logger('constructor')->notice('Content translation will be completed in post-install setup.');
-  $context['results'][] = 'translations_deferred';
+  $content_type_modules = $constructor_settings['content_type_modules'] ?? [];
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $site_basics = $constructor_settings['site_basics'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  if (empty($ai_settings['api_key'])) {
+    \Drupal::logger('constructor')->notice('Translations skipped: No API key.');
+    $context['results'][] = 'translations_skipped_no_key';
+    return;
+  }
+
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Translations skipped: content_translation not installed.');
+    $context['results'][] = 'translations_skipped_no_module';
+    return;
+  }
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages)) {
+    \Drupal::logger('constructor')->notice('Translations skipped: No additional languages.');
+    $context['results'][] = 'translations_skipped_no_languages';
+    return;
+  }
+
+  $site_description = $site_basics['site_description'] ?? '';
+
+  // Translate FAQ nodes.
+  if (in_array('content_faq', $content_type_modules)) {
+    $context['message'] = t('Translating FAQ content...');
+    _constructor_translate_faq_nodes($additional_languages, $site_description, $ai_settings);
+  }
+
+  // Translate Team nodes.
+  if (in_array('content_team', $content_type_modules)) {
+    $context['message'] = t('Translating Team content...');
+    _constructor_translate_team_nodes($additional_languages, $site_description, $ai_settings);
+  }
+
+  // Translate Service nodes.
+  if (in_array('content_services', $content_type_modules)) {
+    $context['message'] = t('Translating Service content...');
+    _constructor_translate_service_nodes($additional_languages, $site_description, $ai_settings);
+  }
+
+  // Translate Article nodes.
+  if (in_array('content_article', $content_type_modules)) {
+    $context['message'] = t('Translating Article content...');
+    _constructor_translate_article_nodes($additional_languages, $site_description, $ai_settings);
+  }
+
+  // Translate Product nodes.
+  if (in_array('content_commerce', $content_type_modules)) {
+    $context['message'] = t('Translating Product content...');
+    _constructor_translate_product_nodes($additional_languages, $site_description, $ai_settings);
+  }
+
+  $context['results'][] = 'translations_completed';
+  \Drupal::logger('constructor')->notice('Content translation batch completed.');
+}
+
+/**
+ * Enables content translation for a bundle.
+ */
+function _constructor_enable_content_translation(string $bundle): bool {
+  try {
+    $config = \Drupal::configFactory()->getEditable("language.content_settings.node.$bundle");
+    $config->set('id', "node.$bundle");
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'node');
+    $config->set('target_bundle', $bundle);
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    // Clear entity and field definition caches.
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+    \Drupal::cache('config')->deleteAll();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for @bundle.', ['@bundle' => $bundle]);
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable translation for @bundle: @message', [
+      '@bundle' => $bundle,
+      '@message' => $e->getMessage(),
+    ]);
+    return FALSE;
+  }
+}
+
+/**
+ * Translates FAQ nodes.
+ */
+function _constructor_translate_faq_nodes(array $languages, string $site_description, array $ai_settings) {
+  if (!_constructor_enable_content_translation('faq')) {
+    return;
+  }
+
+  try {
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = $node_storage->getQuery()
+      ->condition('type', 'faq')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    if (empty($nids)) {
+      return;
+    }
+
+    $nodes = $node_storage->loadMultiple($nids);
+    $count = 0;
+    foreach ($nodes as $node) {
+      if (_constructor_translate_faq_node($node, $languages, $ai_settings)) {
+        $count++;
+      }
+    }
+    \Drupal::logger('constructor')->notice('Translated @count FAQ nodes.', ['@count' => $count]);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('FAQ translation error: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Translates a single FAQ node.
+ */
+function _constructor_translate_faq_node($node, array $languages, array $ai_settings): bool {
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $original_question = $node->getTitle();
+  $original_answer = $node->get('field_faq_answer')->value;
+
+  $language_names = _constructor_get_language_names();
+  $translated = FALSE;
+
+  foreach ($languages as $langcode) {
+    if ($langcode === $node->language()->getId()) {
+      continue;
+    }
+
+    try {
+      if ($node->hasTranslation($langcode)) {
+        continue;
+      }
+    }
+    catch (\Exception $e) {
+      // If hasTranslation fails, try anyway
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      $prompt = "Translate the following FAQ to $language_name:\n\nQuestion: $original_question\nAnswer: $original_answer\n\nReturn as JSON with 'question' and 'answer' keys. Only return the JSON.";
+
+      $translation_data = _constructor_call_openai($api_key, $model, $prompt);
+
+      if (!empty($translation_data['question']) && !empty($translation_data['answer'])) {
+        $node->addTranslation($langcode, [
+          'title' => $translation_data['question'],
+          'field_faq_answer' => [
+            'value' => $translation_data['answer'],
+            'format' => 'basic_html',
+          ],
+          'uid' => $node->getOwnerId(),
+        ]);
+        $node->save();
+        $translated = TRUE;
+        \Drupal::logger('constructor')->notice('Translated FAQ to @lang: @title', [
+          '@lang' => $langcode,
+          '@title' => $original_question,
+        ]);
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('FAQ translation error: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
+  return $translated;
+}
+
+/**
+ * Translates Team nodes.
+ */
+function _constructor_translate_team_nodes(array $languages, string $site_description, array $ai_settings) {
+  if (!_constructor_enable_content_translation('team_member')) {
+    return;
+  }
+
+  try {
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = $node_storage->getQuery()
+      ->condition('type', 'team_member')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    \Drupal::logger('constructor')->notice('Found @count Team nodes to translate.', ['@count' => count($nids)]);
+
+    if (empty($nids)) {
+      return;
+    }
+
+    $nodes = $node_storage->loadMultiple($nids);
+    $count = 0;
+    foreach ($nodes as $node) {
+      if (_constructor_translate_team_node($node, $languages, $ai_settings)) {
+        $count++;
+      }
+    }
+    \Drupal::logger('constructor')->notice('Translated @count Team nodes.', ['@count' => $count]);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Team translation error: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Translates a single Team node.
+ */
+function _constructor_translate_team_node($node, array $languages, array $ai_settings): bool {
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $original_name = $node->getTitle();
+  $original_position = $node->get('field_team_position')->value ?? '';
+
+  $language_names = _constructor_get_language_names();
+  $translated = FALSE;
+
+  foreach ($languages as $langcode) {
+    if ($langcode === $node->language()->getId()) {
+      continue;
+    }
+
+    try {
+      if ($node->hasTranslation($langcode)) {
+        continue;
+      }
+    }
+    catch (\Exception $e) {
+      // If hasTranslation fails, try anyway
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      $prompt = "Translate the following job position to $language_name:\n\nPosition: $original_position\n\nReturn as JSON with 'position' key. Only return the JSON.";
+
+      $translation_data = _constructor_call_openai($api_key, $model, $prompt);
+
+      if (!empty($translation_data['position'])) {
+        $node->addTranslation($langcode, [
+          'title' => $original_name,
+          'field_team_position' => $translation_data['position'],
+          'uid' => $node->getOwnerId(),
+        ]);
+        $node->save();
+        $translated = TRUE;
+        \Drupal::logger('constructor')->notice('Translated Team to @lang: @name', [
+          '@lang' => $langcode,
+          '@name' => $original_name,
+        ]);
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Team translation error for @name: @message', [
+        '@name' => $original_name,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  return $translated;
+}
+
+/**
+ * Translates Service nodes.
+ */
+function _constructor_translate_service_nodes(array $languages, string $site_description, array $ai_settings) {
+  if (!_constructor_enable_content_translation('service')) {
+    return;
+  }
+
+  try {
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = $node_storage->getQuery()
+      ->condition('type', 'service')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    \Drupal::logger('constructor')->notice('Found @count Service nodes to translate.', ['@count' => count($nids)]);
+
+    if (empty($nids)) {
+      return;
+    }
+
+    $nodes = $node_storage->loadMultiple($nids);
+    $count = 0;
+    foreach ($nodes as $node) {
+      if (_constructor_translate_service_node($node, $languages, $ai_settings)) {
+        $count++;
+      }
+    }
+    \Drupal::logger('constructor')->notice('Translated @count Service nodes.', ['@count' => $count]);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Service translation error: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Translates a single Service node.
+ */
+function _constructor_translate_service_node($node, array $languages, array $ai_settings): bool {
+  $api_key = $ai_settings['api_key'] ?? '';
+  if (empty($api_key)) {
+    return FALSE;
+  }
+
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $language_names = _constructor_get_language_names();
+
+  $original_name = $node->getTitle();
+  $original_description = $node->get('field_service_description')->value ?? '';
+
+  $translated = FALSE;
+
+  foreach ($languages as $langcode) {
+    if (empty($langcode)) {
+      continue;
+    }
+
+    try {
+      if ($node->hasTranslation($langcode)) {
+        continue;
+      }
+    }
+    catch (\Exception $e) {
+      // If hasTranslation fails, try anyway
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      $prompt = "Translate the following service to $language_name:\n\nName: $original_name\nDescription: $original_description\n\nReturn as JSON with 'name' and 'description' keys. Only return the JSON.";
+
+      $translation_data = _constructor_call_openai($api_key, $model, $prompt);
+
+      if (!empty($translation_data['name']) && !empty($translation_data['description'])) {
+        $node->addTranslation($langcode, [
+          'title' => $translation_data['name'],
+          'field_service_description' => [
+            'value' => $translation_data['description'],
+            'format' => 'full_html',
+          ],
+          'uid' => $node->getOwnerId(),
+        ]);
+        $node->save();
+        $translated = TRUE;
+        \Drupal::logger('constructor')->notice('Translated Service to @lang: @name', [
+          '@lang' => $langcode,
+          '@name' => $translation_data['name'],
+        ]);
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Service translation error for @name: @message', [
+        '@name' => $original_name,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  return $translated;
+}
+
+/**
+ * Translates Article nodes.
+ */
+function _constructor_translate_article_nodes(array $languages, string $site_description, array $ai_settings) {
+  if (!_constructor_enable_content_translation('article')) {
+    return;
+  }
+
+  try {
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = $node_storage->getQuery()
+      ->condition('type', 'article')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    \Drupal::logger('constructor')->notice('Found @count Article nodes to translate.', ['@count' => count($nids)]);
+
+    if (empty($nids)) {
+      return;
+    }
+
+    $nodes = $node_storage->loadMultiple($nids);
+    $count = 0;
+    foreach ($nodes as $node) {
+      if (_constructor_translate_article_node($node, $languages, $ai_settings)) {
+        $count++;
+      }
+    }
+    \Drupal::logger('constructor')->notice('Translated @count Article nodes.', ['@count' => $count]);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Article translation error: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Translates a single Article node.
+ */
+function _constructor_translate_article_node($node, array $languages, array $ai_settings): bool {
+  $api_key = $ai_settings['api_key'] ?? '';
+  if (empty($api_key)) {
+    return FALSE;
+  }
+
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $language_names = _constructor_get_language_names();
+
+  $original_title = $node->getTitle();
+  $original_body = $node->get('field_article_body')->value ?? '';
+
+  $translated = FALSE;
+
+  foreach ($languages as $langcode) {
+    if (empty($langcode)) {
+      continue;
+    }
+
+    try {
+      if ($node->hasTranslation($langcode)) {
+        continue;
+      }
+    }
+    catch (\Exception $e) {
+      // If hasTranslation fails, try anyway
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      $prompt = "Translate the following article to $language_name:\n\nTitle: $original_title\nBody: $original_body\n\nReturn as JSON with 'title' and 'body' keys. The body should be HTML formatted. Only return the JSON.";
+
+      $translation_data = _constructor_call_openai($api_key, $model, $prompt);
+
+      if (!empty($translation_data['title']) && !empty($translation_data['body'])) {
+        $node->addTranslation($langcode, [
+          'title' => $translation_data['title'],
+          'field_article_body' => [
+            'value' => $translation_data['body'],
+            'format' => 'full_html',
+          ],
+          'uid' => $node->getOwnerId(),
+        ]);
+        $node->save();
+        $translated = TRUE;
+        \Drupal::logger('constructor')->notice('Translated Article to @lang: @title', [
+          '@lang' => $langcode,
+          '@title' => $translation_data['title'],
+        ]);
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Article translation error for @title: @message', [
+        '@title' => $original_title,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  return $translated;
+}
+
+/**
+ * Translates Product nodes.
+ */
+function _constructor_translate_product_nodes(array $languages, string $site_description, array $ai_settings) {
+  if (!_constructor_enable_content_translation('product')) {
+    return;
+  }
+
+  try {
+    \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nids = $node_storage->getQuery()
+      ->condition('type', 'product')
+      ->condition('status', 1)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    \Drupal::logger('constructor')->notice('Found @count Product nodes to translate.', ['@count' => count($nids)]);
+
+    if (empty($nids)) {
+      return;
+    }
+
+    $nodes = $node_storage->loadMultiple($nids);
+    $count = 0;
+    foreach ($nodes as $node) {
+      if (_constructor_translate_product_node($node, $languages, $ai_settings)) {
+        $count++;
+      }
+    }
+    \Drupal::logger('constructor')->notice('Translated @count Product nodes.', ['@count' => $count]);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Product translation error: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Translates a single Product node.
+ */
+function _constructor_translate_product_node($node, array $languages, array $ai_settings): bool {
+  $api_key = $ai_settings['api_key'] ?? '';
+  if (empty($api_key)) {
+    return FALSE;
+  }
+
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $language_names = _constructor_get_language_names();
+
+  $original_title = $node->getTitle();
+  // Products use field_product_body, not body.
+  $original_body = $node->get('field_product_body')->value ?? '';
+
+  $translated = FALSE;
+
+  foreach ($languages as $langcode) {
+    if (empty($langcode)) {
+      continue;
+    }
+
+    try {
+      if ($node->hasTranslation($langcode)) {
+        continue;
+      }
+    }
+    catch (\Exception $e) {
+      // If hasTranslation fails, try anyway
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      $prompt = "Translate the following product to $language_name:\n\nName: $original_title\nDescription: $original_body\n\nReturn as JSON with 'name' and 'description' keys. The description should be HTML formatted. Only return the JSON.";
+
+      $translation_data = _constructor_call_openai($api_key, $model, $prompt);
+
+      if (!empty($translation_data['name'])) {
+        $translation_values = [
+          'title' => $translation_data['name'],
+          'uid' => $node->getOwnerId(),
+        ];
+        if (!empty($translation_data['description'])) {
+          // Products use field_product_body, not body.
+          $translation_values['field_product_body'] = [
+            'value' => $translation_data['description'],
+            'format' => 'full_html',
+          ];
+        }
+        $node->addTranslation($langcode, $translation_values);
+        $node->save();
+        $translated = TRUE;
+        \Drupal::logger('constructor')->notice('Translated Product to @lang: @title', [
+          '@lang' => $langcode,
+          '@title' => $translation_data['name'],
+        ]);
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Product translation error for @title: @message', [
+        '@title' => $original_title,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  return $translated;
+}
+
+/**
+ * Calls OpenAI API for translation.
+ */
+function _constructor_call_openai(string $api_key, string $model, string $prompt): array {
+  $client = \Drupal::httpClient();
+  $response = $client->post('https://api.openai.com/v1/chat/completions', [
+    'headers' => [
+      'Authorization' => 'Bearer ' . $api_key,
+      'Content-Type' => 'application/json',
+    ],
+    'json' => [
+      'model' => $model,
+      'messages' => [['role' => 'user', 'content' => $prompt]],
+      'temperature' => 0.3,
+      'max_tokens' => 500,
+    ],
+    'timeout' => 30,
+  ]);
+
+  $data = json_decode($response->getBody()->getContents(), TRUE);
+  $content = $data['choices'][0]['message']['content'] ?? '';
+  $content = trim($content);
+  $content = preg_replace('/^```json\s*/', '', $content);
+  $content = preg_replace('/\s*```$/', '', $content);
+
+  return json_decode($content, TRUE) ?? [];
+}
+
+/**
+ * Gets language names for translation prompts.
+ */
+function _constructor_get_language_names(): array {
+  return [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+    'it' => 'Italian',
+    'pl' => 'Polish',
+    'nl' => 'Dutch',
+    'ru' => 'Russian',
+  ];
 }
 
 /**
