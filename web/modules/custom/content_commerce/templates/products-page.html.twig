@@ -1,0 +1,80 @@
+{#
+/**
+ * @file
+ * Template for Products Page.
+ *
+ * Available variables:
+ * - products: Array of products.
+ * - categories: Array of category filters.
+ * - current_category: Currently selected category.
+ * - currency_symbol: Currency symbol.
+ */
+#}
+<div class="py-16 lg:py-24 bg-white dark:bg-slate-900 min-h-screen transition-colors">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">{{ 'Our Products'|t }}</h1>
+      <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{{ 'Discover our collection of high-quality products carefully curated for you.'|t }}</p>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex flex-wrap items-center justify-center gap-2 mb-12">
+      <a href="/products" class="product-filter-link px-4 py-2 rounded-full text-sm font-medium {{ current_category == 'all' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700' }} transition-colors">{{ 'All'|t }}</a>
+      {% for category in categories %}
+        <a href="/products?category={{ category.name|url_encode }}" class="product-filter-link px-4 py-2 rounded-full text-sm font-medium {{ current_category == category.name ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700' }} transition-colors">{{ category.name }}</a>
+      {% endfor %}
+    </div>
+
+    <!-- Products Grid -->
+    {% if products|length > 0 %}
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+        {% for product in products %}
+          <div class="product-card group">
+            <a href="{{ product.url }}" class="block">
+              <div class="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 aspect-[3/4] mb-3">
+                {% if product.image_url %}
+                  <img src="{{ product.image_url }}" alt="{{ product.title }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                {% else %}
+                  <div class="w-full h-full flex items-center justify-center">
+                    <svg class="w-12 h-12 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                {% endif %}
+                {% if product.sale_price %}
+                  <span class="absolute top-3 left-3 px-2 py-1 bg-red-500 text-white text-xs font-medium rounded">{{ 'Sale'|t }}</span>
+                {% endif %}
+                {% if product.featured %}
+                  <span class="absolute top-3 {{ product.sale_price ? 'left-16' : 'left-3' }} px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded">{{ 'Featured'|t }}</span>
+                {% endif %}
+              </div>
+              {% if product.category %}
+                <span class="text-xs font-medium text-blue-500 mb-1 block">{{ product.category }}</span>
+              {% endif %}
+              <h3 class="font-medium text-gray-900 dark:text-white text-sm mb-1 line-clamp-2">{{ product.title }}</h3>
+              <p class="text-gray-900 dark:text-white font-semibold text-sm">
+                {% if product.formatted_sale_price %}
+                  {{ product.formatted_sale_price }}
+                  <span class="text-gray-400 line-through font-normal">{{ product.formatted_price }}</span>
+                {% else %}
+                  {{ product.formatted_price }}
+                {% endif %}
+              </p>
+              {% if not product.in_stock %}
+                <span class="text-xs text-red-500 mt-1 block">{{ 'Out of Stock'|t }}</span>
+              {% endif %}
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-16">
+        <svg class="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+        <p class="text-gray-500 dark:text-gray-400">{{ 'No products found.'|t }}</p>
+      </div>
+    {% endif %}
+  </div>
+</div>

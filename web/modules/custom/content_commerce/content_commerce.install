@@ -1,0 +1,393 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for content_commerce module.
+ */
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\node\Entity\NodeType;
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+
+/**
+ * Implements hook_install().
+ */
+function content_commerce_install() {
+  // Create Product Category vocabulary.
+  _content_commerce_create_product_category_vocabulary();
+
+  // Create Product content type.
+  _content_commerce_create_product_content_type();
+
+  // Create fields for Product.
+  _content_commerce_create_product_fields();
+
+  // Configure form and view displays.
+  _content_commerce_configure_displays();
+
+  // Set default commerce configuration.
+  _content_commerce_set_default_config();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function content_commerce_uninstall() {
+  // Delete all product nodes.
+  $storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = $storage->getQuery()
+    ->condition('type', 'product')
+    ->accessCheck(FALSE)
+    ->execute();
+  if ($nids) {
+    $nodes = $storage->loadMultiple($nids);
+    $storage->delete($nodes);
+  }
+
+  // Delete Product content type.
+  $content_type = NodeType::load('product');
+  if ($content_type) {
+    $content_type->delete();
+  }
+
+  // Delete Product Category vocabulary terms.
+  $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+  $tids = $term_storage->getQuery()
+    ->condition('vid', 'product_category')
+    ->accessCheck(FALSE)
+    ->execute();
+  if ($tids) {
+    $terms = $term_storage->loadMultiple($tids);
+    $term_storage->delete($terms);
+  }
+
+  // Delete Product Category vocabulary.
+  $vocabulary = Vocabulary::load('product_category');
+  if ($vocabulary) {
+    $vocabulary->delete();
+  }
+
+  // Delete commerce config.
+  \Drupal::configFactory()->getEditable('content_commerce.settings')->delete();
+}
+
+/**
+ * Creates Product Category vocabulary.
+ */
+function _content_commerce_create_product_category_vocabulary() {
+  $vocabulary = Vocabulary::load('product_category');
+  if (!$vocabulary) {
+    $vocabulary = Vocabulary::create([
+      'vid' => 'product_category',
+      'name' => 'Product Category',
+      'description' => 'Categories for products.',
+    ]);
+    $vocabulary->save();
+  }
+}
+
+/**
+ * Creates Product content type.
+ */
+function _content_commerce_create_product_content_type() {
+  $type = NodeType::load('product');
+  if (!$type) {
+    $type = NodeType::create([
+      'type' => 'product',
+      'name' => 'Product',
+      'description' => 'A product with images, pricing, and configurable properties.',
+    ]);
+    $type->save();
+  }
+}
+
+/**
+ * Creates fields for Product content type.
+ */
+function _content_commerce_create_product_fields() {
+  $fields = [
+    'field_product_body' => [
+      'type' => 'text_long',
+      'label' => 'Description',
+      'description' => 'Product description.',
+      'required' => FALSE,
+      'weight' => 1,
+    ],
+    'field_product_images' => [
+      'type' => 'image',
+      'label' => 'Images',
+      'description' => 'Product images (multiple allowed).',
+      'required' => FALSE,
+      'cardinality' => -1,
+      'weight' => 2,
+      'settings' => [
+        'file_extensions' => 'png gif jpg jpeg webp',
+        'max_filesize' => '5 MB',
+        'alt_field' => TRUE,
+        'alt_field_required' => FALSE,
+      ],
+    ],
+    'field_product_price' => [
+      'type' => 'decimal',
+      'label' => 'Price',
+      'description' => 'Product price.',
+      'required' => TRUE,
+      'weight' => 3,
+      'settings' => [
+        'precision' => 10,
+        'scale' => 2,
+      ],
+    ],
+    'field_product_sale_price' => [
+      'type' => 'decimal',
+      'label' => 'Sale Price',
+      'description' => 'Sale price (leave empty if not on sale).',
+      'required' => FALSE,
+      'weight' => 4,
+      'settings' => [
+        'precision' => 10,
+        'scale' => 2,
+      ],
+    ],
+    'field_product_category' => [
+      'type' => 'entity_reference',
+      'label' => 'Category',
+      'description' => 'Product category.',
+      'required' => FALSE,
+      'weight' => 5,
+      'settings' => [
+        'target_type' => 'taxonomy_term',
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [
+          'target_bundles' => ['product_category' => 'product_category'],
+        ],
+      ],
+    ],
+    'field_product_sku' => [
+      'type' => 'string',
+      'label' => 'SKU',
+      'description' => 'Product SKU/code.',
+      'required' => FALSE,
+      'weight' => 6,
+    ],
+    'field_product_in_stock' => [
+      'type' => 'boolean',
+      'label' => 'In Stock',
+      'description' => 'Whether the product is in stock.',
+      'required' => FALSE,
+      'weight' => 7,
+      'default_value' => TRUE,
+    ],
+    'field_product_featured' => [
+      'type' => 'boolean',
+      'label' => 'Featured',
+      'description' => 'Mark as featured product.',
+      'required' => FALSE,
+      'weight' => 8,
+      'default_value' => FALSE,
+    ],
+    'field_product_colors' => [
+      'type' => 'string',
+      'label' => 'Available Colors',
+      'description' => 'Available color options (comma-separated hex codes with labels, e.g., "Black:#1f2937,Green:#059669").',
+      'required' => FALSE,
+      'weight' => 9,
+    ],
+    'field_product_sizes' => [
+      'type' => 'string',
+      'label' => 'Available Sizes',
+      'description' => 'Available size options (comma-separated, e.g., "Small,Medium,Large,XL").',
+      'required' => FALSE,
+      'weight' => 10,
+    ],
+  ];
+
+  foreach ($fields as $field_name => $field_info) {
+    // Create field storage.
+    $field_storage = FieldStorageConfig::loadByName('node', $field_name);
+    if (!$field_storage) {
+      $storage_settings = [
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'type' => $field_info['type'],
+        'cardinality' => $field_info['cardinality'] ?? 1,
+      ];
+
+      if ($field_info['type'] === 'decimal' && isset($field_info['settings'])) {
+        $storage_settings['settings'] = [
+          'precision' => $field_info['settings']['precision'] ?? 10,
+          'scale' => $field_info['settings']['scale'] ?? 2,
+        ];
+      }
+
+      if ($field_info['type'] === 'entity_reference' && isset($field_info['settings']['target_type'])) {
+        $storage_settings['settings'] = [
+          'target_type' => $field_info['settings']['target_type'],
+        ];
+      }
+
+      $field_storage = FieldStorageConfig::create($storage_settings);
+      $field_storage->save();
+    }
+
+    // Create field instance.
+    $field = FieldConfig::loadByName('node', 'product', $field_name);
+    if (!$field) {
+      $field_config = [
+        'field_storage' => $field_storage,
+        'bundle' => 'product',
+        'label' => $field_info['label'],
+        'description' => $field_info['description'],
+        'required' => $field_info['required'],
+      ];
+
+      if ($field_info['type'] === 'image' && isset($field_info['settings'])) {
+        $field_config['settings'] = $field_info['settings'];
+      }
+
+      if ($field_info['type'] === 'entity_reference' && isset($field_info['settings']['handler'])) {
+        $field_config['settings'] = [
+          'handler' => $field_info['settings']['handler'],
+          'handler_settings' => $field_info['settings']['handler_settings'],
+        ];
+      }
+
+      if (isset($field_info['default_value'])) {
+        $field_config['default_value'] = [['value' => $field_info['default_value']]];
+      }
+
+      $field = FieldConfig::create($field_config);
+      $field->save();
+    }
+  }
+}
+
+/**
+ * Configures form and view displays for Product content type.
+ */
+function _content_commerce_configure_displays() {
+  // Form display.
+  $form_display = EntityFormDisplay::load('node.product.default');
+  if (!$form_display) {
+    $form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'product',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $form_display->setComponent('title', [
+    'type' => 'string_textfield',
+    'weight' => 0,
+  ]);
+  $form_display->setComponent('field_product_body', [
+    'type' => 'text_textarea',
+    'weight' => 1,
+  ]);
+  $form_display->setComponent('field_product_images', [
+    'type' => 'image_image',
+    'weight' => 2,
+    'settings' => [
+      'preview_image_style' => 'medium',
+      'progress_indicator' => 'throbber',
+    ],
+  ]);
+  $form_display->setComponent('field_product_price', [
+    'type' => 'number',
+    'weight' => 3,
+  ]);
+  $form_display->setComponent('field_product_sale_price', [
+    'type' => 'number',
+    'weight' => 4,
+  ]);
+  $form_display->setComponent('field_product_category', [
+    'type' => 'entity_reference_autocomplete',
+    'weight' => 5,
+  ]);
+  $form_display->setComponent('field_product_sku', [
+    'type' => 'string_textfield',
+    'weight' => 6,
+  ]);
+  $form_display->setComponent('field_product_in_stock', [
+    'type' => 'boolean_checkbox',
+    'weight' => 7,
+  ]);
+  $form_display->setComponent('field_product_featured', [
+    'type' => 'boolean_checkbox',
+    'weight' => 8,
+  ]);
+  $form_display->setComponent('field_product_colors', [
+    'type' => 'string_textfield',
+    'weight' => 9,
+  ]);
+  $form_display->setComponent('field_product_sizes', [
+    'type' => 'string_textfield',
+    'weight' => 10,
+  ]);
+  $form_display->save();
+
+  // View display.
+  $view_display = EntityViewDisplay::load('node.product.default');
+  if (!$view_display) {
+    $view_display = EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'product',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $view_display->setComponent('field_product_body', [
+    'type' => 'text_default',
+    'weight' => 1,
+    'label' => 'hidden',
+  ]);
+  $view_display->setComponent('field_product_images', [
+    'type' => 'image',
+    'weight' => 0,
+    'label' => 'hidden',
+    'settings' => [
+      'image_style' => 'large',
+      'image_link' => '',
+    ],
+  ]);
+  $view_display->setComponent('field_product_price', [
+    'type' => 'number_decimal',
+    'weight' => 2,
+    'label' => 'inline',
+  ]);
+  $view_display->setComponent('field_product_sale_price', [
+    'type' => 'number_decimal',
+    'weight' => 3,
+    'label' => 'inline',
+  ]);
+  $view_display->setComponent('field_product_category', [
+    'type' => 'entity_reference_label',
+    'weight' => 4,
+    'label' => 'inline',
+  ]);
+  $view_display->removeComponent('field_product_sku');
+  $view_display->removeComponent('field_product_in_stock');
+  $view_display->removeComponent('field_product_featured');
+  $view_display->removeComponent('field_product_colors');
+  $view_display->removeComponent('field_product_sizes');
+  $view_display->save();
+}
+
+/**
+ * Sets default commerce configuration.
+ */
+function _content_commerce_set_default_config() {
+  $config = \Drupal::configFactory()->getEditable('content_commerce.settings');
+  $config->set('currency', 'USD');
+  $config->set('currency_symbol', '$');
+  $config->set('currency_position', 'before');
+  $config->set('shipping_info', 'Free shipping on orders over $100. Standard delivery takes 3-5 business days. Express delivery available for an additional fee. International shipping available to select countries.');
+  $config->set('default_colors', 'Black:#1f2937,Green:#059669,Gold:#fcd34d,Pink:#f9a8d4,Gray:#9ca3af');
+  $config->set('default_sizes', 'Small,Medium,Large,XL,XXL');
+  $config->save();
+}

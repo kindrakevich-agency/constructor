@@ -1,0 +1,96 @@
+{#
+/**
+ * @file
+ * Template for Product Carousel Block.
+ *
+ * Available variables:
+ * - products: Array of product items.
+ * - collection_title: Collection banner title.
+ * - collection_subtitle: Collection banner subtitle.
+ * - collection_brands: Array of brand names.
+ * - collection_link_text: Link text.
+ * - collection_link_url: Link URL.
+ */
+#}
+<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-white dark:bg-slate-900 transition-colors overflow-x-hidden" data-block-type="product_carousel">
+  <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <!-- Product Slider -->
+    <div class="swiper product-swiper mb-16">
+      <div class="swiper-wrapper">
+        {% for product in products %}
+          <div class="swiper-slide">
+            <a href="{{ product.url }}" class="product-card block">
+              <div class="product-image rounded-xl mb-4 aspect-[4/5] overflow-hidden bg-gray-100 dark:bg-slate-800">
+                {% if product.image_url %}
+                  <img src="{{ product.image_url }}" alt="{{ product.title }}" class="w-full h-full object-cover">
+                {% else %}
+                  <div class="w-full h-full flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+              <h3 class="font-semibold text-gray-900 dark:text-white mb-1">{{ product.title }}</h3>
+              {% if product.category %}
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ product.category }}</p>
+              {% endif %}
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+      <!-- Swiper Navigation -->
+      <div class="flex items-center justify-center gap-4 mt-8">
+        <button class="swiper-button-prev-custom w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="swiper-pagination-custom flex gap-2"></div>
+        <button class="swiper-button-next-custom w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm text-gray-600 dark:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Collection Banner -->
+    {% if collection_title %}
+      <div class="collection-banner dark:bg-slate-800 rounded-3xl p-8 lg:p-12">
+        <div class="grid lg:grid-cols-2 gap-8 items-center">
+          <!-- Left: Collection Title -->
+          <div>
+            <h2 class="text-4xl sm:text-5xl lg:text-6xl 3xl:text-7xl 4xl:text-8xl font-bold leading-tight text-gray-900 dark:text-white">
+              {{ collection_title|nl2br }}
+            </h2>
+          </div>
+          <!-- Right: Brands & CTA -->
+          <div class="flex flex-col items-start lg:items-end">
+            <!-- Brand Logos -->
+            {% if collection_brands|length > 0 %}
+              <div class="flex items-center gap-8 mb-8">
+                {% for brand in collection_brands %}
+                  <span class="brand-logo text-xl font-bold tracking-wider text-gray-800 dark:text-gray-200">{{ brand }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <!-- CTA Link -->
+            <a href="{{ collection_link_url }}" class="group inline-flex items-center gap-3 text-gray-900 dark:text-white font-semibold hover:text-blue-500 transition-colors">
+              <span class="uppercase tracking-wide text-sm">{{ collection_link_text }}</span>
+              <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </a>
+            <!-- Description -->
+            {% if collection_subtitle %}
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-4 max-w-md text-left lg:text-right">
+                {{ collection_subtitle }}
+              </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>

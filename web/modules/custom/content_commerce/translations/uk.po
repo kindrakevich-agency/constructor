@@ -1,0 +1,240 @@
+# Ukrainian translation for Content Commerce module.
+msgid ""
+msgstr ""
+"Project-Id-Version: Content Commerce 1.0\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Product"
+msgstr "Товар"
+
+msgid "Products"
+msgstr "Товари"
+
+msgid "Our Products"
+msgstr "Наші товари"
+
+msgid "Discover our collection of high-quality products carefully curated for you."
+msgstr "Відкрийте для себе нашу колекцію високоякісних товарів, ретельно підібраних для вас."
+
+msgid "All"
+msgstr "Всі"
+
+msgid "Back to Products"
+msgstr "Назад до товарів"
+
+msgid "Add to Cart"
+msgstr "Додати в кошик"
+
+msgid "Add to cart"
+msgstr "Додати в кошик"
+
+msgid "View Product"
+msgstr "Переглянути товар"
+
+msgid "Size"
+msgstr "Розмір"
+
+msgid "Color"
+msgstr "Колір"
+
+msgid "Quantity"
+msgstr "Кількість"
+
+msgid "Price"
+msgstr "Ціна"
+
+msgid "Sale"
+msgstr "Розпродаж"
+
+msgid "Sale Price"
+msgstr "Ціна зі знижкою"
+
+msgid "Featured"
+msgstr "Рекомендовані"
+
+msgid "In Stock"
+msgstr "В наявності"
+
+msgid "Out of Stock"
+msgstr "Немає в наявності"
+
+msgid "SKU"
+msgstr "Артикул"
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Shipping information"
+msgstr "Інформація про доставку"
+
+msgid "Shipping Information"
+msgstr "Інформація про доставку"
+
+msgid "No products found."
+msgstr "Товарів не знайдено."
+
+msgid "Product Category"
+msgstr "Категорія товарів"
+
+msgid "Commerce Settings"
+msgstr "Налаштування магазину"
+
+msgid "Currency"
+msgstr "Валюта"
+
+msgid "Currency Symbol"
+msgstr "Символ валюти"
+
+msgid "Currency Symbol Position"
+msgstr "Позиція символу валюти"
+
+msgid "Before price ($100)"
+msgstr "Перед ціною ($100)"
+
+msgid "After price (100$)"
+msgstr "Після ціни (100$)"
+
+msgid "Default Colors"
+msgstr "Кольори за замовчуванням"
+
+msgid "Default Sizes"
+msgstr "Розміри за замовчуванням"
+
+msgid "Product Carousel Block"
+msgstr "Блок карусель товарів"
+
+msgid "Product Sale Hero Block"
+msgstr "Блок героя розпродажу"
+
+msgid "Single Product Block"
+msgstr "Блок одного товару"
+
+msgid "Products List Block"
+msgstr "Блок списку товарів"
+
+msgid "Commerce"
+msgstr "Магазин"
+
+msgid "Number of products"
+msgstr "Кількість товарів"
+
+msgid "Collection Title"
+msgstr "Назва колекції"
+
+msgid "Collection Subtitle"
+msgstr "Підзаголовок колекції"
+
+msgid "Collection Brands"
+msgstr "Бренди колекції"
+
+msgid "Collection Link Text"
+msgstr "Текст посилання колекції"
+
+msgid "Collection Link URL"
+msgstr "URL посилання колекції"
+
+msgid "Badge Text"
+msgstr "Текст значка"
+
+msgid "CTA Button Text"
+msgstr "Текст кнопки CTA"
+
+msgid "Hottest Sale"
+msgstr "Найгарячіший розпродаж"
+
+msgid "Hero Banner"
+msgstr "Банер героя"
+
+msgid "Hero Title"
+msgstr "Заголовок героя"
+
+msgid "Hero Subtitle"
+msgstr "Підзаголовок героя"
+
+msgid "Hero Image URL"
+msgstr "URL зображення героя"
+
+msgid "Hero CTA Text"
+msgstr "Текст CTA героя"
+
+msgid "Hero CTA URL"
+msgstr "URL CTA героя"
+
+msgid "Feature Cards"
+msgstr "Картки функцій"
+
+msgid "Products Section Title"
+msgstr "Заголовок розділу товарів"
+
+msgid "T-Shirt"
+msgstr "Футболка"
+
+msgid "Shoes"
+msgstr "Взуття"
+
+msgid "Jackets"
+msgstr "Куртки"
+
+msgid "Hat"
+msgstr "Капелюх"
+
+msgid "Shorts"
+msgstr "Шорти"
+
+msgid "Accessories"
+msgstr "Аксесуари"
+
+msgid "Black"
+msgstr "Чорний"
+
+msgid "Green"
+msgstr "Зелений"
+
+msgid "Gold"
+msgstr "Золотий"
+
+msgid "Pink"
+msgstr "Рожевий"
+
+msgid "Gray"
+msgstr "Сірий"
+
+msgid "Small"
+msgstr "Малий"
+
+msgid "Medium"
+msgstr "Середній"
+
+msgid "Large"
+msgstr "Великий"
+
+msgid "US Dollar (USD)"
+msgstr "Долар США (USD)"
+
+msgid "Euro (EUR)"
+msgstr "Євро (EUR)"
+
+msgid "British Pound (GBP)"
+msgstr "Британський фунт (GBP)"
+
+msgid "Ukrainian Hryvnia (UAH)"
+msgstr "Українська гривня (UAH)"
+
+msgid "Polish Zloty (PLN)"
+msgstr "Польський злотий (PLN)"
+
+msgid "Canadian Dollar (CAD)"
+msgstr "Канадський долар (CAD)"
+
+msgid "Australian Dollar (AUD)"
+msgstr "Австралійський долар (AUD)"
+
+msgid "Japanese Yen (JPY)"
+msgstr "Японська єна (JPY)"
+
+msgid "Chinese Yuan (CNY)"
+msgstr "Китайський юань (CNY)"

@@ -1,0 +1,17 @@
+content_commerce.products_page:
+  path: '/products'
+  defaults:
+    _controller: '\Drupal\content_commerce\Controller\ProductsPageController::page'
+    _title: 'Products'
+  requirements:
+    _permission: 'access content'
+
+content_commerce.settings:
+  path: '/admin/config/commerce/settings'
+  defaults:
+    _form: '\Drupal\content_commerce\Form\CommerceSettingsForm'
+    _title: 'Commerce Settings'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

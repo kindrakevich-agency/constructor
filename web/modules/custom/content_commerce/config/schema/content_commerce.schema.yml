@@ -1,0 +1,22 @@
+content_commerce.settings:
+  type: config_object
+  label: 'Commerce settings'
+  mapping:
+    currency:
+      type: string
+      label: 'Currency code'
+    currency_symbol:
+      type: string
+      label: 'Currency symbol'
+    currency_position:
+      type: string
+      label: 'Currency symbol position'
+    shipping_info:
+      type: string
+      label: 'Shipping information'
+    default_colors:
+      type: string
+      label: 'Default product colors'
+    default_sizes:
+      type: string
+      label: 'Default product sizes'

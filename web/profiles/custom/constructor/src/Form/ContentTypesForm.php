@@ -61,6 +61,12 @@ class ContentTypesForm extends InstallerFormBase {
         'default' => TRUE,
         'module' => 'content_services',
       ],
+      'product' => [
+        'name' => 'Product',
+        'description' => 'E-commerce products with images, pricing, and properties. Includes Product blocks.',
+        'default' => FALSE,
+        'module' => 'content_commerce',
+      ],
     ];
 
     // Content Types Section Header
@@ -168,6 +174,11 @@ class ContentTypesForm extends InstallerFormBase {
         'name' => 'Service',
         'description' => 'Services offered by your organization.',
         'module' => 'content_services',
+      ],
+      'product' => [
+        'name' => 'Product',
+        'description' => 'E-commerce products with images and pricing.',
+        'module' => 'content_commerce',
       ],
     ];
 

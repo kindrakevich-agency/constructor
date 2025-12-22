@@ -1317,6 +1317,200 @@ The articles should be informative blog posts, news, or case studies relevant to
 }
 
 /**
+ * Generate products content using OpenAI API.
+ */
+function _constructor_generate_products_with_ai($site_name, $site_description, $language, $ai_settings, $author_uid) {
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+
+  // Default Unsplash product images.
+  $unsplash_images = [
+    'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=500&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=500&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=500&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=400&h=500&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=500&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=500&fit=crop&q=80',
+  ];
+
+  // Default categories.
+  $categories = ['T-Shirt', 'Shoes', 'Jackets', 'Accessories', 'Shorts', 'Hat'];
+
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+  ];
+  $language_name = $language_names[$language] ?? 'English';
+
+  // First, create product categories.
+  _constructor_create_product_categories($categories, $language);
+
+  $prompt = "Generate 6 products for a company with the following description: \"$site_description\".
+
+Please respond in $language_name language.
+
+Return the response as a JSON array with objects containing 'name', 'description', 'price', 'sale_price', 'category', 'sku' keys. Example format:
+[
+  {\"name\": \"Product Name\", \"description\": \"Product description (2-3 sentences)\", \"price\": 99.99, \"sale_price\": null, \"category\": \"T-Shirt\", \"sku\": \"SKU-001\"},
+  ...
+]
+
+Categories must be one of: " . implode(', ', $categories) . "
+Some products should have sale_price (lower than price), others should have null for sale_price.
+Prices should be realistic (between 25 and 500).
+Only return the JSON array, no other text.";
+
+  try {
+    $client = \Drupal::httpClient();
+    $response = $client->post('https://api.openai.com/v1/chat/completions', [
+      'headers' => [
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+      ],
+      'json' => [
+        'model' => $model,
+        'messages' => [
+          ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.7,
+        'max_tokens' => 1500,
+      ],
+      'timeout' => 60,
+    ]);
+
+    $data = json_decode($response->getBody()->getContents(), TRUE);
+    $content = $data['choices'][0]['message']['content'] ?? '';
+
+    // Parse JSON from response.
+    $content = trim($content);
+    $content = preg_replace('/^```json\s*/', '', $content);
+    $content = preg_replace('/\s*```$/', '', $content);
+
+    $products = json_decode($content, TRUE);
+
+    if (is_array($products) && !empty($products)) {
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+      $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+
+      // Default colors and sizes.
+      $default_colors = 'Black:#1f2937,Green:#059669,Gold:#fcd34d,Pink:#f9a8d4,Gray:#9ca3af';
+      $default_sizes = 'Small,Medium,Large,XL,XXL';
+
+      foreach ($products as $index => $product) {
+        // Find category term.
+        $category_tid = NULL;
+        $terms = $term_storage->loadByProperties([
+          'vid' => 'product_category',
+          'name' => $product['category'] ?? 'Accessories',
+        ]);
+        if ($terms) {
+          $category_tid = reset($terms)->id();
+        }
+
+        $node = $node_storage->create([
+          'type' => 'product',
+          'title' => $product['name'],
+          'field_product_body' => [
+            'value' => '<p>' . ($product['description'] ?? '') . '</p>',
+            'format' => 'full_html',
+          ],
+          'field_product_price' => $product['price'] ?? 99.99,
+          'field_product_sale_price' => $product['sale_price'] ?? NULL,
+          'field_product_category' => $category_tid,
+          'field_product_sku' => $product['sku'] ?? 'SKU-' . ($index + 1),
+          'field_product_in_stock' => TRUE,
+          'field_product_featured' => $index < 2,
+          'field_product_colors' => $default_colors,
+          'field_product_sizes' => $default_sizes,
+          'status' => 1,
+          'langcode' => $language,
+          'uid' => $author_uid,
+        ]);
+        $node->save();
+
+        \Drupal::logger('constructor')->notice('Created product: @name', [
+          '@name' => $product['name'],
+        ]);
+      }
+
+      \Drupal::logger('constructor')->notice('Generated @count products with AI.', ['@count' => count($products)]);
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to generate products with AI: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Create product categories.
+ */
+function _constructor_create_product_categories($categories, $language) {
+  $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+
+  foreach ($categories as $category_name) {
+    // Check if term already exists.
+    $existing = $term_storage->loadByProperties([
+      'vid' => 'product_category',
+      'name' => $category_name,
+    ]);
+
+    if (empty($existing)) {
+      $term = $term_storage->create([
+        'vid' => 'product_category',
+        'name' => $category_name,
+        'langcode' => $language,
+      ]);
+      $term->save();
+
+      \Drupal::logger('constructor')->notice('Created product category: @name', [
+        '@name' => $category_name,
+      ]);
+    }
+  }
+}
+
+/**
+ * Enable translation for Product content type.
+ */
+function _constructor_enable_product_translation() {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping Product translation setup.');
+    return FALSE;
+  }
+
+  // Check if language module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('language')) {
+    \Drupal::logger('constructor')->notice('Language module not enabled, skipping Product translation setup.');
+    return FALSE;
+  }
+
+  try {
+    // Enable translation for the Product content type.
+    $config = \Drupal::configFactory()->getEditable('language.content_settings.node.product');
+    $config->set('id', 'node.product');
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'node');
+    $config->set('target_bundle', 'product');
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for Product content type.');
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable Product translation: @message', ['@message' => $e->getMessage()]);
+    return FALSE;
+  }
+}
+
+/**
  * Enable translation for Article content type.
  */
 function _constructor_enable_article_translation() {
@@ -1881,6 +2075,19 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
       ]);
       $articles_link->save();
       \Drupal::logger('constructor')->notice('Created Articles menu link.');
+    }
+
+    // Create Products link if Commerce module is enabled.
+    if (in_array('content_commerce', $content_type_modules)) {
+      $products_link = $menu_link_storage->create([
+        'title' => t('Products'),
+        'link' => ['uri' => 'internal:/products'],
+        'menu_name' => 'main',
+        'weight' => 8,
+        'expanded' => FALSE,
+      ]);
+      $products_link->save();
+      \Drupal::logger('constructor')->notice('Created Products menu link.');
     }
 
     // Create Example page link.
@@ -2583,6 +2790,11 @@ function constructor_batch_generate_ai_content_no_translation($constructor_setti
   // Generate Articles if content_article module is enabled.
   if (in_array('content_article', $content_type_modules)) {
     _constructor_generate_articles_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid ?? 1);
+  }
+
+  // Generate Products if content_commerce module is enabled.
+  if (in_array('content_commerce', $content_type_modules)) {
+    _constructor_generate_products_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid ?? 1);
   }
 
   $context['results'][] = 'ai_content_no_translation';

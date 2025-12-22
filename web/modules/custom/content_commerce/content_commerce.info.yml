@@ -1,0 +1,13 @@
+name: 'Content Commerce'
+type: module
+description: 'Provides Product content type with configurable properties and commerce blocks.'
+core_version_requirement: ^10 || ^11
+package: Constructor
+dependencies:
+  - drupal:node
+  - drupal:block
+  - drupal:text
+  - drupal:image
+  - drupal:file
+  - drupal:taxonomy
+  - drupal:options

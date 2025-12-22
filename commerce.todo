@@ -1,0 +1,296 @@
+# Commerce Shop Module - Implementation Plan
+
+## Overview
+Custom commerce module for Constructor installation profile providing product management
+with configurable properties, multiple blocks matching /example page designs.
+
+---
+
+## Phase 1: Module Foundation & Content Type
+
+### 1.1 Module Setup
+- [ ] Create content_commerce module structure
+  - content_commerce.info.yml
+  - content_commerce.install
+  - content_commerce.module
+  - src/ directory structure
+
+### 1.2 Product Content Type
+- [ ] Create "Product" content type with fields:
+  - field_product_title (string) - Product name
+  - field_product_body (text_long) - Description
+  - field_product_images (image, multiple) - Product gallery
+  - field_product_price (decimal) - Current price
+  - field_product_sale_price (decimal) - Sale price (optional)
+  - field_product_category (entity_reference) - Taxonomy reference
+  - field_product_sku (string) - Product SKU
+  - field_product_in_stock (boolean) - Stock status
+  - field_product_featured (boolean) - Featured flag
+  - field_product_properties (entity_reference, multiple) - Dynamic properties reference
+
+### 1.3 Product Category Taxonomy
+- [ ] Create "Product Category" vocabulary
+- [ ] Default categories during install: T-Shirt, Shoes, Jackets, Hat, Shorts, Accessories
+
+---
+
+## Phase 2: Configuration System
+
+### 2.1 Commerce Configuration Form
+- [ ] Create CommerceConfigForm (admin/config/commerce/settings)
+  - Currency selection (USD, EUR, UAH, etc.)
+  - Currency symbol position (before/after)
+  - Shipping information text (rich text)
+  - Enable/disable sale prices
+  - Default stock status
+
+### 2.2 Product Properties Configuration
+- [ ] Create ProductPropertiesForm (admin/config/commerce/properties)
+- [ ] Property entity/config type with fields:
+  - Property name (e.g., "Color", "Size")
+  - Property machine name
+  - Property type: "radio" (visual buttons) or "select" (dropdown)
+  - Property values (multiple): value, label, optional color code
+  - Weight (for ordering)
+
+### 2.3 Default Properties (installed by default)
+- [ ] Color property:
+  - Type: radio (displayed as color swatches/buttons)
+  - Values: Black (#1f2937), Green (#059669), Gold (#fcd34d), Pink (#f9a8d4), Gray (#9ca3af)
+- [ ] Size property:
+  - Type: select (dropdown)
+  - Values: Small, Medium, Large, XL, XXL
+
+---
+
+## Phase 3: Blocks Implementation
+
+### 3.1 Product Carousel Block (product_carousel)
+- [ ] Create ProductCarouselBlock.php
+  - Config: title, collection banner text, brands, limit
+  - Load featured/latest products
+  - Swiper.js integration
+- [ ] Create product-carousel-block.html.twig template
+  - Product slider with swiper
+  - Collection banner section
+  - Navigation controls
+
+### 3.2 Product Sale Hero Block (hero_product_sale)
+- [ ] Create ProductSaleHeroBlock.php
+  - Config: badge text, CTA text, CTA URL
+  - Select specific product or random sale product
+  - Show original/sale price
+- [ ] Create product-sale-hero-block.html.twig template
+  - "Hottest Sale" badge with animation
+  - Product title, prices, description
+  - Large product image
+  - Add to cart CTA
+
+### 3.3 Single Product Block (single_product)
+- [ ] Create SingleProductBlock.php
+  - Config: product selection
+  - Load product with all properties
+  - Shipping information from config
+- [ ] Create single-product-block.html.twig template
+  - Image gallery with thumbnails
+  - Dynamic property selectors (radio for color, select for others)
+  - Price display (with sale price if applicable)
+  - Shipping accordion
+  - Quantity selector
+  - Add to cart button
+- [ ] JavaScript for:
+  - Thumbnail image switching
+  - Property selection
+  - Quantity +/- buttons
+  - Shipping accordion toggle
+
+### 3.4 Products List Block (products_list)
+- [ ] Create ProductsListBlock.php
+  - Config: hero banner content, feature cards, category filters
+  - Load products with filtering capability
+  - Ajax loading for filters
+- [ ] Create products-list-block.html.twig template
+  - Hero banner section
+  - Feature cards grid
+  - Category filter tabs
+  - Products grid (4 columns)
+  - Product cards with hover actions (wishlist, add to cart)
+- [ ] JavaScript for category filtering
+
+---
+
+## Phase 4: Pages & Controllers
+
+### 4.1 Products Listing Page
+- [ ] Create ProductsPageController
+- [ ] Route: /products
+- [ ] Category filtering via URL: /products?category={slug}
+- [ ] Pagination support
+- [ ] Template: products-page.html.twig
+
+### 4.2 Single Product Page
+- [ ] Template: node--product--full.html.twig
+- [ ] Full product display with gallery
+- [ ] All properties as selectors
+- [ ] Related products section
+- [ ] Breadcrumb navigation
+
+---
+
+## Phase 5: JavaScript & Interaction
+
+### 5.1 Product Gallery
+- [ ] Thumbnail click to switch main image
+- [ ] Smooth transitions
+
+### 5.2 Property Selectors
+- [ ] Color swatch selection (visual ring indicator)
+- [ ] Size dropdown
+- [ ] Custom properties based on config
+
+### 5.3 Shopping Interactions
+- [ ] Quantity selector (+/- buttons)
+- [ ] Add to cart button (show confirmation)
+- [ ] Wishlist toggle
+
+### 5.4 Product Filtering
+- [ ] Category tab filtering with animation
+- [ ] Product grid update without page reload
+
+---
+
+## Phase 6: Installation & AI Content
+
+### 6.1 Install Hook
+- [ ] Create product category terms
+- [ ] Create default properties (Color, Size)
+- [ ] Set default commerce config (currency, shipping text)
+
+### 6.2 AI Product Generation
+- [ ] If OpenAI configured, generate 6-8 sample products:
+  - Fashion items (T-shirts, Shoes, Jackets)
+  - Electronics (Headphones, Speakers)
+  - Accessories
+- [ ] Assign categories and properties
+- [ ] Generate descriptions via AI
+
+### 6.3 Translation Support
+- [ ] Enable translation for Product content type
+- [ ] Translate product category terms
+- [ ] Translate property labels
+
+---
+
+## Phase 7: Theme Integration
+
+### 7.1 CSS/Styling
+- [ ] Product card styles
+- [ ] Color swatch styles
+- [ ] Filter tab styles
+- [ ] Product gallery styles
+
+### 7.2 Library Definition
+- [ ] constructor_theme/commerce library
+  - product.js
+  - product.css
+
+---
+
+## Phase 8: Integration with Install Wizard
+
+### 8.1 ContentTypesForm Update
+- [ ] Add "Product" option to available content types
+- [ ] Enable content_commerce module when Product selected
+
+### 8.2 DesignLayoutForm Update
+- [ ] Allow assigning commerce blocks to regions
+- [ ] Product carousel block
+- [ ] Products list block
+
+---
+
+## Files to Create
+
+```
+web/modules/custom/content_commerce/
+├── content_commerce.info.yml
+├── content_commerce.install
+├── content_commerce.module
+├── content_commerce.routing.yml
+├── content_commerce.permissions.yml
+├── config/
+│   ├── install/
+│   │   ├── commerce.settings.yml
+│   │   └── commerce.property.*.yml
+│   └── schema/
+│       └── content_commerce.schema.yml
+├── src/
+│   ├── Controller/
+│   │   └── ProductsPageController.php
+│   ├── Form/
+│   │   ├── CommerceConfigForm.php
+│   │   └── ProductPropertiesForm.php
+│   ├── Plugin/
+│   │   └── Block/
+│   │       ├── ProductCarouselBlock.php
+│   │       ├── ProductSaleHeroBlock.php
+│   │       ├── SingleProductBlock.php
+│   │       └── ProductsListBlock.php
+│   └── Entity/
+│       └── ProductProperty.php (config entity)
+├── templates/
+│   ├── product-carousel-block.html.twig
+│   ├── product-sale-hero-block.html.twig
+│   ├── single-product-block.html.twig
+│   ├── products-list-block.html.twig
+│   ├── products-page.html.twig
+│   └── node--product--full.html.twig
+├── js/
+│   └── product.js
+├── css/
+│   └── product.css
+└── translations/
+    └── uk.po
+```
+
+---
+
+## Block Types Summary (matching /example)
+
+| Block Type | data-block-type | Key Features |
+|------------|-----------------|--------------|
+| Product Carousel | product_carousel | Swiper slider, collection banner |
+| Product Sale Hero | hero_product_sale | Sale badge, pricing, CTA |
+| Single Product | single_product | Gallery, properties, cart |
+| Products List | products_list | Banner, filters, grid |
+
+---
+
+## Property System Architecture
+
+### Property Configuration Entity
+- Machine name (e.g., "color", "size")
+- Label (translatable)
+- Display type: "radio" (buttons) or "select" (dropdown)
+- Values array with:
+  - value (machine name)
+  - label (human readable)
+  - color_code (optional, for color type)
+  - weight (ordering)
+
+### Product Property Values
+- Stored as multi-value field on Product node
+- References property config + selected value
+- Example: color:black, size:medium
+
+---
+
+## Notes
+
+1. No shopping cart functionality (display only)
+2. Add to cart buttons show confirmation message
+3. Properties are fully dynamic - admin can add any property type
+4. Color property special: uses color swatches with ring selection
+5. All other properties: select dropdowns
+6. Currency from config applies to all price displays
+7. Shipping information text is global, shown on all products

@@ -1,0 +1,6 @@
+product:
+  version: 1.x
+  js:
+    js/product.js: {}
+  dependencies:
+    - core/drupal
