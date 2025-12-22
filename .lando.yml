@@ -19,6 +19,9 @@ services:
         DRUSH_OPTIONS_URI: "https://constructor.lndo.site"
     config:
       php: .lando/php.ini
+  appserver_nginx:
+    config:
+      server: .lando/nginx.conf
 
   database:
     portforward: true

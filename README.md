@@ -18,8 +18,10 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
   - **Simple Metatag**: SEO metatags with path-based overrides and Google Tag support
   - **Simple Sitemap Generator**: XML sitemaps with multi-domain support
   - **Content FAQ**: FAQ content type with accordion block
-  - **Content Team**: Team member content type with block display
+  - **Content Team**: Team member content type with carousel block
   - **Content Services**: Services content type with methods block
+  - **Content Article**: Article content type with video support and blocks
+  - **Content Commerce**: Product content type with e-commerce blocks
   - **Language Switcher**: Custom language switching modal/drawer
   - **Constructor Hero**: Configurable Hero, What We Do, and Booking Modal blocks
 
@@ -112,11 +114,16 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
 ```
 constructor/
 ├── .lando.yml                    # Lando configuration
+├── .lando/
+│   ├── php.ini                   # PHP configuration (timeouts, memory)
+│   └── nginx.conf                # Nginx configuration (timeouts)
 ├── composer.json                 # PHP dependencies
 ├── web/
 │   ├── modules/
 │   │   └── custom/
 │   │       ├── constructor_hero/         # Hero blocks module
+│   │       ├── content_article/          # Article content type module
+│   │       ├── content_commerce/         # Commerce/Product module
 │   │       ├── content_faq/              # FAQ content type module
 │   │       ├── content_services/         # Services content type module
 │   │       ├── content_team/             # Team member content type module
@@ -152,6 +159,23 @@ Provides configurable hero blocks:
 - **Booking Modal Block**: Configurable booking form modal/drawer
 
 All elements are configurable via block settings in the admin UI.
+
+### Content Article
+- Article content type with body, image, and YouTube video URL fields
+- **Articles Block**: Grid display of latest articles with video thumbnails
+- **Article Video Block**: Full-width video banner for video articles
+- Articles listing page at `/articles`
+- Single article page with Plyr video player
+
+### Content Commerce
+- Product content type with multiple images, pricing, colors, sizes
+- Product Category taxonomy
+- Commerce settings (currency, shipping info)
+- **Product Carousel Block**: Swiper-based product slider with collection banner
+- **Product Sale Hero Block**: "Hottest Sale" promotional banner
+- **Single Product Block**: Product detail with gallery, color swatches, size selector
+- **Products List Block**: Category filters, feature cards, product grid
+- Products listing page at `/products`
 
 ### Content FAQ
 - FAQ content type with question/answer fields
@@ -244,10 +268,11 @@ All elements are configurable via block settings in the admin UI.
 ### Step 5: Content Types
 - Select from pre-configured content types:
   - Basic Page
-  - Article
+  - Article (with video support)
   - Team Member
   - FAQ
   - Service
+  - Product (e-commerce)
 
 ### Step 6: Design & Layout
 - Dark mode toggle
@@ -257,7 +282,7 @@ All elements are configurable via block settings in the admin UI.
 ### Step 7: AI Integration
 - OpenAI API configuration
 - Model selection (GPT-4o, GPT-4, etc.)
-- Automatic content generation
+- Automatic content generation for all enabled content types
 
 ## Theme Features
 
@@ -313,16 +338,26 @@ lando drush watchdog:show
 
 ### Common Issues
 
-1. **Node.js version**: Tailwind CSS v4 requires Node.js 22+. Use nvm to switch:
+1. **504 Gateway Timeout during installation**: The installation with AI content generation can take several minutes. The Lando configuration includes extended timeouts (10 minutes) for nginx and PHP. If you still get timeouts:
+   ```bash
+   lando rebuild -y
+   ```
+
+2. **Node.js version**: Tailwind CSS v4 requires Node.js 22+. Use nvm to switch:
    ```bash
    nvm use 22
    ```
 
-2. **Permission issues**: Ensure `web/sites/default/files` is writable
+3. **Permission issues**: Ensure `web/sites/default/files` is writable
 
-3. **Test themes visible**: Add to settings.php:
+4. **Test themes visible**: Add to settings.php:
    ```php
    $settings['extension_discovery_scan_tests'] = FALSE;
+   ```
+
+5. **Clear database for fresh install**:
+   ```bash
+   lando drush sql-drop -y
    ```
 
 ## License
