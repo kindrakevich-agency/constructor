@@ -1,0 +1,267 @@
+# Ukrainian translations for Constructor Hero module.
+# Copyright (C) 2024
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Constructor Hero 1.0\n"
+"POT-Creation-Date: 2024-12-22 10:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+
+# Hero Block
+msgid "Hero Block"
+msgstr "Блок героя"
+
+msgid "Constructor"
+msgstr "Конструктор"
+
+msgid "Title"
+msgstr "Заголовок"
+
+msgid "Title prefix"
+msgstr "Префікс заголовка"
+
+msgid "Text before the highlighted word."
+msgstr "Текст перед виділеним словом."
+
+msgid "Highlighted word"
+msgstr "Виділене слово"
+
+msgid "Word with underline decoration."
+msgstr "Слово з підкресленням."
+
+msgid "Title suffix"
+msgstr "Суфікс заголовка"
+
+msgid "Text after the highlighted word."
+msgstr "Текст після виділеного слова."
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Email Form"
+msgstr "Форма електронної пошти"
+
+msgid "Show email form"
+msgstr "Показати форму електронної пошти"
+
+msgid "Email placeholder"
+msgstr "Плейсхолдер електронної пошти"
+
+msgid "Button text"
+msgstr "Текст кнопки"
+
+msgid "Statistics"
+msgstr "Статистика"
+
+msgid "Show statistics"
+msgstr "Показати статистику"
+
+msgid "Stat 1 value"
+msgstr "Значення статистики 1"
+
+msgid "Stat 1 label"
+msgstr "Мітка статистики 1"
+
+msgid "Stat 2 value"
+msgstr "Значення статистики 2"
+
+msgid "Stat 2 label"
+msgstr "Мітка статистики 2"
+
+msgid "Rating"
+msgstr "Рейтинг"
+
+msgid "Show rating"
+msgstr "Показати рейтинг"
+
+msgid "Rating value"
+msgstr "Значення рейтингу"
+
+msgid "Rating text"
+msgstr "Текст рейтингу"
+
+msgid "Image"
+msgstr "Зображення"
+
+msgid "Image URL"
+msgstr "URL зображення"
+
+msgid "URL of the hero image."
+msgstr "URL зображення героя."
+
+msgid "Image alt text"
+msgstr "Альтернативний текст зображення"
+
+msgid "Floating Card"
+msgstr "Плаваюча картка"
+
+msgid "Show floating card"
+msgstr "Показати плаваючу картку"
+
+msgid "Floating card value"
+msgstr "Значення плаваючої картки"
+
+msgid "Floating card text"
+msgstr "Текст плаваючої картки"
+
+# What We Do Block
+msgid "What We Do Block"
+msgstr "Блок «Що ми робимо»"
+
+msgid "Badge"
+msgstr "Бейдж"
+
+msgid "Badge text"
+msgstr "Текст бейджа"
+
+msgid "Buttons"
+msgstr "Кнопки"
+
+msgid "Show primary button"
+msgstr "Показати основну кнопку"
+
+msgid "Primary button text"
+msgstr "Текст основної кнопки"
+
+msgid "Primary button URL"
+msgstr "URL основної кнопки"
+
+msgid "Show secondary link"
+msgstr "Показати додаткове посилання"
+
+msgid "Secondary link text"
+msgstr "Текст додаткового посилання"
+
+msgid "Secondary link URL"
+msgstr "URL додаткового посилання"
+
+# Booking Modal Block
+msgid "Booking Modal"
+msgstr "Модальне вікно бронювання"
+
+msgid "Modal Settings"
+msgstr "Налаштування модального вікна"
+
+msgid "Modal title"
+msgstr "Заголовок модального вікна"
+
+msgid "Modal description"
+msgstr "Опис модального вікна"
+
+msgid "Header Button"
+msgstr "Кнопка в шапці"
+
+msgid "Show \"Book a demo\" button in header"
+msgstr "Показати кнопку «Замовити демо» в шапці"
+
+msgid "Display a button in the header that opens the booking modal."
+msgstr "Відобразити кнопку в шапці, яка відкриває модальне вікно бронювання."
+
+msgid "Header button text"
+msgstr "Текст кнопки в шапці"
+
+msgid "Name Field"
+msgstr "Поле імені"
+
+msgid "Show name field"
+msgstr "Показати поле імені"
+
+msgid "Label"
+msgstr "Мітка"
+
+msgid "Placeholder"
+msgstr "Плейсхолдер"
+
+msgid "Required"
+msgstr "Обов'язкове"
+
+msgid "Email Field"
+msgstr "Поле електронної пошти"
+
+msgid "Show email field"
+msgstr "Показати поле електронної пошти"
+
+msgid "Company Field"
+msgstr "Поле компанії"
+
+msgid "Show company field"
+msgstr "Показати поле компанії"
+
+msgid "Phone Field"
+msgstr "Поле телефону"
+
+msgid "Show phone field"
+msgstr "Показати поле телефону"
+
+msgid "Message Field"
+msgstr "Поле повідомлення"
+
+msgid "Show message field"
+msgstr "Показати поле повідомлення"
+
+msgid "Submit Button"
+msgstr "Кнопка відправки"
+
+msgid "Submit button text"
+msgstr "Текст кнопки відправки"
+
+msgid "Book a demo"
+msgstr "Замовити демо"
+
+msgid "Book Now"
+msgstr "Замовити зараз"
+
+msgid "Book a Consultation"
+msgstr "Замовити консультацію"
+
+msgid "Fill out the form below and we will get back to you shortly."
+msgstr "Заповніть форму нижче, і ми зв'яжемося з вами найближчим часом."
+
+msgid "Full Name"
+msgstr "Повне ім'я"
+
+msgid "Enter your full name"
+msgstr "Введіть ваше повне ім'я"
+
+msgid "Email"
+msgstr "Електронна пошта"
+
+msgid "Enter your email address"
+msgstr "Введіть вашу електронну адресу"
+
+msgid "Company"
+msgstr "Компанія"
+
+msgid "Enter your company name"
+msgstr "Введіть назву вашої компанії"
+
+msgid "Phone"
+msgstr "Телефон"
+
+msgid "Enter your phone number"
+msgstr "Введіть ваш номер телефону"
+
+msgid "Message"
+msgstr "Повідомлення"
+
+msgid "Tell us about your project..."
+msgstr "Розкажіть нам про ваш проект..."
+
+msgid "Submit Request"
+msgstr "Надіслати запит"
+
+msgid "Thank you! We will contact you shortly."
+msgstr "Дякуємо! Ми зв'яжемося з вами найближчим часом."
+
+msgid "Close"
+msgstr "Закрити"
+
+msgid "Send"
+msgstr "Надіслати"

@@ -1,0 +1,169 @@
+# Ukrainian translations for Constructor Profile.
+# Copyright (C) 2024
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Constructor Profile 1.0\n"
+"POT-Creation-Date: 2024-12-22 10:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+
+# Installation steps
+msgid "Importing translations"
+msgstr "Імпорт перекладів"
+
+msgid "Site Basics"
+msgstr "Основи сайту"
+
+msgid "Languages"
+msgstr "Мови"
+
+msgid "Content Types"
+msgstr "Типи контенту"
+
+msgid "Design & Layout"
+msgstr "Дизайн та макет"
+
+msgid "AI Integration"
+msgstr "Інтеграція ШІ"
+
+msgid "Applying Configuration"
+msgstr "Застосування конфігурації"
+
+msgid "Installing Translation Module"
+msgstr "Встановлення модуля перекладу"
+
+msgid "Updating Translations"
+msgstr "Оновлення перекладів"
+
+msgid "Finalizing"
+msgstr "Завершення"
+
+msgid "CLI Setup"
+msgstr "Налаштування CLI"
+
+msgid "Setting up Constructor"
+msgstr "Налаштування Constructor"
+
+msgid "Applying default configuration..."
+msgstr "Застосування конфігурації за замовчуванням..."
+
+msgid "Translation module installed."
+msgstr "Модуль перекладу встановлено."
+
+msgid "Translating Content"
+msgstr "Переклад контенту"
+
+msgid "Content translation completed."
+msgstr "Переклад контенту завершено."
+
+msgid "Content translation had some issues."
+msgstr "Під час перекладу контенту виникли деякі проблеми."
+
+msgid "Configuring languages..."
+msgstr "Налаштування мов..."
+
+msgid "Installing language switcher..."
+msgstr "Встановлення перемикача мови..."
+
+msgid "Installing content type modules..."
+msgstr "Встановлення модулів типів контенту..."
+
+msgid "Creating content types..."
+msgstr "Створення типів контенту..."
+
+msgid "Enabling modules..."
+msgstr "Увімкнення модулів..."
+
+msgid "Setting up theme..."
+msgstr "Налаштування теми..."
+
+msgid "Placing blocks..."
+msgstr "Розміщення блоків..."
+
+msgid "Configuring AI settings..."
+msgstr "Налаштування ШІ..."
+
+msgid "Generating AI content..."
+msgstr "Генерація контенту ШІ..."
+
+msgid "Site Name"
+msgstr "Назва сайту"
+
+msgid "Site Email"
+msgstr "Email сайту"
+
+msgid "Admin Username"
+msgstr "Ім'я адміністратора"
+
+msgid "Admin Password"
+msgstr "Пароль адміністратора"
+
+msgid "Enable Multilingual Support"
+msgstr "Увімкнути багатомовну підтримку"
+
+msgid "Default Language"
+msgstr "Мова за замовчуванням"
+
+msgid "Additional Languages"
+msgstr "Додаткові мови"
+
+msgid "Select Content Types"
+msgstr "Вибрати типи контенту"
+
+msgid "FAQ"
+msgstr "Часті запитання"
+
+msgid "Team Members"
+msgstr "Члени команди"
+
+msgid "Services"
+msgstr "Послуги"
+
+msgid "Blog"
+msgstr "Блог"
+
+msgid "Pages"
+msgstr "Сторінки"
+
+msgid "Enable AI Content Generation"
+msgstr "Увімкнути генерацію контенту ШІ"
+
+msgid "OpenAI API Key"
+msgstr "API ключ OpenAI"
+
+msgid "Generate sample content"
+msgstr "Генерувати зразковий контент"
+
+msgid "Next"
+msgstr "Далі"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Finish"
+msgstr "Завершити"
+
+msgid "Skip"
+msgstr "Пропустити"
+
+msgid "Save and continue"
+msgstr "Зберегти і продовжити"
+
+msgid "Installation complete!"
+msgstr "Встановлення завершено!"
+
+msgid "Your site has been successfully installed."
+msgstr "Ваш сайт успішно встановлено."
+
+msgid "Visit your new site"
+msgstr "Відвідати ваш новий сайт"
+
+msgid "Go to administration"
+msgstr "Перейти до адміністрування"

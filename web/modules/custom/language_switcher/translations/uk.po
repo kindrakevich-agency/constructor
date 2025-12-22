@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Language Switcher 1.0.0\n"
 "POT-Creation-Date: 2024-12-22 00:00+0000\n"
-"PO-Revision-Date: 2024-12-22 00:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Ukrainian\n"
 "Language: uk\n"
@@ -23,3 +23,18 @@ msgstr "Оберіть бажану мову"
 
 msgid "Language Switcher"
 msgstr "Перемикач мови"
+
+msgid "Language"
+msgstr "Мова"
+
+msgid "Change language"
+msgstr "Змінити мову"
+
+msgid "Close"
+msgstr "Закрити"
+
+msgid "English"
+msgstr "Англійська"
+
+msgid "Ukrainian"
+msgstr "Українська"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Content Services 1.0.0\n"
 "POT-Creation-Date: 2024-12-22 00:00+0000\n"
-"PO-Revision-Date: 2024-12-22 00:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: Ukrainian\n"
 "Language: uk\n"
@@ -23,6 +23,27 @@ msgstr "Послуги"
 
 msgid "Services Block"
 msgstr "Блок послуг"
+
+msgid "Service Methods Block"
+msgstr "Блок методів послуг"
+
+msgid "Content"
+msgstr "Контент"
+
+msgid "Block Title"
+msgstr "Заголовок блоку"
+
+msgid "Subtitle"
+msgstr "Підзаголовок"
+
+msgid "Button Text"
+msgstr "Текст кнопки"
+
+msgid "Button URL"
+msgstr "URL кнопки"
+
+msgid "Number of services to display"
+msgstr "Кількість послуг для відображення"
 
 msgid "No services available."
 msgstr "Послуги недоступні."
@@ -50,3 +71,12 @@ msgstr "Опис"
 
 msgid "Image URL"
 msgstr "URL зображення"
+
+msgid "Enter the URL of the image to display"
+msgstr "Введіть URL зображення для відображення"
+
+msgid "Our Methods"
+msgstr "Наші методи"
+
+msgid "We blend innovation with expertise to create sustainable solutions that work for your needs"
+msgstr "Ми поєднуємо інновації з досвідом для створення стійких рішень, які відповідають вашим потребам"

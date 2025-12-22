@@ -1,0 +1,69 @@
+# Ukrainian translations for Content FAQ module.
+# Copyright (C) 2024
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Content FAQ 1.0\n"
+"POT-Creation-Date: 2024-12-22 10:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+
+msgid "FAQ Block"
+msgstr "Блок FAQ"
+
+msgid "Content"
+msgstr "Контент"
+
+msgid "Block Title"
+msgstr "Заголовок блоку"
+
+msgid "Subtitle"
+msgstr "Підзаголовок"
+
+msgid "Button Text"
+msgstr "Текст кнопки"
+
+msgid "Button URL"
+msgstr "URL кнопки"
+
+msgid "Number of FAQs to display"
+msgstr "Кількість FAQ для відображення"
+
+msgid "FAQs"
+msgstr "Часті запитання"
+
+msgid "Frequently Asked Questions"
+msgstr "Часті запитання"
+
+msgid "Find answers to commonly asked questions about our services and products."
+msgstr "Знайдіть відповіді на поширені запитання про наші послуги та продукти."
+
+msgid "No FAQs available yet."
+msgstr "Поки що немає доступних FAQ."
+
+msgid "No FAQs available."
+msgstr "Немає доступних FAQ."
+
+msgid "Still have questions?"
+msgstr "Залишилися питання?"
+
+msgid "Can't find what you're looking for? Get in touch with our team."
+msgstr "Не можете знайти те, що шукаєте? Зв'яжіться з нашою командою."
+
+msgid "Contact Us"
+msgstr "Зв'язатися з нами"
+
+msgid "FAQ"
+msgstr "FAQ"
+
+msgid "Question"
+msgstr "Питання"
+
+msgid "Answer"
+msgstr "Відповідь"

@@ -1,0 +1,204 @@
+# Ukrainian translations for Simple Sitemap Generator module.
+# Copyright (C) 2024
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Sitemap Generator 1.0\n"
+"POT-Creation-Date: 2024-12-22 10:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+
+msgid "Simple Sitemap Generator"
+msgstr "Простий генератор карти сайту"
+
+msgid "Sitemap Status"
+msgstr "Статус карти сайту"
+
+msgid "Domain"
+msgstr "Домен"
+
+msgid "Sitemap URL"
+msgstr "URL карти сайту"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "No domains configured."
+msgstr "Домени не налаштовано."
+
+msgid "Active"
+msgstr "Активний"
+
+msgid "Your sitemap is available at:"
+msgstr "Ваша карта сайту доступна за адресою:"
+
+msgid "Regenerate all sitemaps"
+msgstr "Перегенерувати всі карти сайту"
+
+msgid "Content Types"
+msgstr "Типи контенту"
+
+msgid "Include content types"
+msgstr "Включити типи контенту"
+
+msgid "Select which content types should be included in the sitemap."
+msgstr "Виберіть, які типи контенту мають бути включені в карту сайту."
+
+msgid "Sitemap Settings"
+msgstr "Налаштування карти сайту"
+
+msgid "Default priority"
+msgstr "Пріоритет за замовчуванням"
+
+msgid "Default priority for URLs in the sitemap."
+msgstr "Пріоритет за замовчуванням для URL у карті сайту."
+
+msgid "Default change frequency"
+msgstr "Частота оновлення за замовчуванням"
+
+msgid "Always"
+msgstr "Завжди"
+
+msgid "Hourly"
+msgstr "Щогодини"
+
+msgid "Daily"
+msgstr "Щодня"
+
+msgid "Weekly"
+msgstr "Щотижня"
+
+msgid "Monthly"
+msgstr "Щомісяця"
+
+msgid "Yearly"
+msgstr "Щороку"
+
+msgid "Never"
+msgstr "Ніколи"
+
+msgid "How frequently the page is likely to change."
+msgstr "Як часто сторінка може змінюватися."
+
+msgid "URLs per sitemap"
+msgstr "URL на карту сайту"
+
+msgid "Maximum number of URLs per sitemap file. If exceeded, multiple sitemaps will be created."
+msgstr "Максимальна кількість URL на файл карти сайту. При перевищенні будуть створені декілька карт сайту."
+
+msgid "Cache lifetime"
+msgstr "Час життя кешу"
+
+msgid "No cache"
+msgstr "Без кешу"
+
+msgid "1 hour"
+msgstr "1 година"
+
+msgid "6 hours"
+msgstr "6 годин"
+
+msgid "12 hours"
+msgstr "12 годин"
+
+msgid "1 day"
+msgstr "1 день"
+
+msgid "1 week"
+msgstr "1 тиждень"
+
+msgid "How long to cache generated sitemaps."
+msgstr "Як довго кешувати згенеровані карти сайту."
+
+msgid "Include images"
+msgstr "Включити зображення"
+
+msgid "Include image information in sitemap entries."
+msgstr "Включити інформацію про зображення у записи карти сайту."
+
+msgid "Include last modification date"
+msgstr "Включити дату останньої зміни"
+
+msgid "Include lastmod tag for each URL."
+msgstr "Включити тег lastmod для кожного URL."
+
+msgid "Add custom URL"
+msgstr "Додати власний URL"
+
+msgid "Default"
+msgstr "За замовчуванням"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Priority"
+msgstr "Пріоритет"
+
+msgid "Change freq"
+msgstr "Частота оновлення"
+
+msgid "Operations"
+msgstr "Операції"
+
+msgid "No custom URLs configured."
+msgstr "Власні URL не налаштовано."
+
+msgid "Disabled"
+msgstr "Вимкнено"
+
+msgid "Edit"
+msgstr "Редагувати"
+
+msgid "Delete"
+msgstr "Видалити"
+
+msgid "URL Path"
+msgstr "Шлях URL"
+
+msgid "Enter the URL path (e.g., /about-us or https://example.com/page)."
+msgstr "Введіть шлях URL (наприклад, /about-us або https://example.com/page)."
+
+msgid "URL priority (0.0 to 1.0)."
+msgstr "Пріоритет URL (від 0.0 до 1.0)."
+
+msgid "Change frequency"
+msgstr "Частота оновлення"
+
+msgid "Only active URLs will be included in the sitemap."
+msgstr "Тільки активні URL будуть включені в карту сайту."
+
+msgid "Save"
+msgstr "Зберегти"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "URL must start with / or http:// or https://"
+msgstr "URL повинен починатися з / або http:// або https://"
+
+msgid "Custom URL updated."
+msgstr "Власний URL оновлено."
+
+msgid "Custom URL added."
+msgstr "Власний URL додано."
+
+msgid "Are you sure you want to delete this custom URL?"
+msgstr "Ви впевнені, що хочете видалити цей власний URL?"
+
+msgid "This action cannot be undone."
+msgstr "Цю дію не можна скасувати."
+
+msgid "Custom URL deleted."
+msgstr "Власний URL видалено."
+
+msgid "Custom URLs"
+msgstr "Власні URL"
+
+msgid "Select the domain this URL belongs to."
+msgstr "Виберіть домен, до якого належить цей URL."

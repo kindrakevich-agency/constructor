@@ -1,0 +1,102 @@
+# Ukrainian translations for Simple Metatag module.
+# Copyright (C) 2024
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Metatag 1.0\n"
+"POT-Creation-Date: 2024-12-22 10:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+
+msgid "Simple Metatag"
+msgstr "Прості метатеги"
+
+msgid "Path-based Metatag Overrides"
+msgstr "Перевизначення метатегів на основі шляху"
+
+msgid "Add Path-based Metatag Override"
+msgstr "Додати перевизначення метатегів"
+
+msgid "Edit Path-based Metatag Override"
+msgstr "Редагувати перевизначення метатегів"
+
+msgid "Path Overrides"
+msgstr "Перевизначення шляхів"
+
+msgid "Settings"
+msgstr "Налаштування"
+
+msgid "Path"
+msgstr "Шлях"
+
+msgid "Enter the path pattern (e.g., /blog/*, /about, or &lt;front&gt; for homepage). Use * as wildcard."
+msgstr "Введіть шаблон шляху (наприклад, /blog/*, /about, або &lt;front&gt; для головної сторінки). Використовуйте * як підстановочний знак."
+
+msgid "Domains"
+msgstr "Домени"
+
+msgid "Select domains. Leave empty to apply to all domains."
+msgstr "Виберіть домени. Залиште порожнім для застосування до всіх доменів."
+
+msgid "Language"
+msgstr "Мова"
+
+msgid "Select language. Leave empty for all languages."
+msgstr "Виберіть мову. Залиште порожнім для всіх мов."
+
+msgid "- All languages -"
+msgstr "- Усі мови -"
+
+msgid "Meta Title"
+msgstr "Мета-заголовок"
+
+msgid "Meta Description"
+msgstr "Мета-опис"
+
+msgid "Image"
+msgstr "Зображення"
+
+msgid "Upload an image for og:image metatag."
+msgstr "Завантажте зображення для метатегу og:image."
+
+msgid "Save"
+msgstr "Зберегти"
+
+msgid "Path-based metatag override updated."
+msgstr "Перевизначення метатегів оновлено."
+
+msgid "Path-based metatag override created."
+msgstr "Перевизначення метатегів створено."
+
+msgid "Google Tag Code"
+msgstr "Код Google Tag"
+
+msgid "Google Tag Codes"
+msgstr "Коди Google Tag"
+
+msgid "Configure Google Tag (gtag.js) code. The tag will be automatically injected into your site's &lt;head&gt; section."
+msgstr "Налаштуйте код Google Tag (gtag.js). Тег буде автоматично вставлено у секцію &lt;head&gt; вашого сайту."
+
+msgid "Configure Google Tag (gtag.js) codes for different domains. The appropriate tag will be automatically injected into your site's &lt;head&gt; section based on the current domain."
+msgstr "Налаштуйте коди Google Tag (gtag.js) для різних доменів. Відповідний тег буде автоматично вставлено у секцію &lt;head&gt; вашого сайту на основі поточного домену."
+
+msgid "Default Google Tag (All Domains)"
+msgstr "Google Tag за замовчуванням (усі домени)"
+
+msgid "This Google Tag will be used as a fallback for domains not specifically configured above."
+msgstr "Цей Google Tag буде використовуватися як резервний для доменів, не налаштованих окремо вище."
+
+msgid "Metatags"
+msgstr "Метатеги"
+
+msgid "Meta Image"
+msgstr "Мета-зображення"
+
+msgid "Administer Simple Metatag"
+msgstr "Адміністрування простих метатегів"

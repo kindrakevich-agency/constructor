@@ -1,0 +1,162 @@
+# Ukrainian translations for OpenAI Provider module.
+# Copyright (C) 2024
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenAI Provider 1.0\n"
+"POT-Creation-Date: 2024-12-22 10:00+0000\n"
+"PO-Revision-Date: 2024-12-22 10:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+
+msgid "OpenAI Provider"
+msgstr "Провайдер OpenAI"
+
+msgid "OpenAI Settings"
+msgstr "Налаштування OpenAI"
+
+msgid "API Key"
+msgstr "API ключ"
+
+msgid "Enter your OpenAI API key. Get one from <a href=\"https://platform.openai.com/api-keys\" target=\"_blank\">OpenAI Dashboard</a>."
+msgstr "Введіть ваш API ключ OpenAI. Отримайте його з <a href=\"https://platform.openai.com/api-keys\" target=\"_blank\">панелі OpenAI</a>."
+
+msgid "Text Generation Settings"
+msgstr "Налаштування генерації тексту"
+
+msgid "Default Text Model"
+msgstr "Модель тексту за замовчуванням"
+
+msgid "Select the default model for text generation."
+msgstr "Виберіть модель за замовчуванням для генерації тексту."
+
+msgid "Temperature"
+msgstr "Температура"
+
+msgid "Controls randomness. Lower values (0.0-0.3) for focused output, higher values (0.7-1.0) for creative output."
+msgstr "Контролює випадковість. Нижчі значення (0.0-0.3) для точного виводу, вищі значення (0.7-1.0) для творчого виводу."
+
+msgid "Max Tokens"
+msgstr "Максимум токенів"
+
+msgid "Maximum number of tokens in the response."
+msgstr "Максимальна кількість токенів у відповіді."
+
+msgid "Short responses (500 tokens)"
+msgstr "Короткі відповіді (500 токенів)"
+
+msgid "Medium responses (1,000 tokens)"
+msgstr "Середні відповіді (1 000 токенів)"
+
+msgid "Standard articles (2,000 tokens)"
+msgstr "Стандартні статті (2 000 токенів)"
+
+msgid "Long articles (4,000 tokens)"
+msgstr "Довгі статті (4 000 токенів)"
+
+msgid "Extended content (8,000 tokens)"
+msgstr "Розширений контент (8 000 токенів)"
+
+msgid "Maximum (16,000 tokens)"
+msgstr "Максимум (16 000 токенів)"
+
+msgid "Image Generation Settings (DALL-E)"
+msgstr "Налаштування генерації зображень (DALL-E)"
+
+msgid "Default Image Model"
+msgstr "Модель зображень за замовчуванням"
+
+msgid "Select the default model for image generation."
+msgstr "Виберіть модель за замовчуванням для генерації зображень."
+
+msgid "Image Size"
+msgstr "Розмір зображення"
+
+msgid "Default size for generated images."
+msgstr "Розмір за замовчуванням для згенерованих зображень."
+
+msgid "Image Quality"
+msgstr "Якість зображення"
+
+msgid "Quality setting for DALL-E 3 images."
+msgstr "Налаштування якості для зображень DALL-E 3."
+
+msgid "Standard"
+msgstr "Стандартна"
+
+msgid "HD (Higher detail)"
+msgstr "HD (Вища деталізація)"
+
+msgid "Connection Status"
+msgstr "Статус з'єднання"
+
+msgid "Connected"
+msgstr "Підключено"
+
+msgid "Test Type"
+msgstr "Тип тесту"
+
+msgid "Text Generation (GPT)"
+msgstr "Генерація тексту (GPT)"
+
+msgid "Image Generation (DALL-E)"
+msgstr "Генерація зображень (DALL-E)"
+
+msgid "Text Generation Test"
+msgstr "Тест генерації тексту"
+
+msgid "Prompt"
+msgstr "Запит"
+
+msgid "Write a short poem about coding."
+msgstr "Напишіть коротку вірш про програмування."
+
+msgid "Model"
+msgstr "Модель"
+
+msgid "Image Generation Test"
+msgstr "Тест генерації зображень"
+
+msgid "Image Prompt"
+msgstr "Запит для зображення"
+
+msgid "A futuristic city skyline at sunset, digital art style"
+msgstr "Футуристичний силует міста на заході сонця, у стилі цифрового мистецтва"
+
+msgid "Run Test"
+msgstr "Запустити тест"
+
+msgid "Test Result"
+msgstr "Результат тесту"
+
+msgid "Text generation successful."
+msgstr "Генерація тексту успішна."
+
+msgid "Text generation failed. Check the logs for details."
+msgstr "Генерація тексту не вдалася. Перевірте логи для деталей."
+
+msgid "Image generation successful."
+msgstr "Генерація зображення успішна."
+
+msgid "Quick Start"
+msgstr "Швидкий старт"
+
+msgid "Text Generation API (GPT)"
+msgstr "API генерації тексту (GPT)"
+
+msgid "Image Generation API (DALL-E)"
+msgstr "API генерації зображень (DALL-E)"
+
+msgid "Utility Methods"
+msgstr "Допоміжні методи"
+
+msgid "Full Example: Content Generator"
+msgstr "Повний приклад: Генератор контенту"
+
+msgid "Error Handling"
+msgstr "Обробка помилок"
