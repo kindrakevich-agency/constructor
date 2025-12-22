@@ -1,0 +1,11 @@
+name: 'Content Article'
+type: module
+description: 'Provides Article content type with image and video fields, and a block for displaying articles.'
+package: Constructor
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:node
+  - drupal:block
+  - drupal:text
+  - drupal:image
+  - drupal:file

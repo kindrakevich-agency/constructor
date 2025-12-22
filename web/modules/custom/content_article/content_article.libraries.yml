@@ -1,0 +1,6 @@
+articles-block:
+  version: 1.x
+  js:
+    js/articles-block.js: {}
+  dependencies:
+    - core/drupal

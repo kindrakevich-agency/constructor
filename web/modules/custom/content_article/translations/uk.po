@@ -1,0 +1,105 @@
+# Ukrainian translations for Content Article module.
+# Copyright (C) 2024 Constructor
+# This file is distributed under the same license as the Content Article module.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Content Article 1.0.0\n"
+"POT-Creation-Date: 2024-12-22 12:00+0000\n"
+"PO-Revision-Date: 2024-12-22 12:00+0000\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: uk\n"
+
+msgid "Content Article"
+msgstr "Контент Статті"
+
+msgid "Provides Article content type with image and video fields, and a block for displaying articles."
+msgstr "Надає тип контенту Стаття з полями зображення та відео, а також блок для відображення статей."
+
+msgid "Articles Block"
+msgstr "Блок статей"
+
+msgid "Article"
+msgstr "Стаття"
+
+msgid "Articles"
+msgstr "Статті"
+
+msgid "Video"
+msgstr "Відео"
+
+msgid "Latest Articles"
+msgstr "Останні статті"
+
+msgid "Use Cases"
+msgstr "Приклади використання"
+
+msgid "Real Impact of Driving Electric"
+msgstr "Реальний вплив електромобілів"
+
+msgid "From daily comfort to operational savings, these are the real advantages drivers experience using our smart electric vehicles."
+msgstr "Від щоденного комфорту до економії на експлуатації — це реальні переваги, які отримують водії наших розумних електромобілів."
+
+msgid "View All Articles"
+msgstr "Переглянути всі статті"
+
+msgid "Learn More"
+msgstr "Дізнатись більше"
+
+msgid "Read more"
+msgstr "Читати далі"
+
+msgid "Back to Articles"
+msgstr "Назад до статей"
+
+msgid "Share this article"
+msgstr "Поділитися цією статтею"
+
+msgid "No articles available."
+msgstr "Статті недоступні."
+
+msgid "No articles available yet."
+msgstr "Статті поки що недоступні."
+
+msgid "Explore our latest stories, insights, and updates."
+msgstr "Ознайомтеся з нашими останніми історіями, думками та оновленнями."
+
+msgid "Block Title"
+msgstr "Заголовок блоку"
+
+msgid "Subtitle"
+msgstr "Підзаголовок"
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Show \"View All\" link"
+msgstr "Показувати посилання \"Переглянути всі\""
+
+msgid "Link Text"
+msgstr "Текст посилання"
+
+msgid "Link URL"
+msgstr "URL посилання"
+
+msgid "Number of articles to display"
+msgstr "Кількість статей для відображення"
+
+msgid "Body"
+msgstr "Текст"
+
+msgid "Image"
+msgstr "Зображення"
+
+msgid "Video URL"
+msgstr "URL відео"
+
+msgid "Enter a YouTube video URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)"
+msgstr "Введіть URL відео YouTube (наприклад, https://www.youtube.com/watch?v=VIDEO_ID або https://youtu.be/VIDEO_ID)"
+
+msgid "Use articles for blog posts, news, or stories with images and videos."
+msgstr "Використовуйте статті для блогів, новин або історій із зображеннями та відео."

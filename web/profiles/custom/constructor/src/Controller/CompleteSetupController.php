@@ -85,6 +85,11 @@ class CompleteSetupController extends ControllerBase {
     if (in_array('content_services', $content_type_modules)) {
       $this->translateServiceNodes($additional_languages, $site_description, $ai_settings);
     }
+
+    // Translate Article nodes.
+    if (in_array('content_article', $content_type_modules)) {
+      $this->translateArticleNodes($additional_languages, $site_description, $ai_settings);
+    }
   }
 
   /**
@@ -433,6 +438,119 @@ class CompleteSetupController extends ControllerBase {
       catch (\Exception $e) {
         \Drupal::logger('constructor')->error('Service translation error for @name: @message', [
           '@name' => $original_name,
+          '@message' => $e->getMessage(),
+        ]);
+      }
+    }
+
+    return $translated;
+  }
+
+  /**
+   * Translates Article nodes.
+   */
+  protected function translateArticleNodes(array $languages, string $site_description, array $ai_settings) {
+    if (!$this->enableContentTranslation('article')) {
+      return;
+    }
+
+    try {
+      // Reset the node storage to get fresh instances.
+      \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+      $nids = $node_storage->getQuery()
+        ->condition('type', 'article')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->execute();
+
+      \Drupal::logger('constructor')->notice('Found @count Article nodes to translate.', ['@count' => count($nids)]);
+
+      if (empty($nids)) {
+        return;
+      }
+
+      $nodes = $node_storage->loadMultiple($nids);
+      $count = 0;
+      foreach ($nodes as $node) {
+        if ($this->translateArticleNode($node, $languages, $ai_settings)) {
+          $count++;
+        }
+      }
+      \Drupal::logger('constructor')->notice('Translated @count Article nodes.', ['@count' => $count]);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Article translation error: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
+  /**
+   * Translates a single Article node.
+   */
+  protected function translateArticleNode($node, array $languages, array $ai_settings): bool {
+    $api_key = $ai_settings['api_key'] ?? '';
+    if (empty($api_key)) {
+      return FALSE;
+    }
+
+    $model = $ai_settings['text_model'] ?? 'gpt-4';
+    $language_names = $this->getLanguageNames();
+
+    $original_title = $node->getTitle();
+    $original_body = $node->get('field_article_body')->value ?? '';
+
+    $translated = FALSE;
+
+    foreach ($languages as $langcode) {
+      if (empty($langcode)) {
+        continue;
+      }
+
+      // Check if translation already exists
+      try {
+        if ($node->hasTranslation($langcode)) {
+          continue;
+        }
+      }
+      catch (\Exception $e) {
+        // If hasTranslation fails, try anyway
+      }
+
+      $language_name = $language_names[$langcode] ?? $langcode;
+
+      try {
+        \Drupal::logger('constructor')->notice('Starting Article translation for @title to @lang', [
+          '@title' => $original_title,
+          '@lang' => $langcode,
+        ]);
+
+        $prompt = "Translate the following article to $language_name:\n\nTitle: $original_title\nBody: $original_body\n\nReturn as JSON with 'title' and 'body' keys. The body should be HTML formatted. Only return the JSON.";
+
+        $translation_data = $this->callOpenAI($api_key, $model, $prompt);
+
+        if (!empty($translation_data['title']) && !empty($translation_data['body'])) {
+          $node->addTranslation($langcode, [
+            'title' => $translation_data['title'],
+            'field_article_body' => [
+              'value' => $translation_data['body'],
+              'format' => 'full_html',
+            ],
+          ]);
+          $node->save();
+          $translated = TRUE;
+          \Drupal::logger('constructor')->notice('Translated Article to @lang: @title', [
+            '@lang' => $langcode,
+            '@title' => $translation_data['title'],
+          ]);
+        }
+        else {
+          \Drupal::logger('constructor')->warning('No translation returned for Article @title', ['@title' => $original_title]);
+        }
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('constructor')->error('Article translation error for @title: @message', [
+          '@title' => $original_title,
           '@message' => $e->getMessage(),
         ]);
       }

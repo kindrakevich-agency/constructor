@@ -1,0 +1,140 @@
+{#
+/**
+ * @file
+ * Template for Articles Block.
+ *
+ * Available variables:
+ * - articles: Array of article items with keys:
+ *   - id: Node ID
+ *   - title: Article title
+ *   - body: Article body/summary
+ *   - url: Article URL
+ *   - image_url: Featured image URL
+ *   - image_alt: Image alt text
+ *   - youtube_id: YouTube video ID (if video article)
+ *   - has_video: Boolean indicating if article has video
+ * - title: Block title.
+ * - subtitle: Block subtitle.
+ * - description: Block description.
+ * - show_more_link: Whether to show the "view all" link.
+ * - more_link_text: Link text.
+ * - more_link_url: Link URL.
+ */
+#}
+<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-white dark:bg-slate-900 transition-colors" data-block-type="articles">
+  <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <!-- Header -->
+    <div class="grid lg:grid-cols-2 gap-8 mb-12">
+      <div>
+        {% if subtitle %}
+          <span class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 block">{{ subtitle }}</span>
+        {% endif %}
+        <h2 class="text-3xl sm:text-4xl 3xl:text-5xl font-bold text-gray-900 dark:text-white">{{ title }}</h2>
+      </div>
+      <div class="flex items-end">
+        {% if description %}
+          <p class="text-gray-600 dark:text-gray-300">{{ description }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Articles Grid -->
+    {% if articles|length > 0 %}
+      <div class="grid lg:grid-cols-2 gap-6">
+        {% for article in articles %}
+          {% if loop.first %}
+            <!-- Large Card - First Article -->
+            <a href="{{ article.url }}" class="relative rounded-3xl overflow-hidden min-h-[500px] lg:min-h-[600px] lg:row-span-2 block group">
+              {% if article.has_video and article.youtube_id %}
+                <img src="https://img.youtube.com/vi/{{ article.youtube_id }}/maxresdefault.jpg" alt="{{ article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                <div class="absolute inset-0 flex items-center justify-center z-10">
+                  <div class="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:bg-white transition-colors">
+                    <svg class="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              {% elseif article.image_url %}
+                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+              {% else %}
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600"></div>
+              {% endif %}
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              <div class="absolute top-6 left-6">
+                <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full">
+                  {% if article.has_video %}{{ 'Video'|t }}{% else %}{{ 'Article'|t }}{% endif %}
+                </span>
+              </div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+                <h3 class="text-2xl lg:text-3xl 3xl:text-4xl font-bold text-white mb-3">{{ article.title }}</h3>
+                {% if article.body %}
+                  <p class="text-white/70 text-sm">{{ article.body|striptags|slice(0, 100) }}{% if article.body|length > 100 %}...{% endif %}</p>
+                {% endif %}
+              </div>
+            </a>
+          {% elseif loop.index == 2 %}
+            <!-- Top Right Card - Second Article -->
+            <a href="{{ article.url }}" class="relative rounded-3xl overflow-hidden min-h-[280px] block group">
+              {% if article.has_video and article.youtube_id %}
+                <img src="https://img.youtube.com/vi/{{ article.youtube_id }}/hqdefault.jpg" alt="{{ article.title }}" class="absolute inset-0 w-full h-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105">
+                <div class="absolute inset-0 flex items-center justify-center z-10">
+                  <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:bg-white transition-colors">
+                    <svg class="w-6 h-6 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              {% elseif article.image_url %}
+                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105">
+              {% else %}
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30"></div>
+              {% endif %}
+              <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
+              <div class="absolute top-6 left-6">
+                <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full">
+                  {% if article.has_video %}{{ 'Video'|t }}{% else %}{{ 'Article'|t }}{% endif %}
+                </span>
+              </div>
+              <div class="absolute bottom-0 left-0 right-0 p-6">
+                <h3 class="text-xl lg:text-2xl font-bold text-white mb-2">{{ article.title }}</h3>
+                {% if article.body %}
+                  <p class="text-white/80 text-sm">{{ article.body|striptags|slice(0, 80) }}{% if article.body|length > 80 %}...{% endif %}</p>
+                {% endif %}
+              </div>
+            </a>
+          {% elseif loop.index == 3 %}
+            <!-- Bottom Right Card - Third Article / Learn More -->
+            <a href="{{ article.url }}" class="relative rounded-3xl overflow-hidden min-h-[280px] block group">
+              {% if article.has_video and article.youtube_id %}
+                <img src="https://img.youtube.com/vi/{{ article.youtube_id }}/hqdefault.jpg" alt="{{ article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+              {% elseif article.image_url %}
+                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+              {% else %}
+                <div class="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-600"></div>
+              {% endif %}
+              <div class="absolute inset-0 bg-black/40"></div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="px-6 py-3 bg-white text-gray-900 font-medium rounded-lg group-hover:bg-gray-100 transition-colors">
+                  {{ article.title }}
+                </span>
+              </div>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if show_more_link and more_link_url %}
+        <div class="mt-12 text-center">
+          <a href="{{ more_link_url }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors">
+            {{ more_link_text }}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+      {% endif %}
+    {% else %}
+      <p class="text-gray-500 dark:text-gray-400 text-center py-12">{{ 'No articles available.'|t }}</p>
+    {% endif %}
+  </div>
+</section>

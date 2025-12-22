@@ -1,0 +1,295 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Content Article module.
+ */
+
+use Drupal\node\Entity\NodeType;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+
+/**
+ * Implements hook_install().
+ */
+function content_article_install() {
+  // Create Article content type.
+  _content_article_create_content_type();
+
+  // Create fields.
+  _content_article_create_fields();
+
+  // Configure form display.
+  _content_article_configure_form_display();
+
+  // Configure view display.
+  _content_article_configure_view_display();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function content_article_uninstall() {
+  // Delete all Article nodes.
+  $storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nodes = $storage->loadByProperties(['type' => 'article']);
+  $storage->delete($nodes);
+
+  // Delete field configs.
+  $fields = ['field_article_image', 'field_article_video_url', 'field_article_body'];
+  foreach ($fields as $field_name) {
+    $field_config = FieldConfig::loadByName('node', 'article', $field_name);
+    if ($field_config) {
+      $field_config->delete();
+    }
+  }
+
+  // Delete field storage.
+  foreach ($fields as $field_name) {
+    $field_storage = FieldStorageConfig::loadByName('node', $field_name);
+    if ($field_storage) {
+      $field_storage->delete();
+    }
+  }
+
+  // Delete content type.
+  $content_type = NodeType::load('article');
+  if ($content_type) {
+    $content_type->delete();
+  }
+}
+
+/**
+ * Create the Article content type.
+ */
+function _content_article_create_content_type() {
+  // Check if content type already exists.
+  if (NodeType::load('article')) {
+    // Delete existing article type to replace it.
+    $existing = NodeType::load('article');
+
+    // First delete all nodes of this type.
+    $storage = \Drupal::entityTypeManager()->getStorage('node');
+    $nodes = $storage->loadByProperties(['type' => 'article']);
+    if (!empty($nodes)) {
+      $storage->delete($nodes);
+    }
+
+    // Delete existing fields.
+    $existing_fields = \Drupal::entityTypeManager()
+      ->getStorage('field_config')
+      ->loadByProperties(['entity_type' => 'node', 'bundle' => 'article']);
+    foreach ($existing_fields as $field) {
+      $field->delete();
+    }
+
+    $existing->delete();
+  }
+
+  $type = NodeType::create([
+    'type' => 'article',
+    'name' => 'Article',
+    'description' => 'Use articles for blog posts, news, or stories with images and videos.',
+  ]);
+  $type->save();
+}
+
+/**
+ * Create Article fields.
+ */
+function _content_article_create_fields() {
+  // Field: Body (text_long).
+  if (!FieldStorageConfig::loadByName('node', 'field_article_body')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_article_body',
+      'entity_type' => 'node',
+      'type' => 'text_long',
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'article', 'field_article_body')) {
+    FieldConfig::create([
+      'field_name' => 'field_article_body',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => 'Body',
+      'required' => FALSE,
+      'settings' => [],
+    ])->save();
+  }
+
+  // Field: Image.
+  if (!FieldStorageConfig::loadByName('node', 'field_article_image')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_article_image',
+      'entity_type' => 'node',
+      'type' => 'image',
+      'cardinality' => 1,
+      'settings' => [
+        'target_type' => 'file',
+      ],
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'article', 'field_article_image')) {
+    FieldConfig::create([
+      'field_name' => 'field_article_image',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => 'Image',
+      'required' => FALSE,
+      'settings' => [
+        'file_directory' => 'articles',
+        'alt_field' => TRUE,
+        'alt_field_required' => TRUE,
+        'title_field' => FALSE,
+        'max_resolution' => '2560x1440',
+        'min_resolution' => '640x360',
+        'file_extensions' => 'png gif jpg jpeg webp',
+      ],
+    ])->save();
+  }
+
+  // Field: Video URL (YouTube).
+  if (!FieldStorageConfig::loadByName('node', 'field_article_video_url')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_article_video_url',
+      'entity_type' => 'node',
+      'type' => 'string',
+      'cardinality' => 1,
+      'settings' => [
+        'max_length' => 255,
+      ],
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'article', 'field_article_video_url')) {
+    FieldConfig::create([
+      'field_name' => 'field_article_video_url',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => 'Video URL',
+      'description' => 'Enter a YouTube video URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID)',
+      'required' => FALSE,
+      'settings' => [],
+    ])->save();
+  }
+}
+
+/**
+ * Configure form display for Article content type.
+ */
+function _content_article_configure_form_display() {
+  $form_display = EntityFormDisplay::load('node.article.default');
+  if (!$form_display) {
+    $form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'article',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $form_display->setComponent('field_article_body', [
+    'type' => 'text_textarea',
+    'weight' => 1,
+    'settings' => [
+      'rows' => 9,
+      'placeholder' => '',
+    ],
+  ]);
+
+  $form_display->setComponent('field_article_image', [
+    'type' => 'image_image',
+    'weight' => 2,
+    'settings' => [
+      'progress_indicator' => 'throbber',
+      'preview_image_style' => 'medium',
+    ],
+  ]);
+
+  $form_display->setComponent('field_article_video_url', [
+    'type' => 'string_textfield',
+    'weight' => 3,
+    'settings' => [
+      'size' => 60,
+      'placeholder' => 'https://www.youtube.com/watch?v=VIDEO_ID',
+    ],
+  ]);
+
+  $form_display->save();
+}
+
+/**
+ * Configure view display for Article content type.
+ */
+function _content_article_configure_view_display() {
+  $view_display = EntityViewDisplay::load('node.article.default');
+  if (!$view_display) {
+    $view_display = EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'article',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $view_display->setComponent('field_article_body', [
+    'type' => 'text_default',
+    'weight' => 1,
+    'label' => 'hidden',
+  ]);
+
+  $view_display->setComponent('field_article_image', [
+    'type' => 'image',
+    'weight' => 0,
+    'label' => 'hidden',
+    'settings' => [
+      'image_style' => 'large',
+      'image_link' => '',
+    ],
+  ]);
+
+  $view_display->setComponent('field_article_video_url', [
+    'type' => 'string',
+    'weight' => 2,
+    'label' => 'hidden',
+  ]);
+
+  $view_display->save();
+
+  // Create teaser view display.
+  $teaser_display = EntityViewDisplay::load('node.article.teaser');
+  if (!$teaser_display) {
+    $teaser_display = EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'article',
+      'mode' => 'teaser',
+      'status' => TRUE,
+    ]);
+  }
+
+  $teaser_display->setComponent('field_article_image', [
+    'type' => 'image',
+    'weight' => 0,
+    'label' => 'hidden',
+    'settings' => [
+      'image_style' => 'medium',
+      'image_link' => 'content',
+    ],
+  ]);
+
+  $teaser_display->setComponent('field_article_body', [
+    'type' => 'text_trimmed',
+    'weight' => 1,
+    'label' => 'hidden',
+    'settings' => [
+      'trim_length' => 200,
+    ],
+  ]);
+
+  $teaser_display->save();
+}

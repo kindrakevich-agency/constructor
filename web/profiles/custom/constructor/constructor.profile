@@ -1206,6 +1206,263 @@ function _constructor_enable_service_translation() {
 }
 
 /**
+ * Generate articles content using OpenAI API.
+ */
+function _constructor_generate_articles_with_ai($site_name, $site_description, $language, $ai_settings, $author_uid) {
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+
+  // Default YouTube video IDs for articles with video.
+  $youtube_videos = [
+    'bTqVqk7FSmY',
+    'dQw4w9WgXcQ',
+    'jNQXAC9IVRw',
+  ];
+
+  // Default Unsplash images for articles.
+  $unsplash_images = [
+    'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&h=600&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&h=600&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=800&h=600&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&h=600&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop&q=80',
+  ];
+
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+  ];
+  $language_name = $language_names[$language] ?? 'English';
+
+  $prompt = "Generate 5 articles for a company with the following description: \"$site_description\".
+
+Please respond in $language_name language.
+
+Return the response as a JSON array with objects containing 'title' and 'body' keys. Example format:
+[
+  {\"title\": \"Article Title Here\", \"body\": \"Full article content with 2-3 paragraphs, HTML formatted with <p> tags.\"},
+  ...
+]
+
+The articles should be informative blog posts, news, or case studies relevant to the business. Each article should be 2-3 paragraphs. Only return the JSON array, no other text.";
+
+  try {
+    $client = \Drupal::httpClient();
+    $response = $client->post('https://api.openai.com/v1/chat/completions', [
+      'headers' => [
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+      ],
+      'json' => [
+        'model' => $model,
+        'messages' => [
+          ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.7,
+        'max_tokens' => 2000,
+      ],
+      'timeout' => 60,
+    ]);
+
+    $data = json_decode($response->getBody()->getContents(), TRUE);
+    $content = $data['choices'][0]['message']['content'] ?? '';
+
+    // Parse JSON from response.
+    $content = trim($content);
+    $content = preg_replace('/^```json\s*/', '', $content);
+    $content = preg_replace('/\s*```$/', '', $content);
+
+    $articles = json_decode($content, TRUE);
+
+    if (is_array($articles) && !empty($articles)) {
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+      foreach ($articles as $index => $article) {
+        // First 2 articles get YouTube videos, rest get images.
+        $video_url = '';
+        if ($index < 2 && isset($youtube_videos[$index])) {
+          $video_url = 'https://www.youtube.com/watch?v=' . $youtube_videos[$index];
+        }
+
+        $node_data = [
+          'type' => 'article',
+          'title' => $article['title'],
+          'field_article_body' => [
+            'value' => $article['body'] ?? '',
+            'format' => 'full_html',
+          ],
+          'field_article_video_url' => $video_url,
+          'status' => 1,
+          'langcode' => $language,
+          'uid' => $author_uid,
+        ];
+
+        $node = $node_storage->create($node_data);
+        $node->save();
+
+        \Drupal::logger('constructor')->notice('Created article: @title', [
+          '@title' => $article['title'],
+        ]);
+      }
+
+      \Drupal::logger('constructor')->notice('Generated @count articles with AI.', ['@count' => count($articles)]);
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to generate articles with AI: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Enable translation for Article content type.
+ */
+function _constructor_enable_article_translation() {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping Article translation setup.');
+    return FALSE;
+  }
+
+  // Check if language module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('language')) {
+    \Drupal::logger('constructor')->notice('Language module not enabled, skipping Article translation setup.');
+    return FALSE;
+  }
+
+  try {
+    // Enable translation for the Article content type.
+    $config = \Drupal::configFactory()->getEditable('language.content_settings.node.article');
+    // IMPORTANT: The 'id' key is required by ContentLanguageSettings entity.
+    $config->set('id', 'node.article');
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'node');
+    $config->set('target_bundle', 'article');
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for Article content type.');
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable Article translation: @message', ['@message' => $e->getMessage()]);
+    return FALSE;
+  }
+}
+
+/**
+ * Translate Article node to additional languages using AI.
+ */
+function _constructor_translate_article_node($node, $languages, $site_description, $ai_settings) {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping Article translation.');
+    return;
+  }
+
+  // Check if node is translatable.
+  try {
+    if (!$node->isTranslatable()) {
+      \Drupal::logger('constructor')->notice('Article node is not translatable.');
+      return;
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->warning('Could not check Article translatability: @message', ['@message' => $e->getMessage()]);
+    return;
+  }
+
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+  $original_title = $node->getTitle();
+  $original_body = $node->get('field_article_body')->value ?? '';
+
+  \Drupal::logger('constructor')->notice('Translating Article: @title to @langs', [
+    '@title' => $original_title,
+    '@langs' => implode(', ', $languages),
+  ]);
+
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+  ];
+
+  foreach ($languages as $langcode) {
+    // Skip if translation already exists.
+    if ($node->hasTranslation($langcode)) {
+      continue;
+    }
+
+    $language_name = $language_names[$langcode] ?? $langcode;
+
+    try {
+      $prompt = "Translate the following article to $language_name:
+
+Title: $original_title
+Body: $original_body
+
+Return as JSON with 'title' and 'body' keys. The body should be HTML formatted. Only return the JSON, no other text.";
+
+      $client = \Drupal::httpClient();
+      $response = $client->post('https://api.openai.com/v1/chat/completions', [
+        'headers' => [
+          'Authorization' => 'Bearer ' . $api_key,
+          'Content-Type' => 'application/json',
+        ],
+        'json' => [
+          'model' => $model,
+          'messages' => [
+            ['role' => 'user', 'content' => $prompt],
+          ],
+          'temperature' => 0.3,
+          'max_tokens' => 1500,
+        ],
+        'timeout' => 60,
+      ]);
+
+      $data = json_decode($response->getBody()->getContents(), TRUE);
+      $content = $data['choices'][0]['message']['content'] ?? '';
+
+      // Parse JSON.
+      $content = trim($content);
+      $content = preg_replace('/^```json\s*/', '', $content);
+      $content = preg_replace('/\s*```$/', '', $content);
+
+      $translation_data = json_decode($content, TRUE);
+
+      if (!empty($translation_data['title']) && !empty($translation_data['body'])) {
+        $node->addTranslation($langcode, [
+          'title' => $translation_data['title'],
+          'field_article_body' => [
+            'value' => $translation_data['body'],
+            'format' => 'full_html',
+          ],
+        ]);
+        $node->save();
+        \Drupal::logger('constructor')->notice('Added @lang translation for Article: @title', [
+          '@lang' => $langcode,
+          '@title' => $original_title,
+        ]);
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Failed to translate Article to @lang: @message', [
+        '@lang' => $langcode,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+  }
+}
+
+/**
  * Get or create a Content Editor user for AI-generated content.
  *
  * @return int
@@ -1611,6 +1868,19 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
       ]);
       $services_link->save();
       \Drupal::logger('constructor')->notice('Created Services menu link.');
+    }
+
+    // Create Articles link if Article module is enabled.
+    if (in_array('content_article', $content_type_modules)) {
+      $articles_link = $menu_link_storage->create([
+        'title' => t('Articles'),
+        'link' => ['uri' => 'internal:/articles'],
+        'menu_name' => 'main',
+        'weight' => 7,
+        'expanded' => FALSE,
+      ]);
+      $articles_link->save();
+      \Drupal::logger('constructor')->notice('Created Articles menu link.');
     }
 
     // Create Example page link.
@@ -2143,6 +2413,43 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
       }
     }
 
+    // Place Articles block if content_article module is installed.
+    if (in_array('content_article', $content_type_modules) &&
+        \Drupal::moduleHandler()->moduleExists('content_article')) {
+      if (!$block_storage->load('constructor_theme_articles_block')) {
+        $articles_block = $block_storage->create([
+          'id' => 'constructor_theme_articles_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 7,
+          'status' => TRUE,
+          'plugin' => 'articles_block',
+          'settings' => [
+            'id' => 'articles_block',
+            'label' => 'Articles Block',
+            'label_display' => '0',
+            'provider' => 'content_article',
+            'title' => 'Real Impact of Driving Electric',
+            'subtitle' => 'Use Cases',
+            'description' => 'From daily comfort to operational savings, these are the real advantages drivers experience using our smart electric vehicles.',
+            'show_more_link' => TRUE,
+            'more_link_text' => 'Learn More',
+            'more_link_url' => '/articles',
+            'limit' => 3,
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $articles_block->save();
+        \Drupal::logger('constructor')->notice('Created Articles block.');
+      }
+    }
+
     // Place language switcher block if language_switcher module is installed.
     if (\Drupal::moduleHandler()->moduleExists('language_switcher') &&
         !empty($languages['enable_multilingual'])) {
@@ -2271,6 +2578,11 @@ function constructor_batch_generate_ai_content_no_translation($constructor_setti
   // Generate Services if content_services module is enabled.
   if (in_array('content_services', $content_type_modules)) {
     _constructor_generate_services_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid ?? 1);
+  }
+
+  // Generate Articles if content_article module is enabled.
+  if (in_array('content_article', $content_type_modules)) {
+    _constructor_generate_articles_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid ?? 1);
   }
 
   $context['results'][] = 'ai_content_no_translation';

@@ -39,8 +39,9 @@ class ContentTypesForm extends InstallerFormBase {
       ],
       'article' => [
         'name' => 'Article',
-        'description' => 'Use articles for time-sensitive content like news, blog posts.',
+        'description' => 'Blog posts and news with images and video. Includes Articles block.',
         'default' => TRUE,
+        'module' => 'content_article',
       ],
       'team_member' => [
         'name' => 'Team Member',
@@ -150,7 +151,8 @@ class ContentTypesForm extends InstallerFormBase {
       ],
       'article' => [
         'name' => 'Article',
-        'description' => 'Use articles for time-sensitive content.',
+        'description' => 'Blog posts and news with images and video.',
+        'module' => 'content_article',
       ],
       'team_member' => [
         'name' => 'Team Member',
