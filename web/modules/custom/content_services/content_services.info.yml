@@ -1,0 +1,9 @@
+name: 'Content Services'
+type: module
+description: 'Provides Services content type and block for displaying services.'
+package: Constructor
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:node
+  - drupal:block
+  - drupal:text

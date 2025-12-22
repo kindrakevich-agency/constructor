@@ -54,6 +54,12 @@ class ContentTypesForm extends InstallerFormBase {
         'default' => TRUE,
         'module' => 'content_faq',
       ],
+      'service' => [
+        'name' => 'Service',
+        'description' => 'Services offered by your organization. Includes Services block.',
+        'default' => TRUE,
+        'module' => 'content_services',
+      ],
     ];
 
     // Content Types Section Header
@@ -251,6 +257,11 @@ class ContentTypesForm extends InstallerFormBase {
         'name' => 'FAQ',
         'description' => 'Frequently asked questions.',
         'module' => 'content_faq',
+      ],
+      'service' => [
+        'name' => 'Service',
+        'description' => 'Services offered by your organization.',
+        'module' => 'content_services',
       ],
     ];
 

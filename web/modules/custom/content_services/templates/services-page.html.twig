@@ -1,0 +1,49 @@
+{#
+/**
+ * @file
+ * Template for Services Page.
+ *
+ * Available variables:
+ * - services: Array of service items with 'name', 'description', 'image_url', 'url'.
+ */
+#}
+<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-white dark:bg-slate-900 transition-colors min-h-screen">
+  <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <!-- Page Header -->
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl 3xl:text-7xl font-bold text-gray-900 dark:text-white mb-6">{{ 'Our Services'|t }}</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300">{{ 'Discover how we can help you achieve your goals with our comprehensive range of services.'|t }}</p>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for service in services %}
+        <a href="{{ service.url }}" class="group block bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-slate-700">
+          <div class="aspect-[4/3] overflow-hidden">
+            <img src="{{ service.image_url }}" alt="{{ service.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          </div>
+          <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-500 transition-colors">{{ service.name }}</h2>
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{{ service.description }}</p>
+            <div class="mt-4 flex items-center text-blue-500 font-medium text-sm group-hover:gap-2 transition-all">
+              {{ 'Learn more'|t }}
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+      {% else %}
+        <div class="col-span-3 text-center py-16">
+          <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ 'No services available'|t }}</h3>
+          <p class="text-gray-500 dark:text-gray-400">{{ 'Check back later for our services.'|t }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

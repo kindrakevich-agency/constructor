@@ -1,0 +1,48 @@
+{#
+/**
+ * @file
+ * Template for Services Block.
+ *
+ * Available variables:
+ * - services: Array of service items with 'name', 'description', 'image_url', 'url'.
+ * - title: Block title.
+ * - subtitle: Block subtitle.
+ * - button_text: CTA button text.
+ * - button_url: CTA button URL.
+ */
+#}
+<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-white dark:bg-slate-900 transition-colors" data-block-type="services">
+  <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <!-- Section Header -->
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl 3xl:text-5xl font-bold text-gray-900 dark:text-white mb-4">{{ title }}</h2>
+      <p class="text-gray-600 dark:text-gray-300">{{ subtitle }}</p>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+      {% for service in services %}
+        <a href="{{ service.url }}" class="group block">
+          <div class="rounded-2xl overflow-hidden mb-4 aspect-[4/3]">
+            <img src="{{ service.image_url }}" alt="{{ service.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">{{ service.name }}</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">{{ service.description|length > 120 ? service.description|slice(0, 120) ~ '...' : service.description }}</p>
+        </a>
+      {% else %}
+        <div class="col-span-3 text-center py-12">
+          <p class="text-gray-500 dark:text-gray-400">{{ 'No services available.'|t }}</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- View All Button -->
+    {% if button_text and button_url %}
+      <div class="text-center">
+        <a href="{{ button_url }}" class="inline-flex items-center gap-2 px-6 py-3 border border-blue-500 rounded-lg text-blue-500 font-medium hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors">
+          {{ button_text }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>

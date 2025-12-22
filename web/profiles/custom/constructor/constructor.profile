@@ -1071,6 +1071,141 @@ Make the names and positions realistic and diverse. Only return the JSON array, 
 }
 
 /**
+ * Generate services content using OpenAI API.
+ */
+function _constructor_generate_services_with_ai($site_name, $site_description, $language, $ai_settings, $author_uid) {
+  $api_key = $ai_settings['api_key'];
+  $model = $ai_settings['text_model'] ?? 'gpt-4';
+
+  // Default Unsplash images for services.
+  $unsplash_images = [
+    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=400&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=400&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=500&h=400&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500&h=400&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=500&h=400&fit=crop&q=80',
+  ];
+
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+  ];
+  $language_name = $language_names[$language] ?? 'English';
+
+  $prompt = "Generate 5 services for a company with the following description: \"$site_description\".
+
+Please respond in $language_name language.
+
+Return the response as a JSON array with objects containing 'name' and 'description' keys. Example format:
+[
+  {\"name\": \"Service Name\", \"description\": \"Brief description of the service (1-2 sentences)\"},
+  ...
+]
+
+Make the services realistic and relevant to the business. Only return the JSON array, no other text.";
+
+  try {
+    $client = \Drupal::httpClient();
+    $response = $client->post('https://api.openai.com/v1/chat/completions', [
+      'headers' => [
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+      ],
+      'json' => [
+        'model' => $model,
+        'messages' => [
+          ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.7,
+        'max_tokens' => 1500,
+      ],
+      'timeout' => 60,
+    ]);
+
+    $data = json_decode($response->getBody()->getContents(), TRUE);
+    $content = $data['choices'][0]['message']['content'] ?? '';
+
+    // Parse JSON from response.
+    $content = trim($content);
+    $content = preg_replace('/^```json\s*/', '', $content);
+    $content = preg_replace('/\s*```$/', '', $content);
+
+    $services = json_decode($content, TRUE);
+
+    if (is_array($services) && !empty($services)) {
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+      foreach ($services as $index => $service) {
+        $node = $node_storage->create([
+          'type' => 'service',
+          'title' => $service['name'],
+          'field_service_description' => [
+            'value' => $service['description'],
+            'format' => 'full_html',
+          ],
+          'field_service_image_url' => $unsplash_images[$index % count($unsplash_images)],
+          'status' => 1,
+          'langcode' => $language,
+          'uid' => $author_uid,
+        ]);
+        $node->save();
+
+        \Drupal::logger('constructor')->notice('Created service: @name', [
+          '@name' => $service['name'],
+        ]);
+      }
+
+      \Drupal::logger('constructor')->notice('Generated @count services with AI.', ['@count' => count($services)]);
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to generate services with AI: @message', ['@message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Enable translation for Service content type.
+ */
+function _constructor_enable_service_translation() {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping Service translation setup.');
+    return FALSE;
+  }
+
+  // Check if language module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('language')) {
+    \Drupal::logger('constructor')->notice('Language module not enabled, skipping Service translation setup.');
+    return FALSE;
+  }
+
+  try {
+    // Enable translation for the Service content type.
+    $config = \Drupal::configFactory()->getEditable('language.content_settings.node.service');
+    // IMPORTANT: The 'id' key is required by ContentLanguageSettings entity.
+    $config->set('id', 'node.service');
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'node');
+    $config->set('target_bundle', 'service');
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for Service content type.');
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable Service translation: @message', ['@message' => $e->getMessage()]);
+    return FALSE;
+  }
+}
+
+/**
  * Get or create a Content Editor user for AI-generated content.
  *
  * @return int
@@ -1465,6 +1600,19 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
       \Drupal::logger('constructor')->notice('Created Team menu link.');
     }
 
+    // Create Services link if Services module is enabled.
+    if (in_array('content_services', $content_type_modules)) {
+      $services_link = $menu_link_storage->create([
+        'title' => t('Services'),
+        'link' => ['uri' => 'internal:/services'],
+        'menu_name' => 'main',
+        'weight' => 6,
+        'expanded' => FALSE,
+      ]);
+      $services_link->save();
+      \Drupal::logger('constructor')->notice('Created Services menu link.');
+    }
+
     // Create Example page link.
     $example_link = $menu_link_storage->create([
       'title' => t('Example'),
@@ -1527,6 +1675,9 @@ function constructor_batch_create_full_html_format(&$context) {
       'create faq content',
       'edit own faq content',
       'delete own faq content',
+      'create service content',
+      'edit own service content',
+      'delete own service content',
       'access toolbar',
       'access administration pages',
       'view the administration theme',
@@ -1794,6 +1945,41 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
       }
     }
 
+    // Place Services block if content_services module is installed.
+    if (in_array('content_services', $content_type_modules) &&
+        \Drupal::moduleHandler()->moduleExists('content_services')) {
+      if (!$block_storage->load('constructor_theme_services_block')) {
+        $services_block = $block_storage->create([
+          'id' => 'constructor_theme_services_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 3,
+          'status' => TRUE,
+          'plugin' => 'services_block',
+          'settings' => [
+            'id' => 'services_block',
+            'label' => 'Services Block',
+            'label_display' => '0',
+            'provider' => 'content_services',
+            'title' => 'Our Services',
+            'subtitle' => 'We provide comprehensive solutions to help you achieve your goals',
+            'button_text' => 'View All',
+            'button_url' => '/services',
+            'limit' => 6,
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $services_block->save();
+        \Drupal::logger('constructor')->notice('Created Services block.');
+      }
+    }
+
     // Place language switcher block if language_switcher module is installed.
     if (\Drupal::moduleHandler()->moduleExists('language_switcher') &&
         !empty($languages['enable_multilingual'])) {
@@ -1917,6 +2103,11 @@ function constructor_batch_generate_ai_content_no_translation($constructor_setti
   // Generate Team Members if content_team module is enabled.
   if (in_array('content_team', $content_type_modules)) {
     _constructor_generate_team_members_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid ?? 1);
+  }
+
+  // Generate Services if content_services module is enabled.
+  if (in_array('content_services', $content_type_modules)) {
+    _constructor_generate_services_with_ai($site_name, $site_description, $main_language, $ai_settings, $content_editor_uid ?? 1);
   }
 
   $context['results'][] = 'ai_content_no_translation';

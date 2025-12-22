@@ -80,6 +80,11 @@ class CompleteSetupController extends ControllerBase {
     if (in_array('content_team', $content_type_modules)) {
       $this->translateTeamNodes($additional_languages, $site_description, $ai_settings);
     }
+
+    // Translate Service nodes.
+    if (in_array('content_services', $content_type_modules)) {
+      $this->translateServiceNodes($additional_languages, $site_description, $ai_settings);
+    }
   }
 
   /**
@@ -314,6 +319,119 @@ class CompleteSetupController extends ControllerBase {
       }
       catch (\Exception $e) {
         \Drupal::logger('constructor')->error('Team translation error for @name: @message', [
+          '@name' => $original_name,
+          '@message' => $e->getMessage(),
+        ]);
+      }
+    }
+
+    return $translated;
+  }
+
+  /**
+   * Translates Service nodes.
+   */
+  protected function translateServiceNodes(array $languages, string $site_description, array $ai_settings) {
+    if (!$this->enableContentTranslation('service')) {
+      return;
+    }
+
+    try {
+      // Reset the node storage to get fresh instances.
+      \Drupal::entityTypeManager()->getStorage('node')->resetCache();
+
+      $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+      $nids = $node_storage->getQuery()
+        ->condition('type', 'service')
+        ->condition('status', 1)
+        ->accessCheck(FALSE)
+        ->execute();
+
+      \Drupal::logger('constructor')->notice('Found @count Service nodes to translate.', ['@count' => count($nids)]);
+
+      if (empty($nids)) {
+        return;
+      }
+
+      $nodes = $node_storage->loadMultiple($nids);
+      $count = 0;
+      foreach ($nodes as $node) {
+        if ($this->translateServiceNode($node, $languages, $ai_settings)) {
+          $count++;
+        }
+      }
+      \Drupal::logger('constructor')->notice('Translated @count Service nodes.', ['@count' => $count]);
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Service translation error: @message', ['@message' => $e->getMessage()]);
+    }
+  }
+
+  /**
+   * Translates a single Service node.
+   */
+  protected function translateServiceNode($node, array $languages, array $ai_settings): bool {
+    $api_key = $ai_settings['api_key'] ?? '';
+    if (empty($api_key)) {
+      return FALSE;
+    }
+
+    $model = $ai_settings['text_model'] ?? 'gpt-4';
+    $language_names = $this->getLanguageNames();
+
+    $original_name = $node->getTitle();
+    $original_description = $node->get('field_service_description')->value ?? '';
+
+    $translated = FALSE;
+
+    foreach ($languages as $langcode) {
+      if (empty($langcode)) {
+        continue;
+      }
+
+      // Check if translation already exists
+      try {
+        if ($node->hasTranslation($langcode)) {
+          continue;
+        }
+      }
+      catch (\Exception $e) {
+        // If hasTranslation fails, try anyway
+      }
+
+      $language_name = $language_names[$langcode] ?? $langcode;
+
+      try {
+        \Drupal::logger('constructor')->notice('Starting Service translation for @name to @lang', [
+          '@name' => $original_name,
+          '@lang' => $langcode,
+        ]);
+
+        $prompt = "Translate the following service to $language_name:\n\nName: $original_name\nDescription: $original_description\n\nReturn as JSON with 'name' and 'description' keys. Only return the JSON.";
+
+        $translation_data = $this->callOpenAI($api_key, $model, $prompt);
+
+        if (!empty($translation_data['name']) && !empty($translation_data['description'])) {
+          $node->addTranslation($langcode, [
+            'title' => $translation_data['name'],
+            'field_service_description' => [
+              'value' => $translation_data['description'],
+              'format' => 'full_html',
+            ],
+          ]);
+          $node->save();
+          $translated = TRUE;
+          \Drupal::logger('constructor')->notice('Translated Service to @lang: @name', [
+            '@lang' => $langcode,
+            '@name' => $translation_data['name'],
+          ]);
+        }
+        else {
+          \Drupal::logger('constructor')->warning('No translation returned for Service @name', ['@name' => $original_name]);
+        }
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('constructor')->error('Service translation error for @name: @message', [
           '@name' => $original_name,
           '@message' => $e->getMessage(),
         ]);

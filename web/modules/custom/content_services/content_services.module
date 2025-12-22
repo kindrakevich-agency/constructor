@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Content Services module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function content_services_theme($existing, $type, $theme, $path) {
+  return [
+    'services_block_content' => [
+      'variables' => [
+        'services' => [],
+        'title' => NULL,
+        'subtitle' => NULL,
+        'button_text' => NULL,
+        'button_url' => NULL,
+      ],
+      'template' => 'services-block-content',
+      'path' => $path . '/templates',
+    ],
+    'services_page' => [
+      'variables' => [
+        'services' => [],
+      ],
+      'template' => 'services-page',
+      'path' => $path . '/templates',
+    ],
+  ];
+}

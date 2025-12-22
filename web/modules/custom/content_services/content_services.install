@@ -1,0 +1,193 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Content Services module.
+ */
+
+use Drupal\node\Entity\NodeType;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+
+/**
+ * Implements hook_install().
+ */
+function content_services_install() {
+  // Create Service content type.
+  _content_services_create_content_type();
+
+  // Create fields.
+  _content_services_create_fields();
+
+  // Configure form display.
+  _content_services_configure_form_display();
+
+  // Configure view display.
+  _content_services_configure_view_display();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function content_services_uninstall() {
+  // Delete all Service nodes.
+  $storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nodes = $storage->loadByProperties(['type' => 'service']);
+  $storage->delete($nodes);
+
+  // Delete field configs.
+  $fields = ['field_service_description', 'field_service_image_url'];
+  foreach ($fields as $field_name) {
+    $field_config = FieldConfig::loadByName('node', 'service', $field_name);
+    if ($field_config) {
+      $field_config->delete();
+    }
+  }
+
+  // Delete field storage.
+  foreach ($fields as $field_name) {
+    $field_storage = FieldStorageConfig::loadByName('node', $field_name);
+    if ($field_storage) {
+      $field_storage->delete();
+    }
+  }
+
+  // Delete content type.
+  $content_type = NodeType::load('service');
+  if ($content_type) {
+    $content_type->delete();
+  }
+}
+
+/**
+ * Create the Service content type.
+ */
+function _content_services_create_content_type() {
+  // Check if content type already exists.
+  if (NodeType::load('service')) {
+    return;
+  }
+
+  $type = NodeType::create([
+    'type' => 'service',
+    'name' => 'Service',
+    'description' => 'Services offered by your organization.',
+  ]);
+  $type->save();
+}
+
+/**
+ * Create Service fields.
+ */
+function _content_services_create_fields() {
+  // Field: Description.
+  if (!FieldStorageConfig::loadByName('node', 'field_service_description')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_service_description',
+      'entity_type' => 'node',
+      'type' => 'text_long',
+      'cardinality' => 1,
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'service', 'field_service_description')) {
+    FieldConfig::create([
+      'field_name' => 'field_service_description',
+      'entity_type' => 'node',
+      'bundle' => 'service',
+      'label' => 'Description',
+      'required' => TRUE,
+      'settings' => [],
+    ])->save();
+  }
+
+  // Field: Image URL.
+  if (!FieldStorageConfig::loadByName('node', 'field_service_image_url')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_service_image_url',
+      'entity_type' => 'node',
+      'type' => 'string',
+      'cardinality' => 1,
+      'settings' => [
+        'max_length' => 2048,
+      ],
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('node', 'service', 'field_service_image_url')) {
+    FieldConfig::create([
+      'field_name' => 'field_service_image_url',
+      'entity_type' => 'node',
+      'bundle' => 'service',
+      'label' => 'Image URL',
+      'required' => FALSE,
+      'settings' => [],
+    ])->save();
+  }
+}
+
+/**
+ * Configure form display for Service content type.
+ */
+function _content_services_configure_form_display() {
+  $form_display = EntityFormDisplay::load('node.service.default');
+  if (!$form_display) {
+    $form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'service',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $form_display->setComponent('field_service_description', [
+    'type' => 'text_textarea',
+    'weight' => 0,
+    'settings' => [
+      'rows' => 3,
+      'placeholder' => '',
+    ],
+  ]);
+
+  $form_display->setComponent('field_service_image_url', [
+    'type' => 'string_textfield',
+    'weight' => 1,
+    'settings' => [
+      'size' => 100,
+      'placeholder' => 'https://example.com/image.jpg',
+    ],
+  ]);
+
+  $form_display->save();
+}
+
+/**
+ * Configure view display for Service content type.
+ */
+function _content_services_configure_view_display() {
+  $view_display = EntityViewDisplay::load('node.service.default');
+  if (!$view_display) {
+    $view_display = EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'service',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $view_display->setComponent('field_service_description', [
+    'type' => 'text_default',
+    'weight' => 0,
+    'label' => 'hidden',
+  ]);
+
+  $view_display->setComponent('field_service_image_url', [
+    'type' => 'string',
+    'weight' => 1,
+    'label' => 'hidden',
+  ]);
+
+  $view_display->save();
+}

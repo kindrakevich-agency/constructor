@@ -1,0 +1,7 @@
+content_services.page:
+  path: '/services'
+  defaults:
+    _controller: '\Drupal\content_services\Controller\ServicesPageController::content'
+    _title: 'Our Services'
+  requirements:
+    _permission: 'access content'
