@@ -72,7 +72,7 @@ class ProductSaleHeroBlock extends BlockBase implements ContainerFactoryPluginIn
   public function defaultConfiguration() {
     return [
       'badge_text' => 'Hottest Sale',
-      'cta_text' => 'Add to Cart',
+      'cta_text' => 'Buy',
       'product_id' => '',
     ] + parent::defaultConfiguration();
   }

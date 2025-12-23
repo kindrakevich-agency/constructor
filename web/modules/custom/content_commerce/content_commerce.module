@@ -34,7 +34,7 @@ function content_commerce_theme($existing, $type, $theme, $path) {
         'currency_symbol' => '$',
         'image_url' => '',
         'product_url' => '',
-        'cta_text' => 'Add to Cart',
+        'cta_text' => 'Buy',
       ],
       'template' => 'product-sale-hero-block',
       'path' => $path . '/templates',
@@ -45,12 +45,21 @@ function content_commerce_theme($existing, $type, $theme, $path) {
         'product_title' => '',
         'product_price' => '',
         'product_sale_price' => '',
+        'original_price' => '',
         'currency_symbol' => '$',
         'images' => [],
         'colors' => [],
         'sizes' => [],
+        'materials' => [],
+        'brands' => [],
         'shipping_info' => '',
         'product_url' => '',
+        'enable_wishlist' => FALSE,
+        'enable_compare' => FALSE,
+        'tax_enabled' => FALSE,
+        'tax_label' => 'VAT',
+        'tax_rate' => 0,
+        'free_shipping_message' => '',
       ],
       'template' => 'single-product-block',
       'path' => $path . '/templates',
@@ -131,6 +140,18 @@ function content_commerce_preprocess_node(&$variables) {
 
     // Parse sizes.
     $variables['product_sizes'] = content_commerce_parse_sizes($node->get('field_product_sizes')->value ?? '');
+
+    // Parse materials.
+    $materials_string = $node->get('field_product_materials')->value ?? '';
+    $variables['product_materials'] = !empty($materials_string) ? array_map('trim', explode(',', $materials_string)) : [];
+
+    // Parse brands.
+    $brands_string = $node->get('field_product_brand')->value ?? '';
+    $variables['product_brands'] = !empty($brands_string) ? array_map('trim', explode(',', $brands_string)) : [];
+
+    // Parse custom options.
+    $options_json = $node->get('field_product_options')->value ?? '';
+    $variables['product_options'] = !empty($options_json) ? (json_decode($options_json, TRUE) ?: []) : [];
 
     // Attach library.
     $variables['#attached']['library'][] = 'content_commerce/product';
@@ -265,4 +286,428 @@ function content_commerce_get_product_images($node) {
   }
 
   return $images;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_product_form.
+ */
+function content_commerce_form_node_product_form_alter(&$form, &$form_state, $form_id) {
+  _content_commerce_alter_product_form($form, $form_state);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_product_edit_form.
+ */
+function content_commerce_form_node_product_edit_form_alter(&$form, &$form_state, $form_id) {
+  _content_commerce_alter_product_form($form, $form_state);
+}
+
+/**
+ * Helper to alter product node form with global properties.
+ */
+function _content_commerce_alter_product_form(&$form, &$form_state) {
+  $properties_config = \Drupal::config('content_commerce.properties');
+  $node = $form_state->getFormObject()->getEntity();
+
+  // Always hide the original text fields.
+  if (isset($form['field_product_colors'])) {
+    $form['field_product_colors']['#access'] = FALSE;
+  }
+  if (isset($form['field_product_sizes'])) {
+    $form['field_product_sizes']['#access'] = FALSE;
+  }
+  if (isset($form['field_product_materials'])) {
+    $form['field_product_materials']['#access'] = FALSE;
+  }
+  if (isset($form['field_product_brand'])) {
+    $form['field_product_brand']['#access'] = FALSE;
+  }
+  if (isset($form['field_product_options'])) {
+    $form['field_product_options']['#access'] = FALSE;
+  }
+
+  // Add inline CSS for color swatches.
+  $form['#attached']['html_head'][] = [
+    [
+      '#type' => 'html_tag',
+      '#tag' => 'style',
+      '#value' => '
+        .product-color-option { display: flex; align-items: center; gap: 8px; }
+        .product-color-swatch { display: inline-block; width: 24px; height: 24px; border-radius: 6px; border: 2px solid #ddd; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .product-color-swatch:hover { border-color: #666; }
+        .product-properties-fieldset { margin-bottom: 1em; padding: 1em; background: #f9f9f9; border: 1px solid #ddd; border-radius: 4px; }
+        .product-properties-fieldset legend { font-weight: bold; padding: 0 8px; }
+        .form-checkboxes .form-item { margin-bottom: 0.5em; }
+        #edit-product-properties { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; }
+        #edit-product-properties summary { font-weight: 600; color: #333; }
+      ',
+    ],
+    'content_commerce_product_form_styles',
+  ];
+
+  // Create Product Properties fieldset.
+  $form['product_properties'] = [
+    '#type' => 'details',
+    '#title' => t('Product Properties'),
+    '#open' => TRUE,
+    '#weight' => 15,
+    '#tree' => TRUE,
+    '#description' => t('Select properties for this product. <a href="/admin/config/commerce/properties" target="_blank">Manage global properties</a>.'),
+  ];
+
+  // === COLORS ===
+  $global_colors = $properties_config->get('colors') ?: [];
+  $current_colors_string = '';
+  if ($node->hasField('field_product_colors') && !$node->get('field_product_colors')->isEmpty()) {
+    $current_colors_string = $node->get('field_product_colors')->value ?? '';
+  }
+
+  $current_colors = [];
+  if (!empty($current_colors_string)) {
+    $pairs = explode(',', $current_colors_string);
+    foreach ($pairs as $pair) {
+      $parts = explode(':', trim($pair));
+      if (count($parts) === 2) {
+        $current_colors[trim($parts[0])] = trim($parts[1]);
+      }
+    }
+  }
+
+  if (!empty($global_colors)) {
+    $color_options = [];
+    $default_colors = [];
+
+    foreach ($global_colors as $color) {
+      $color_name = $color['name'];
+      $color_hex = $color['hex'];
+      $color_options[$color_name] = '<span class="product-color-option"><span class="product-color-swatch" style="background-color: ' . $color_hex . ';"></span> ' . $color_name . '</span>';
+
+      if (isset($current_colors[$color_name])) {
+        $default_colors[] = $color_name;
+      }
+    }
+
+    $form['product_properties']['product_colors_checkboxes'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Colors'),
+      '#options' => $color_options,
+      '#default_value' => $default_colors,
+    ];
+  }
+  else {
+    $form['product_properties']['no_colors'] = [
+      '#markup' => '<p><em>' . t('No colors configured. <a href="/admin/config/commerce/properties" target="_blank">Add colors</a>.') . '</em></p>',
+    ];
+  }
+
+  // === SIZES ===
+  $global_sizes = $properties_config->get('sizes') ?: [];
+  $current_sizes_string = '';
+  if ($node->hasField('field_product_sizes') && !$node->get('field_product_sizes')->isEmpty()) {
+    $current_sizes_string = $node->get('field_product_sizes')->value ?? '';
+  }
+
+  $current_sizes = [];
+  if (!empty($current_sizes_string)) {
+    $current_sizes = array_map('trim', explode(',', $current_sizes_string));
+  }
+
+  if (!empty($global_sizes)) {
+    $size_options = [];
+    $default_sizes = [];
+
+    foreach ($global_sizes as $size) {
+      $size_name = $size['name'];
+      $size_code = $size['code'] ?? $size_name;
+      $size_options[$size_name] = $size_name . ' (' . $size_code . ')';
+
+      if (in_array($size_name, $current_sizes)) {
+        $default_sizes[] = $size_name;
+      }
+    }
+
+    $form['product_properties']['product_sizes_checkboxes'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Sizes'),
+      '#options' => $size_options,
+      '#default_value' => $default_sizes,
+    ];
+  }
+  else {
+    $form['product_properties']['no_sizes'] = [
+      '#markup' => '<p><em>' . t('No sizes configured. <a href="/admin/config/commerce/properties" target="_blank">Add sizes</a>.') . '</em></p>',
+    ];
+  }
+
+  // === MATERIALS ===
+  $global_materials = $properties_config->get('materials') ?: [];
+  $current_materials_string = '';
+  if ($node->hasField('field_product_materials') && !$node->get('field_product_materials')->isEmpty()) {
+    $current_materials_string = $node->get('field_product_materials')->value ?? '';
+  }
+
+  $current_materials = [];
+  if (!empty($current_materials_string)) {
+    $current_materials = array_map('trim', explode(',', $current_materials_string));
+  }
+
+  if (!empty($global_materials)) {
+    $material_options = [];
+    $default_materials = [];
+
+    foreach ($global_materials as $material) {
+      $material_name = $material['name'];
+      $material_desc = $material['description'] ?? '';
+      $material_options[$material_name] = $material_name . ($material_desc ? ' - ' . $material_desc : '');
+
+      if (in_array($material_name, $current_materials)) {
+        $default_materials[] = $material_name;
+      }
+    }
+
+    $form['product_properties']['product_materials_checkboxes'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Materials'),
+      '#options' => $material_options,
+      '#default_value' => $default_materials,
+    ];
+  }
+
+  // === BRANDS (checkboxes, multiple selection) ===
+  $global_brands = $properties_config->get('brands') ?: [];
+  $current_brands_string = '';
+  if ($node->hasField('field_product_brand') && !$node->get('field_product_brand')->isEmpty()) {
+    $current_brands_string = $node->get('field_product_brand')->value ?? '';
+  }
+
+  $current_brands = [];
+  if (!empty($current_brands_string)) {
+    $current_brands = array_map('trim', explode(',', $current_brands_string));
+  }
+
+  if (!empty($global_brands)) {
+    $brand_options = [];
+    $default_brands = [];
+
+    foreach ($global_brands as $brand) {
+      $brand_name = $brand['name'];
+      $brand_options[$brand_name] = $brand_name;
+
+      if (in_array($brand_name, $current_brands)) {
+        $default_brands[] = $brand_name;
+      }
+    }
+
+    $form['product_properties']['product_brands_checkboxes'] = [
+      '#type' => 'checkboxes',
+      '#title' => t('Brands'),
+      '#options' => $brand_options,
+      '#default_value' => $default_brands,
+    ];
+  }
+
+  // === CUSTOM OPTIONS ===
+  $custom_options_groups = $properties_config->get('custom_options') ?: [];
+  $current_custom_options = [];
+  if ($node->hasField('field_product_options') && !$node->get('field_product_options')->isEmpty()) {
+    $options_json = $node->get('field_product_options')->value ?? '';
+    if (!empty($options_json)) {
+      $current_custom_options = json_decode($options_json, TRUE) ?: [];
+    }
+  }
+
+  if (!empty($custom_options_groups)) {
+    foreach ($custom_options_groups as $group) {
+      $group_id = $group['id'] ?? strtolower(preg_replace('/[^a-z0-9]+/i', '_', $group['name']));
+      $group_name = $group['name'];
+      $group_options = $group['options'] ?? [];
+      $group_type = $group['type'] ?? 'checkboxes';
+
+      if (empty($group_options)) {
+        continue;
+      }
+
+      $options = [];
+      foreach ($group_options as $option) {
+        $options[$option] = $option;
+      }
+
+      $default_value = $current_custom_options[$group_id] ?? [];
+      if ($group_type === 'select' && is_array($default_value)) {
+        $default_value = reset($default_value) ?: '';
+      }
+
+      if ($group_type === 'select') {
+        $options = ['' => t('- Select -')] + $options;
+        $form['product_properties']['custom_option_' . $group_id] = [
+          '#type' => 'select',
+          '#title' => $group_name,
+          '#options' => $options,
+          '#default_value' => $default_value,
+        ];
+      }
+      else {
+        $form['product_properties']['custom_option_' . $group_id] = [
+          '#type' => 'checkboxes',
+          '#title' => $group_name,
+          '#options' => $options,
+          '#default_value' => is_array($default_value) ? $default_value : [],
+        ];
+      }
+    }
+  }
+
+  // Add submit handler BEFORE the default entity save handler.
+  // Use array_unshift to add at the beginning of the submit chain.
+  array_unshift($form['actions']['submit']['#submit'], '_content_commerce_product_form_submit');
+
+  // Also add entity builder to ensure values are set before entity is built.
+  $form['#entity_builders'][] = '_content_commerce_product_entity_builder';
+}
+
+/**
+ * Custom submit handler to convert checkboxes to field values.
+ */
+function _content_commerce_product_form_submit(&$form, &$form_state) {
+  // This submit handler prepares the values before entity save.
+  // The actual value setting is done in the entity builder.
+}
+
+/**
+ * Entity builder callback to set product property values.
+ */
+function _content_commerce_product_entity_builder($entity_type, $entity, &$form, &$form_state) {
+  $properties_config = \Drupal::config('content_commerce.properties');
+
+  // Get values from the nested product_properties container.
+  // Try nested first, then fall back to direct access for compatibility.
+  $product_properties = $form_state->getValue('product_properties');
+  if (empty($product_properties)) {
+    // Fallback: get values directly from form_state if not nested.
+    $product_properties = [
+      'product_colors_checkboxes' => $form_state->getValue('product_colors_checkboxes') ?? [],
+      'product_sizes_checkboxes' => $form_state->getValue('product_sizes_checkboxes') ?? [],
+      'product_materials_checkboxes' => $form_state->getValue('product_materials_checkboxes') ?? [],
+      'product_brands_checkboxes' => $form_state->getValue('product_brands_checkboxes') ?? [],
+    ];
+    // Add custom options.
+    $custom_groups = $properties_config->get('custom_options') ?: [];
+    foreach ($custom_groups as $group) {
+      $group_id = $group['id'] ?? strtolower(preg_replace('/[^a-z0-9]+/i', '_', $group['name']));
+      $product_properties['custom_option_' . $group_id] = $form_state->getValue('custom_option_' . $group_id);
+    }
+  }
+
+  // Process colors.
+  $selected_colors = array_filter($product_properties['product_colors_checkboxes'] ?? []);
+  if (!empty($selected_colors)) {
+    $global_colors = $properties_config->get('colors') ?: [];
+    $color_strings = [];
+
+    foreach ($global_colors as $color) {
+      if (in_array($color['name'], $selected_colors)) {
+        $color_strings[] = $color['name'] . ':' . $color['hex'];
+      }
+    }
+
+    $entity->set('field_product_colors', implode(',', $color_strings));
+  }
+  else {
+    $entity->set('field_product_colors', '');
+  }
+
+  // Process sizes.
+  $selected_sizes = array_filter($product_properties['product_sizes_checkboxes'] ?? []);
+  if (!empty($selected_sizes)) {
+    $entity->set('field_product_sizes', implode(',', $selected_sizes));
+  }
+  else {
+    $entity->set('field_product_sizes', '');
+  }
+
+  // Process materials.
+  $selected_materials = array_filter($product_properties['product_materials_checkboxes'] ?? []);
+  if (!empty($selected_materials)) {
+    $entity->set('field_product_materials', implode(',', $selected_materials));
+  }
+  else {
+    $entity->set('field_product_materials', '');
+  }
+
+  // Process brands (checkboxes, multiple selection).
+  $selected_brands = array_filter($product_properties['product_brands_checkboxes'] ?? []);
+  if (!empty($selected_brands)) {
+    $entity->set('field_product_brand', implode(',', $selected_brands));
+  }
+  else {
+    $entity->set('field_product_brand', '');
+  }
+
+  // Process custom options.
+  $custom_options_groups = $properties_config->get('custom_options') ?: [];
+  $custom_options_data = [];
+
+  foreach ($custom_options_groups as $group) {
+    $group_id = $group['id'] ?? strtolower(preg_replace('/[^a-z0-9]+/i', '_', $group['name']));
+    $value = $product_properties['custom_option_' . $group_id] ?? NULL;
+
+    if (!empty($value)) {
+      if (is_array($value)) {
+        $custom_options_data[$group_id] = array_values(array_filter($value));
+      }
+      else {
+        $custom_options_data[$group_id] = [$value];
+      }
+    }
+  }
+
+  if (!empty($custom_options_data)) {
+    $entity->set('field_product_options', json_encode($custom_options_data));
+  }
+  else {
+    $entity->set('field_product_options', '');
+  }
+}
+
+/**
+ * Get store configuration.
+ *
+ * @return array
+ *   Store configuration array.
+ */
+function content_commerce_get_store_config() {
+  $config = \Drupal::config('content_commerce.config');
+  return [
+    'store_name' => $config->get('store_name') ?: '',
+    'store_email' => $config->get('store_email') ?: '',
+    'store_phone' => $config->get('store_phone') ?: '',
+    'store_address' => $config->get('store_address') ?: '',
+    'tax_enabled' => (bool) $config->get('tax_enabled'),
+    'tax_rate' => (float) ($config->get('tax_rate') ?: 0),
+    'tax_label' => $config->get('tax_label') ?: 'VAT',
+    'prices_include_tax' => (bool) $config->get('prices_include_tax'),
+    'enable_wishlist' => (bool) $config->get('enable_wishlist'),
+    'enable_compare' => (bool) $config->get('enable_compare'),
+    'enable_reviews' => (bool) $config->get('enable_reviews'),
+    'enable_stock_notification' => (bool) $config->get('enable_stock_notification'),
+    'order_prefix' => $config->get('order_prefix') ?: 'ORD-',
+    'min_order_amount' => (float) ($config->get('min_order_amount') ?: 0),
+    'free_shipping_threshold' => (float) ($config->get('free_shipping_threshold') ?: 0),
+  ];
+}
+
+/**
+ * Get product properties configuration.
+ *
+ * @return array
+ *   Product properties configuration array.
+ */
+function content_commerce_get_properties_config() {
+  $config = \Drupal::config('content_commerce.properties');
+  return [
+    'colors' => $config->get('colors') ?: [],
+    'sizes' => $config->get('sizes') ?: [],
+    'materials' => $config->get('materials') ?: [],
+    'brands' => $config->get('brands') ?: [],
+  ];
 }

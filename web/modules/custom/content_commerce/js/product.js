@@ -13,7 +13,7 @@
     initQuantityControls();
     initShippingAccordion();
     initProductFilters();
-    initAddToCart();
+    initBuyDrawer();
     initWishlist();
     initProductCarousel();
   });
@@ -221,35 +221,306 @@
   }
 
   /**
-   * Initialize add to cart buttons.
+   * Check if the device is mobile.
    */
-  function initAddToCart() {
-    document.querySelectorAll('.add-to-cart-btn').forEach(function (btn) {
+  function isMobile() {
+    return window.innerWidth < 1024;
+  }
+
+  /**
+   * Initialize buy drawer/popup functionality.
+   * Shows popup on desktop, drawer on mobile (like language switcher).
+   */
+  function initBuyDrawer() {
+    // Open drawer/popup on Buy button click
+    document.querySelectorAll('.buy-btn').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
 
+        // Don't open if button is disabled
+        if (this.disabled) return;
+
         const productId = this.getAttribute('data-product-id');
-        const originalText = this.innerHTML;
+        const drawer = document.getElementById('buy-drawer-' + productId);
+        const overlay = document.getElementById('buy-drawer-overlay-' + productId);
 
-        // Show loading state
-        this.innerHTML = '<svg class="animate-spin w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-        this.disabled = true;
-
-        // Simulate adding to cart (no actual cart functionality)
-        setTimeout(function () {
-          btn.innerHTML = '<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Added!';
-          btn.classList.remove('bg-gray-900', 'dark:bg-white', 'bg-blue-500');
-          btn.classList.add('bg-green-500', 'text-white');
-
-          setTimeout(function () {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            btn.classList.remove('bg-green-500');
-            btn.classList.add('bg-gray-900', 'dark:bg-white', 'bg-blue-500');
-          }, 2000);
-        }, 800);
+        if (drawer && overlay) {
+          if (isMobile()) {
+            openBuyDrawer(drawer, overlay);
+          } else {
+            openBuyPopup(drawer, overlay);
+          }
+        }
       });
     });
+
+    // Close drawer/popup on overlay click
+    document.querySelectorAll('.buy-drawer-overlay').forEach(function (overlay) {
+      overlay.addEventListener('click', function () {
+        const drawerId = this.id.replace('buy-drawer-overlay-', 'buy-drawer-');
+        const drawer = document.getElementById(drawerId);
+        if (drawer) {
+          closeBuyModal(drawer, this);
+        }
+      });
+    });
+
+    // Close drawer/popup on close button click
+    document.querySelectorAll('.buy-drawer-close').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const productId = this.getAttribute('data-product-id');
+        const drawer = document.getElementById('buy-drawer-' + productId);
+        const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+
+        if (drawer && overlay) {
+          closeBuyModal(drawer, overlay);
+        }
+      });
+    });
+
+    // Close drawer/popup on Escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        const openDrawer = document.querySelector('.buy-drawer:not(.hidden)');
+        if (openDrawer) {
+          const productId = openDrawer.getAttribute('data-product-id');
+          const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+          closeBuyModal(openDrawer, overlay);
+        }
+      }
+    });
+
+    // Handle drag to close
+    initDrawerDrag();
+
+    // Handle form submission
+    document.querySelectorAll('.buy-form').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const productId = this.getAttribute('data-product-id');
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        // Get form data
+        const formData = new FormData(this);
+        const data = {
+          name: formData.get('name'),
+          phone: formData.get('phone'),
+          address: formData.get('address'),
+          productId: productId
+        };
+
+        // Show loading state
+        submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        submitBtn.disabled = true;
+
+        // Simulate processing (replace with actual API call)
+        setTimeout(function () {
+          submitBtn.innerHTML = '<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Order Placed!';
+          submitBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+          submitBtn.classList.add('bg-green-500');
+
+          // Log form data to console (for testing)
+          console.log('Order data:', data);
+
+          // Close drawer/popup after success
+          setTimeout(function () {
+            const drawer = document.getElementById('buy-drawer-' + productId);
+            const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+            if (drawer && overlay) {
+              closeBuyModal(drawer, overlay);
+            }
+
+            // Reset form and button
+            form.reset();
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('bg-green-500');
+            submitBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+          }, 1500);
+        }, 1000);
+      });
+    });
+  }
+
+  /**
+   * Initialize drawer drag to close functionality.
+   */
+  function initDrawerDrag() {
+    document.querySelectorAll('.buy-drawer-handle').forEach(function (handle) {
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+      const drawer = handle.closest('.buy-drawer');
+      const content = drawer ? drawer.querySelector('.buy-drawer-content') : null;
+
+      if (!drawer || !content) return;
+
+      handle.addEventListener('touchstart', function (e) {
+        isDragging = true;
+        startY = e.touches[0].clientY;
+        content.style.transition = 'none';
+      });
+
+      handle.addEventListener('touchmove', function (e) {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        const diff = currentY - startY;
+
+        if (diff > 0) {
+          content.style.transform = 'translateY(' + diff + 'px)';
+        }
+      });
+
+      handle.addEventListener('touchend', function () {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const diff = currentY - startY;
+        content.style.transition = 'transform 0.3s ease';
+
+        if (diff > 100) {
+          // Close drawer
+          const productId = drawer.getAttribute('data-product-id');
+          const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+          closeBuyModal(drawer, overlay);
+        } else {
+          // Reset position
+          content.style.transform = 'translateY(0)';
+        }
+      });
+    });
+  }
+
+  /**
+   * Open buy drawer with animation (mobile - bottom sheet).
+   */
+  function openBuyDrawer(drawer, overlay) {
+    // Set drawer mode for styling
+    drawer.setAttribute('data-mode', 'drawer');
+
+    // Show elements
+    overlay.classList.remove('hidden');
+    drawer.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    // Animate in
+    requestAnimationFrame(function () {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+
+      const content = drawer.querySelector('.buy-drawer-content');
+      if (content) {
+        // Reset popup styles if any
+        content.style.position = '';
+        content.style.top = '';
+        content.style.left = '';
+        content.style.maxWidth = '';
+        content.style.borderRadius = '';
+
+        // Apply drawer styles
+        content.style.transform = 'translateY(100%)';
+        content.style.transition = 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
+      }
+
+      requestAnimationFrame(function () {
+        overlay.style.opacity = '1';
+        if (content) {
+          content.style.transform = 'translateY(0)';
+        }
+      });
+    });
+  }
+
+  /**
+   * Open buy popup with animation (desktop - centered modal).
+   */
+  function openBuyPopup(drawer, overlay) {
+    // Set popup mode for styling
+    drawer.setAttribute('data-mode', 'popup');
+
+    // Show elements
+    overlay.classList.remove('hidden');
+    drawer.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    const content = drawer.querySelector('.buy-drawer-content');
+
+    // Apply popup styles
+    if (content) {
+      content.style.position = 'fixed';
+      content.style.top = '50%';
+      content.style.left = '50%';
+      content.style.transform = 'translate(-50%, -50%) scale(0.95)';
+      content.style.maxWidth = '480px';
+      content.style.width = '100%';
+      content.style.maxHeight = '90vh';
+      content.style.borderRadius = '20px';
+      content.style.opacity = '0';
+      content.style.transition = 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease';
+    }
+
+    // Animate in
+    requestAnimationFrame(function () {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+
+      requestAnimationFrame(function () {
+        overlay.style.opacity = '1';
+        if (content) {
+          content.style.transform = 'translate(-50%, -50%) scale(1)';
+          content.style.opacity = '1';
+        }
+      });
+    });
+  }
+
+  /**
+   * Close buy modal (drawer or popup) with animation.
+   */
+  function closeBuyModal(drawer, overlay) {
+    const content = drawer.querySelector('.buy-drawer-content');
+    const mode = drawer.getAttribute('data-mode') || 'drawer';
+
+    if (overlay) {
+      overlay.style.opacity = '0';
+    }
+
+    if (content) {
+      if (mode === 'popup') {
+        content.style.transform = 'translate(-50%, -50%) scale(0.95)';
+        content.style.opacity = '0';
+      } else {
+        content.style.transform = 'translateY(100%)';
+      }
+    }
+
+    setTimeout(function () {
+      drawer.classList.add('hidden');
+      drawer.removeAttribute('data-mode');
+
+      if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.opacity = '';
+        overlay.style.transition = '';
+      }
+      document.body.style.overflow = '';
+
+      // Reset content styles
+      if (content) {
+        content.style.transform = '';
+        content.style.transition = '';
+        content.style.opacity = '';
+        content.style.position = '';
+        content.style.top = '';
+        content.style.left = '';
+        content.style.maxWidth = '';
+        content.style.width = '';
+        content.style.maxHeight = '';
+        content.style.borderRadius = '';
+      }
+    }, 300);
   }
 
   /**

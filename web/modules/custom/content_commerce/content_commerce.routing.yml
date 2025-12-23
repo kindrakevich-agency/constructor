@@ -15,3 +15,23 @@ content_commerce.settings:
     _permission: 'administer site configuration'
   options:
     _admin_route: TRUE
+
+content_commerce.config:
+  path: '/admin/config/commerce/config'
+  defaults:
+    _form: '\Drupal\content_commerce\Form\CommerceConfigForm'
+    _title: 'Store Configuration'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+content_commerce.properties:
+  path: '/admin/config/commerce/properties'
+  defaults:
+    _form: '\Drupal\content_commerce\Form\ProductPropertiesForm'
+    _title: 'Product Properties'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

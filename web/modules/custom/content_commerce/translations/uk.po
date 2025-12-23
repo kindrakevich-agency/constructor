@@ -32,6 +32,36 @@ msgstr "Додати в кошик"
 msgid "Add to cart"
 msgstr "Додати в кошик"
 
+msgid "Buy"
+msgstr "Купити"
+
+msgid "Complete Your Order"
+msgstr "Оформіть замовлення"
+
+msgid "Your Name"
+msgstr "Ваше ім'я"
+
+msgid "Phone Number"
+msgstr "Номер телефону"
+
+msgid "Delivery Address"
+msgstr "Адреса доставки"
+
+msgid "Enter your full name"
+msgstr "Введіть ваше повне ім'я"
+
+msgid "+380 XX XXX XX XX"
+msgstr "+380 XX XXX XX XX"
+
+msgid "City, street, building, apartment"
+msgstr "Місто, вулиця, будинок, квартира"
+
+msgid "Confirm Order"
+msgstr "Підтвердити замовлення"
+
+msgid "By placing an order, you agree to our terms of service"
+msgstr "Оформляючи замовлення, ви погоджуєтесь з нашими умовами обслуговування"
+
 msgid "View Product"
 msgstr "Переглянути товар"
 
@@ -238,3 +268,18 @@ msgstr "Японська єна (JPY)"
 
 msgid "Chinese Yuan (CNY)"
 msgstr "Китайський юань (CNY)"
+
+msgid "Fill in your details below"
+msgstr "Заповніть свої дані нижче"
+
+msgid "Order Placed!"
+msgstr "Замовлення оформлено!"
+
+msgid "incl."
+msgstr "вкл."
+
+msgid "Compare"
+msgstr "Порівняти"
+
+msgid "Add to Wishlist"
+msgstr "Додати до списку бажань"

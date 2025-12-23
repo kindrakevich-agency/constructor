@@ -106,8 +106,18 @@ class SingleProductBlock extends BlockBase implements ContainerFactoryPluginInte
   public function build() {
     $current_langcode = $this->languageManager->getCurrentLanguage()->getId();
     $config = $this->configFactory->get('content_commerce.settings');
+    $store_config = $this->configFactory->get('content_commerce.config');
     $currency_symbol = $config->get('currency_symbol') ?: '$';
     $shipping_info = $config->get('shipping_info') ?: '';
+
+    // Get store features.
+    $enable_wishlist = (bool) $store_config->get('enable_wishlist');
+    $enable_compare = (bool) $store_config->get('enable_compare');
+    $tax_enabled = (bool) $store_config->get('tax_enabled');
+    $tax_rate = (float) ($store_config->get('tax_rate') ?: 0);
+    $tax_label = $store_config->get('tax_label') ?: 'VAT';
+    $prices_include_tax = (bool) $store_config->get('prices_include_tax');
+    $free_shipping_threshold = (float) ($store_config->get('free_shipping_threshold') ?: 0);
 
     $node = NULL;
 
@@ -187,13 +197,56 @@ class SingleProductBlock extends BlockBase implements ContainerFactoryPluginInte
       $sizes = array_map('trim', explode(',', $size_string));
     }
 
-    $price = $node->get('field_product_price')->value ?? 0;
-    $sale_price = $node->get('field_product_sale_price')->value;
+    // Parse materials.
+    $materials = [];
+    $materials_string = $node->get('field_product_materials')->value ?? '';
+    if (!empty($materials_string)) {
+      $materials = array_map('trim', explode(',', $materials_string));
+    }
+
+    // Parse brands.
+    $brands = [];
+    $brands_string = $node->get('field_product_brand')->value ?? '';
+    if (!empty($brands_string)) {
+      $brands = array_map('trim', explode(',', $brands_string));
+    }
+
+    $price = (float) ($node->get('field_product_price')->value ?? 0);
+    $sale_price = $node->get('field_product_sale_price')->value ? (float) $node->get('field_product_sale_price')->value : NULL;
+
+    // Calculate tax if enabled and prices don't include tax.
+    $tax_amount = 0;
+    $price_with_tax = $price;
+    $sale_price_with_tax = $sale_price;
+
+    if ($tax_enabled && $tax_rate > 0 && !$prices_include_tax) {
+      $tax_amount = $price * ($tax_rate / 100);
+      $price_with_tax = $price + $tax_amount;
+      if ($sale_price) {
+        $sale_price_with_tax = $sale_price + ($sale_price * ($tax_rate / 100));
+      }
+    }
 
     // Format price display.
-    $price_display = $currency_symbol . number_format((float) $price, 2);
-    if ($sale_price) {
-      $price_display = $currency_symbol . number_format((float) $sale_price, 2) . ' - ' . $currency_symbol . number_format((float) $price, 2);
+    $display_price = $tax_enabled && !$prices_include_tax ? $price_with_tax : $price;
+    $display_sale_price = $sale_price ? ($tax_enabled && !$prices_include_tax ? $sale_price_with_tax : $sale_price) : NULL;
+
+    $price_display = $currency_symbol . number_format($display_price, 2);
+    if ($display_sale_price) {
+      $price_display = $currency_symbol . number_format($display_sale_price, 2) . ' - ' . $currency_symbol . number_format($display_price, 2);
+    }
+
+    // Free shipping message.
+    $free_shipping_message = '';
+    if ($free_shipping_threshold > 0) {
+      $effective_price = $display_sale_price ?: $display_price;
+      if ($effective_price >= $free_shipping_threshold) {
+        $free_shipping_message = t('Free shipping!');
+      }
+      else {
+        $remaining = $free_shipping_threshold - $effective_price;
+        $free_shipping_message = t('Add @amount more for free shipping', ['@amount' => $currency_symbol . number_format($remaining, 2)]);
+      }
     }
 
     return [
@@ -201,13 +254,22 @@ class SingleProductBlock extends BlockBase implements ContainerFactoryPluginInte
       '#product_id' => $node->id(),
       '#product_title' => $node->getTitle(),
       '#product_price' => $price_display,
-      '#product_sale_price' => $sale_price ? $currency_symbol . number_format((float) $sale_price, 2) : NULL,
+      '#product_sale_price' => $display_sale_price ? $currency_symbol . number_format($display_sale_price, 2) : NULL,
+      '#original_price' => $currency_symbol . number_format($display_price, 2),
       '#currency_symbol' => $currency_symbol,
       '#images' => $images,
       '#colors' => $colors,
       '#sizes' => $sizes,
+      '#materials' => $materials,
+      '#brands' => $brands,
       '#shipping_info' => $shipping_info,
       '#product_url' => $node->toUrl()->toString(),
+      '#enable_wishlist' => $enable_wishlist,
+      '#enable_compare' => $enable_compare,
+      '#tax_enabled' => $tax_enabled,
+      '#tax_label' => $tax_label,
+      '#tax_rate' => $tax_rate,
+      '#free_shipping_message' => $free_shipping_message,
       '#attached' => [
         'library' => [
           'content_commerce/product',

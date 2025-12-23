@@ -1,0 +1,27 @@
+content_commerce.admin:
+  title: 'Commerce'
+  description: 'Configure commerce settings.'
+  route_name: content_commerce.config
+  parent: system.admin_config
+  weight: 50
+
+content_commerce.config:
+  title: 'Store Configuration'
+  description: 'Configure store information, tax, and features.'
+  route_name: content_commerce.config
+  parent: content_commerce.admin
+  weight: 0
+
+content_commerce.settings:
+  title: 'Commerce Settings'
+  description: 'Configure currency and shipping settings.'
+  route_name: content_commerce.settings
+  parent: content_commerce.admin
+  weight: 10
+
+content_commerce.properties:
+  title: 'Product Properties'
+  description: 'Manage colors, sizes, materials, and brands.'
+  route_name: content_commerce.properties
+  parent: content_commerce.admin
+  weight: 20

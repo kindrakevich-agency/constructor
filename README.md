@@ -2,6 +2,14 @@
 
 A customizable Drupal 11 installation profile with a multi-step setup wizard for configuring languages, content types, modules, layout, and AI content integration.
 
+## Screenshots
+
+### Installation Wizard
+![Installation Wizard](installer.png)
+
+### Frontend Design
+![Frontend Design](design.png)
+
 ## Features
 
 - **Multi-step Installation Wizard**: 7-step guided setup process

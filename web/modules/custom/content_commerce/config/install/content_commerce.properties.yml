@@ -1,0 +1,57 @@
+colors:
+  - name: 'Black'
+    hex: '#1f2937'
+  - name: 'White'
+    hex: '#ffffff'
+  - name: 'Gray'
+    hex: '#9ca3af'
+  - name: 'Red'
+    hex: '#dc2626'
+  - name: 'Blue'
+    hex: '#2563eb'
+  - name: 'Green'
+    hex: '#059669'
+  - name: 'Navy'
+    hex: '#1e3a5f'
+  - name: 'Pink'
+    hex: '#ec4899'
+sizes:
+  - name: 'Extra Small'
+    code: 'XS'
+    sort_order: 0
+  - name: 'Small'
+    code: 'S'
+    sort_order: 10
+  - name: 'Medium'
+    code: 'M'
+    sort_order: 20
+  - name: 'Large'
+    code: 'L'
+    sort_order: 30
+  - name: 'Extra Large'
+    code: 'XL'
+    sort_order: 40
+  - name: 'XXL'
+    code: 'XXL'
+    sort_order: 50
+materials:
+  - name: 'Cotton'
+    description: '100% organic cotton'
+  - name: 'Polyester'
+    description: 'Durable synthetic fabric'
+  - name: 'Leather'
+    description: 'Genuine leather'
+  - name: 'Wool'
+    description: 'Natural wool blend'
+  - name: 'Linen'
+    description: 'Breathable linen fabric'
+brands:
+  - name: 'Nike'
+    website: 'https://nike.com'
+  - name: 'Adidas'
+    website: 'https://adidas.com'
+  - name: 'Puma'
+    website: 'https://puma.com'
+  - name: 'New Balance'
+    website: 'https://newbalance.com'
+custom_options: []

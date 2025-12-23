@@ -2379,6 +2379,35 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
         $articles_block->save();
         \Drupal::logger('constructor')->notice('Created Articles block.');
       }
+
+      // Article Video Block.
+      if (!$block_storage->load('constructor_theme_article_video_block')) {
+        $article_video_block = $block_storage->create([
+          'id' => 'constructor_theme_article_video_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 6,
+          'status' => TRUE,
+          'plugin' => 'article_video_block',
+          'settings' => [
+            'id' => 'article_video_block',
+            'label' => 'Article Video Block',
+            'label_display' => '0',
+            'provider' => 'content_article',
+            'title' => 'Cultivating success together',
+            'subtitle' => 'Watch how we help achieve bigger and better results',
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $article_video_block->save();
+        \Drupal::logger('constructor')->notice('Created Article Video block.');
+      }
     }
 
     // Place Product blocks if content_commerce module is installed.
