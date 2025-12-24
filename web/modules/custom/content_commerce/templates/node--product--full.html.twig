@@ -21,7 +21,7 @@
 
 {# Buy Drawer/Popup - Drawer on mobile, centered popup on desktop #}
 <div id="buy-drawer-{{ node.id }}" class="buy-drawer fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" data-product-id="{{ node.id }}">
-  <div class="buy-drawer-content bg-white dark:bg-slate-900 rounded-t-[20px] shadow-2xl max-h-[90vh] flex flex-col absolute inset-x-0 bottom-0 lg:relative lg:inset-auto">
+  <div class="buy-drawer-content bg-white dark:bg-slate-900 rounded-t-[20px] lg:rounded-[20px] shadow-2xl max-h-[90vh] flex flex-col absolute inset-x-0 bottom-0 lg:relative lg:inset-auto overflow-hidden">
     {# Drag Handle - Only visible on mobile #}
     <div class="buy-drawer-handle flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing lg:hidden">
       <div class="w-12 h-1.5 bg-gray-300 dark:bg-slate-600 rounded-full"></div>
@@ -66,9 +66,9 @@
       </div>
     </div>
 
-    {# Form #}
-    <div class="p-6 overflow-y-auto">
-      <form class="buy-form space-y-4" data-product-id="{{ node.id }}">
+    {# Form - Scrollable area #}
+    <div class="flex-1 overflow-y-auto">
+      <form class="buy-form p-6 space-y-4" data-product-id="{{ node.id }}">
         <div>
           <label for="buy-name-{{ node.id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ 'Your Name'|t }} <span class="text-red-500">*</span></label>
           <input type="text" id="buy-name-{{ node.id }}" name="name" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400" placeholder="{{ 'Enter your full name'|t }}">
@@ -88,15 +88,18 @@
         <button type="submit" class="w-full py-3.5 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors">
           {{ 'Confirm Order'|t }}
         </button>
-
-        <p class="text-xs text-center text-gray-500 dark:text-gray-400">
-          {{ 'By placing an order, you agree to our terms of service'|t }}
-        </p>
       </form>
     </div>
 
+    {# Footer - Always visible #}
+    <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-900">
+      <p class="text-xs text-center text-gray-500 dark:text-gray-400">
+        {{ 'By placing an order, you agree to our terms of service'|t }}
+      </p>
+    </div>
+
     {# Safe area padding for iOS #}
-    <div class="h-6 bg-white dark:bg-slate-900"></div>
+    <div class="h-6 bg-white dark:bg-slate-900 lg:hidden"></div>
   </div>
 </div>
 
