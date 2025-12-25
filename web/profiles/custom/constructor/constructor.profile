@@ -1814,17 +1814,6 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
       \Drupal::logger('constructor')->notice('Created Products menu link.');
     }
 
-    // Create Example page link.
-    $example_link = $menu_link_storage->create([
-      'title' => t('Example'),
-      'link' => ['uri' => 'internal:/example'],
-      'menu_name' => 'main',
-      'weight' => 10,
-      'expanded' => FALSE,
-    ]);
-    $example_link->save();
-    \Drupal::logger('constructor')->notice('Created Example menu link.');
-
     // Note: Block placement skipped during installation to avoid entity type issues.
     // Main menu and branding blocks will be available via Block Layout UI.
     \Drupal::logger('constructor')->notice('Block placement skipped during installation.');
