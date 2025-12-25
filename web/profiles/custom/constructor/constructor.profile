@@ -1817,12 +1817,90 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
     // Note: Block placement skipped during installation to avoid entity type issues.
     // Main menu and branding blocks will be available via Block Layout UI.
     \Drupal::logger('constructor')->notice('Block placement skipped during installation.');
+
+    // Create footer menu links.
+    _constructor_create_footer_menu($menu_link_storage);
   }
   catch (\Exception $e) {
     \Drupal::logger('constructor')->error('Failed to create main menu links: @message', ['@message' => $e->getMessage()]);
   }
 
   $context['results'][] = 'main_menu';
+}
+
+/**
+ * Create footer menu links with parent sections.
+ *
+ * @param \Drupal\Core\Entity\EntityStorageInterface $menu_link_storage
+ *   The menu link content storage.
+ */
+function _constructor_create_footer_menu($menu_link_storage) {
+  $footer_sections = [
+    'Product' => [
+      'weight' => 0,
+      'items' => [
+        'Features' => 0,
+        'Integrations' => 1,
+        'Pricing' => 2,
+        'Changelog' => 3,
+      ],
+    ],
+    'Company' => [
+      'weight' => 1,
+      'items' => [
+        'About us' => 0,
+        'Blog' => 1,
+        'Careers' => 2,
+        'Press' => 3,
+      ],
+    ],
+    'Resources' => [
+      'weight' => 2,
+      'items' => [
+        'Documentation' => 0,
+        'Help Center' => 1,
+        'Contact' => 2,
+        'Status' => 3,
+      ],
+    ],
+    'Legal' => [
+      'weight' => 3,
+      'items' => [
+        'Privacy' => 0,
+        'Terms' => 1,
+        'Cookie Policy' => 2,
+      ],
+    ],
+  ];
+
+  foreach ($footer_sections as $section_title => $section_data) {
+    // Create parent menu item.
+    $parent_link = $menu_link_storage->create([
+      'title' => t($section_title),
+      'link' => ['uri' => 'internal:/'],
+      'menu_name' => 'footer',
+      'weight' => $section_data['weight'],
+      'expanded' => TRUE,
+    ]);
+    $parent_link->save();
+
+    $parent_uuid = $parent_link->uuid();
+
+    // Create child menu items.
+    foreach ($section_data['items'] as $item_title => $item_weight) {
+      $child_link = $menu_link_storage->create([
+        'title' => t($item_title),
+        'link' => ['uri' => 'internal:/'],
+        'menu_name' => 'footer',
+        'parent' => 'menu_link_content:' . $parent_uuid,
+        'weight' => $item_weight,
+        'expanded' => FALSE,
+      ]);
+      $child_link->save();
+    }
+  }
+
+  \Drupal::logger('constructor')->notice('Created footer menu links.');
 }
 
 /**

@@ -31,48 +31,43 @@
                 {% endif %}
             </div>
 
-            <!-- Product -->
-            <div>
-                <h4 class="font-semibold 3xl:text-lg mb-4">{{ 'Product'|t }}</h4>
-                <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Features'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Integrations'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Pricing'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Changelog'|t }}</a></li>
-                </ul>
-            </div>
-
-            <!-- Company -->
-            <div>
-                <h4 class="font-semibold 3xl:text-lg mb-4">{{ 'Company'|t }}</h4>
-                <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'About us'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Blog'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Careers'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Press'|t }}</a></li>
-                </ul>
-            </div>
-
-            <!-- Resources -->
-            <div>
-                <h4 class="font-semibold 3xl:text-lg mb-4">{{ 'Resources'|t }}</h4>
-                <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Documentation'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Help Center'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Contact'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Status'|t }}</a></li>
-                </ul>
-            </div>
-
-            <!-- Legal -->
-            <div>
-                <h4 class="font-semibold 3xl:text-lg mb-4">{{ 'Legal'|t }}</h4>
-                <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Privacy'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Terms'|t }}</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">{{ 'Cookie Policy'|t }}</a></li>
-                </ul>
-            </div>
+            {% if footer_menu|length > 0 %}
+                {% for section in footer_menu %}
+                    <div>
+                        <h4 class="font-semibold 3xl:text-lg mb-4">{{ section.title }}</h4>
+                        {% if section.items|length > 0 %}
+                            <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
+                                {% for item in section.items %}
+                                    <li><a href="{{ item.url }}" class="hover:text-white transition-colors">{{ item.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback if no menu items -->
+                <div>
+                    <h4 class="font-semibold 3xl:text-lg mb-4">{{ 'Product'|t }}</h4>
+                    <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
+                        <li><a href="{{ path('<front>') }}" class="hover:text-white transition-colors">{{ 'Features'|t }}</a></li>
+                        <li><a href="{{ path('<front>') }}" class="hover:text-white transition-colors">{{ 'Pricing'|t }}</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold 3xl:text-lg mb-4">{{ 'Company'|t }}</h4>
+                    <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
+                        <li><a href="{{ path('<front>') }}" class="hover:text-white transition-colors">{{ 'About us'|t }}</a></li>
+                        <li><a href="{{ path('<front>') }}" class="hover:text-white transition-colors">{{ 'Contact'|t }}</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold 3xl:text-lg mb-4">{{ 'Legal'|t }}</h4>
+                    <ul class="space-y-2 3xl:space-y-3 text-sm 3xl:text-base text-gray-400">
+                        <li><a href="{{ path('<front>') }}" class="hover:text-white transition-colors">{{ 'Privacy'|t }}</a></li>
+                        <li><a href="{{ path('<front>') }}" class="hover:text-white transition-colors">{{ 'Terms'|t }}</a></li>
+                    </ul>
+                </div>
+            {% endif %}
         </div>
 
         <!-- Bottom Footer -->

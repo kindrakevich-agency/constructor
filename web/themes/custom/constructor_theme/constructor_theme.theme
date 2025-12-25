@@ -50,6 +50,58 @@ function constructor_theme_preprocess_page(&$variables) {
 
   // Always attach mobile menu JS.
   $variables['#attached']['library'][] = 'constructor_theme/mobile-menu';
+
+  // Load footer menu.
+  $variables['footer_menu'] = _constructor_theme_get_footer_menu();
+}
+
+/**
+ * Get footer menu tree organized by parent items.
+ *
+ * @return array
+ *   Footer menu organized by sections.
+ */
+function _constructor_theme_get_footer_menu() {
+  $menu_tree = \Drupal::menuTree();
+  $parameters = $menu_tree->getCurrentRouteMenuTreeParameters('footer');
+  $parameters->setMinDepth(1);
+  $parameters->setMaxDepth(2);
+
+  $tree = $menu_tree->load('footer', $parameters);
+
+  $manipulators = [
+    ['callable' => 'menu.default_tree_manipulators:checkAccess'],
+    ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
+  ];
+  $tree = $menu_tree->transform($tree, $manipulators);
+
+  $footer_sections = [];
+
+  foreach ($tree as $item) {
+    if ($item->link->isEnabled()) {
+      $section = [
+        'title' => $item->link->getTitle(),
+        'url' => $item->link->getUrlObject()->toString(),
+        'items' => [],
+      ];
+
+      // Get child items.
+      if ($item->subtree) {
+        foreach ($item->subtree as $child) {
+          if ($child->link->isEnabled()) {
+            $section['items'][] = [
+              'title' => $child->link->getTitle(),
+              'url' => $child->link->getUrlObject()->toString(),
+            ];
+          }
+        }
+      }
+
+      $footer_sections[] = $section;
+    }
+  }
+
+  return $footer_sections;
 }
 
 /**
