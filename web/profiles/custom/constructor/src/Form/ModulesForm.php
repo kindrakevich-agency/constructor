@@ -85,6 +85,16 @@ class ModulesForm extends InstallerFormBase {
         'description' => 'Generate XML sitemaps for search engines.',
         'default' => TRUE,
       ],
+      'form_sender' => [
+        'name' => 'Form Sender',
+        'description' => 'Send form submissions via Email and Telegram.',
+        'default' => TRUE,
+      ],
+      'contact_form' => [
+        'name' => 'Contact Form',
+        'description' => 'Contact form block for frontpage with Email/Telegram notifications.',
+        'default' => TRUE,
+      ],
     ];
 
     // Core Modules Section

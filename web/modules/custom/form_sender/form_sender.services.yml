@@ -1,0 +1,9 @@
+services:
+  form_sender:
+    class: Drupal\form_sender\FormSenderService
+    arguments:
+      - '@config.factory'
+      - '@plugin.manager.mail'
+      - '@http_client'
+      - '@logger.factory'
+      - '@language_manager'

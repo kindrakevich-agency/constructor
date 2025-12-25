@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Form Sender module.
+ *
+ * Provides API for sending form data via Email and Telegram.
+ */
+
+/**
+ * Implements hook_mail().
+ */
+function form_sender_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'form_submission':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['message'];
+      break;
+  }
+}

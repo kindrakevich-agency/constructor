@@ -1,0 +1,98 @@
+/**
+ * Contact form styles.
+ */
+.contact-form .form-item {
+  margin-bottom: 1.25rem;
+}
+
+.contact-form .form-item label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.contact-form .form-item .description {
+  display: none;
+}
+
+.contact-form .form-actions {
+  margin-top: 1.25rem;
+}
+
+/* Remove default Drupal form styling */
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-width: 1px;
+}
+
+/* Honeypot field - hidden from users but visible to bots */
+.contact-form-honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Success/error messages */
+.contact-form .messages {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.contact-form .messages--status {
+  background-color: #dcfce7;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.contact-form .messages--error {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+/* Dark mode message styles */
+.dark .contact-form .messages--status {
+  background-color: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+.dark .contact-form .messages--error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+/* AJAX loading state */
+.contact-form-submit.is-disabled,
+.contact-form-submit:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Form validation error styles */
+.contact-form .form-item--error input,
+.contact-form .form-item--error textarea {
+  border-color: #ef4444 !important;
+}
+
+.contact-form .form-item--error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.dark .contact-form .form-item--error-message {
+  color: #fca5a5;
+}

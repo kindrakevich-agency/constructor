@@ -1,0 +1,7 @@
+name: 'Contact Form'
+type: module
+description: 'Provides a contact form block that uses Form Sender for email and Telegram notifications.'
+core_version_requirement: ^10 || ^11
+package: Custom
+dependencies:
+  - form_sender:form_sender

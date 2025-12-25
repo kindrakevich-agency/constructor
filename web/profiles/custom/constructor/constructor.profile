@@ -2477,6 +2477,51 @@ function constructor_batch_place_all_blocks($constructor_settings, &$context) {
       }
     }
 
+    // Place Contact Form block if contact_form module is installed.
+    if (\Drupal::moduleHandler()->moduleExists('contact_form')) {
+      if (!$block_storage->load('constructor_theme_contact_form_block')) {
+        $contact_form_block = $block_storage->create([
+          'id' => 'constructor_theme_contact_form_block',
+          'theme' => 'constructor_theme',
+          'region' => 'content',
+          'weight' => 15,
+          'status' => TRUE,
+          'plugin' => 'contact_form_block',
+          'settings' => [
+            'id' => 'contact_form_block',
+            'label' => 'Contact Form',
+            'label_display' => '0',
+            'provider' => 'contact_form',
+            'section_title' => 'Contact us',
+            'section_subtitle' => 'Get in Touch with Our Team',
+            'section_description' => "We're here to answer your questions, discuss your project, and help you find the best solutions for your software needs. Reach out to us, and let's start building something great together.",
+            'form_title' => "Let's Talk About Your Project",
+            'contact_title' => 'Prefer a Direct Approach?',
+            'phone' => '+1-234-567-8901',
+            'email' => 'contact@example.com',
+            'working_hours' => 'Monday to Friday, 9 AM - 6 PM (GMT)',
+            'office_title' => 'Visit Our Office',
+            'address' => '123 Main Street, Innovation City, 56789',
+            'map_latitude' => '34.0507',
+            'map_longitude' => '-118.2437',
+            'directions_url' => 'https://www.google.com/maps',
+            'success_title' => 'Thank You!',
+            'success_message' => "Your message has been sent successfully. We'll get back to you within 24 hours.",
+            'success_button_text' => 'Close',
+          ],
+          'visibility' => [
+            'request_path' => [
+              'id' => 'request_path',
+              'negate' => FALSE,
+              'pages' => "<front>\n/frontpage",
+            ],
+          ],
+        ]);
+        $contact_form_block->save();
+        \Drupal::logger('constructor')->notice('Created Contact Form block.');
+      }
+    }
+
     // Place language switcher block if language_switcher module is installed.
     if (\Drupal::moduleHandler()->moduleExists('language_switcher') &&
         !empty($languages['enable_multilingual'])) {

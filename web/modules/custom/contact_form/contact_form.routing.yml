@@ -1,0 +1,7 @@
+contact_form.submit:
+  path: '/api/contact-form/submit'
+  defaults:
+    _controller: '\Drupal\contact_form\Controller\ContactFormController::submit'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'

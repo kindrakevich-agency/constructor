@@ -1,0 +1,22 @@
+form_sender.settings:
+  type: config_object
+  label: 'Form Sender settings'
+  mapping:
+    email_enabled:
+      type: boolean
+      label: 'Email sending enabled'
+    email_to:
+      type: string
+      label: 'Email recipient'
+    email_subject_prefix:
+      type: string
+      label: 'Email subject prefix'
+    telegram_enabled:
+      type: boolean
+      label: 'Telegram sending enabled'
+    telegram_bot_token:
+      type: string
+      label: 'Telegram bot token'
+    telegram_chat_id:
+      type: string
+      label: 'Telegram chat ID'

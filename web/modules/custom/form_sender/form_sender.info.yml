@@ -1,0 +1,6 @@
+name: 'Form Sender'
+type: module
+description: 'Provides API for sending form data via Email and Telegram.'
+core_version_requirement: ^10 || ^11
+package: Custom
+configure: form_sender.settings

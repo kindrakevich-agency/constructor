@@ -32,6 +32,8 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
   - **Content Commerce**: Product content type with e-commerce blocks
   - **Language Switcher**: Custom language switching modal/drawer
   - **Constructor Hero**: Configurable Hero, What We Do, and Booking Modal blocks
+  - **Form Sender**: Universal API for sending form data via Email and Telegram
+  - **Contact Form**: Contact form block with configurable fields, map, and success modal
 
 - **Pre-configured Core Modules**:
   - Pathauto: Automatic URL alias generation
@@ -130,11 +132,13 @@ constructor/
 │   ├── modules/
 │   │   └── custom/
 │   │       ├── constructor_hero/         # Hero blocks module
+│   │       ├── contact_form/             # Contact form block module
 │   │       ├── content_article/          # Article content type module
 │   │       ├── content_commerce/         # Commerce/Product module
 │   │       ├── content_faq/              # FAQ content type module
 │   │       ├── content_services/         # Services content type module
 │   │       ├── content_team/             # Team member content type module
+│   │       ├── form_sender/              # Form sending API (Email/Telegram)
 │   │       ├── language_switcher/        # Language switcher block
 │   │       ├── openai_provider/          # OpenAI integration
 │   │       ├── simple_metatag/           # SEO module
@@ -199,6 +203,25 @@ All elements are configurable via block settings in the admin UI.
 - Team Member content type with photo, position, bio
 - Team Block with carousel display
 - Team page listing
+
+### Form Sender
+Universal API for sending form data:
+- Email sending with configurable recipient and subject prefix
+- Telegram Bot API integration
+- Settings page at `/admin/config/services/form-sender`
+- Test sending functionality
+- Usage: `\Drupal::service('form_sender')->send($data)`
+
+### Contact Form
+Contact form block with:
+- Configurable header (title, subtitle, description)
+- Form fields: Name, Email, Company, Subject, Message
+- Honeypot spam protection (no CAPTCHA needed)
+- Contact info section (phone, email, working hours)
+- Interactive OpenStreetMap with configurable coordinates
+- Office address card with directions link
+- Success modal (desktop) / drawer (mobile) matching language switcher style
+- Pure JavaScript form submission via JSON API (no jQuery)
 
 ### Language Switcher
 - Language selection modal (desktop)

@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * @file
+ * Contact Form module.
+ *
+ * Provides a contact form block that uses Form Sender.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function contact_form_theme() {
+  return [
+    'contact_form_block' => [
+      'variables' => [
+        'section_title' => NULL,
+        'section_subtitle' => NULL,
+        'section_description' => NULL,
+        'form_title' => NULL,
+        'contact_title' => NULL,
+        'phone' => NULL,
+        'email' => NULL,
+        'working_hours' => NULL,
+        'office_title' => NULL,
+        'address' => NULL,
+        'map_url' => NULL,
+        'directions_url' => NULL,
+        'success_title' => NULL,
+        'success_message' => NULL,
+        'success_button_text' => NULL,
+        'form' => NULL,
+      ],
+      'template' => 'contact-form-block',
+    ],
+  ];
+}

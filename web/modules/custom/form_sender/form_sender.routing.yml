@@ -1,0 +1,7 @@
+form_sender.settings:
+  path: '/admin/config/services/form-sender'
+  defaults:
+    _form: '\Drupal\form_sender\Form\FormSenderSettingsForm'
+    _title: 'Form Sender Settings'
+  requirements:
+    _permission: 'administer site configuration'

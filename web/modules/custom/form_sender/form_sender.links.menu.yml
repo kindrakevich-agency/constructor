@@ -1,0 +1,6 @@
+form_sender.settings:
+  title: 'Form Sender'
+  description: 'Configure email and Telegram sending for forms.'
+  route_name: form_sender.settings
+  parent: system.admin_config_services
+  weight: 10

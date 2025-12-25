@@ -502,14 +502,76 @@
     overflow: hidden;
   }
 
-  body.drawer-open > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(script) {
+  body.drawer-open > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(.contact-drawer):not(.contact-modal-overlay):not(.contact-modal-desktop):not(script) {
     transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), border-radius 0.5s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  body.drawer-scaled > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(script) {
+  body.drawer-scaled > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(.contact-drawer):not(.contact-modal-overlay):not(.contact-modal-desktop):not(script) {
     transform: scale(0.97);
     border-radius: 12px;
     overflow: hidden;
+  }
+
+  /* ===== CONTACT SUCCESS MODAL ===== */
+  .contact-modal-overlay {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.3s;
+  }
+
+  .contact-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Desktop Modal */
+  .contact-modal-desktop {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.95);
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.3s, transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @media (min-width: 1024px) {
+    .contact-modal-desktop {
+      display: flex;
+    }
+  }
+
+  .contact-modal-desktop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  /* Mobile Drawer */
+  .contact-drawer {
+    transform: translateY(100%);
+    pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  .contact-drawer.active {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .contact-drawer.dragging {
+    transition: none;
+  }
+
+  .contact-drawer-content {
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  html.dark .contact-drawer-content {
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
   }
 
   /* ===== BOOKING MODAL ===== */

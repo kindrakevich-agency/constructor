@@ -1,0 +1,6 @@
+contact_form:
+  js:
+    js/contact-form.js: {}
+  css:
+    component:
+      css/contact-form.css: {}
