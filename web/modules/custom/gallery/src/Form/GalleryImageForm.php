@@ -28,8 +28,12 @@ class GalleryImageForm extends FormBase {
       '#description' => $this->t('Upload an image for the gallery. Allowed formats: png, gif, jpg, jpeg, webp.'),
       '#upload_location' => 'public://gallery/',
       '#upload_validators' => [
-        'file_validate_extensions' => ['png gif jpg jpeg webp'],
-        'file_validate_size' => [10 * 1024 * 1024],
+        'FileExtension' => [
+          'extensions' => 'png gif jpg jpeg webp',
+        ],
+        'FileSizeLimit' => [
+          'fileLimit' => 10 * 1024 * 1024,
+        ],
       ],
       '#required' => TRUE,
     ];
