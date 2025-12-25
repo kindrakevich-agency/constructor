@@ -8,7 +8,7 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
 ![Installation Wizard](installer.png)
 
 ### Frontend Design
-![Frontend Design](design.png)
+![Frontend Design](design.jpg)
 
 ## Features
 
