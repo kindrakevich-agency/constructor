@@ -1,5 +1,8 @@
 gallery:
   version: 1.x
+  css:
+    component:
+      https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css: { type: external, minified: true }
   js:
     js/gallery.js: {}
   dependencies:
