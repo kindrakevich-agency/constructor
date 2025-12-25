@@ -1,0 +1,7 @@
+pricing_plans.submit:
+  path: '/api/pricing/submit'
+  defaults:
+    _controller: '\Drupal\pricing_plans\Controller\PricingController::submit'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'

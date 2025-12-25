@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Contains pricing_plans.module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function pricing_plans_theme($existing, $type, $theme, $path) {
+  return [
+    'pricing_block' => [
+      'variables' => [
+        'title' => '',
+        'description' => '',
+        'annual_label' => 'Bill annually',
+        'monthly_label' => 'Bill monthly',
+        'discount_text' => '10% OFF',
+        'plans' => [],
+      ],
+      'template' => 'pricing-block',
+      'path' => $path . '/templates',
+    ],
+  ];
+}

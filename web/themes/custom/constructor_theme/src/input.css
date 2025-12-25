@@ -502,11 +502,11 @@
     overflow: hidden;
   }
 
-  body.drawer-open > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(.contact-drawer):not(.contact-modal-overlay):not(.contact-modal-desktop):not(.booking-success-overlay):not(.booking-success-desktop):not(.booking-success-drawer):not(.buy-success-overlay):not(.buy-success-desktop):not(.buy-success-drawer):not(script) {
+  body.drawer-open > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(.contact-drawer):not(.contact-modal-overlay):not(.contact-modal-desktop):not(.booking-success-overlay):not(.booking-success-desktop):not(.booking-success-drawer):not(.buy-success-overlay):not(.buy-success-desktop):not(.buy-success-drawer):not(.pricing-form-overlay):not(.pricing-form-desktop):not(.pricing-form-drawer):not(.pricing-success-overlay):not(.pricing-success-desktop):not(.pricing-success-drawer):not(script) {
     transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), border-radius 0.5s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  body.drawer-scaled > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(.contact-drawer):not(.contact-modal-overlay):not(.contact-modal-desktop):not(.booking-success-overlay):not(.booking-success-desktop):not(.booking-success-drawer):not(.buy-success-overlay):not(.buy-success-desktop):not(.buy-success-drawer):not(script) {
+  body.drawer-scaled > *:not(.language-drawer):not(.language-modal-overlay):not(.language-modal-desktop):not(.contact-drawer):not(.contact-modal-overlay):not(.contact-modal-desktop):not(.booking-success-overlay):not(.booking-success-desktop):not(.booking-success-drawer):not(.buy-success-overlay):not(.buy-success-desktop):not(.buy-success-drawer):not(.pricing-form-overlay):not(.pricing-form-desktop):not(.pricing-form-drawer):not(.pricing-success-overlay):not(.pricing-success-desktop):not(.pricing-success-drawer):not(script) {
     transform: scale(0.97);
     border-radius: 12px;
     overflow: hidden;
@@ -691,6 +691,126 @@
   }
 
   html.dark .buy-success-drawer-content {
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ===== PRICING FORM MODAL ===== */
+  .pricing-form-overlay {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.3s;
+  }
+
+  .pricing-form-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .pricing-form-desktop {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.95);
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.3s, transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @media (min-width: 1024px) {
+    .pricing-form-desktop {
+      display: flex;
+    }
+  }
+
+  .pricing-form-desktop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  .pricing-form-drawer {
+    transform: translateY(100%);
+    pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  .pricing-form-drawer.active {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .pricing-form-drawer.dragging {
+    transition: none;
+  }
+
+  .pricing-form-drawer-content {
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  html.dark .pricing-form-drawer-content {
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ===== PRICING SUCCESS MODAL ===== */
+  .pricing-success-overlay {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.3s;
+  }
+
+  .pricing-success-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .pricing-success-desktop {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.95);
+    transition: opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.3s, transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @media (min-width: 1024px) {
+    .pricing-success-desktop {
+      display: flex;
+    }
+  }
+
+  .pricing-success-desktop.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+
+  .pricing-success-drawer {
+    transform: translateY(100%);
+    pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+
+  .pricing-success-drawer.active {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .pricing-success-drawer.dragging {
+    transition: none;
+  }
+
+  .pricing-success-drawer-content {
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  html.dark .pricing-success-drawer-content {
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
   }
 

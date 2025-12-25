@@ -1,0 +1,88 @@
+{#
+/**
+ * @file
+ * Template for Pricing Block.
+ *
+ * Available variables:
+ * - title: Block title.
+ * - description: Block description.
+ * - annual_label: Annual billing toggle label.
+ * - monthly_label: Monthly billing toggle label.
+ * - discount_text: Discount badge text.
+ * - plans: Array of pricing plans.
+ */
+#}
+<section class="py-16 lg:py-24 3xl:py-32 4xl:py-40 bg-gradient-to-b from-blue-50/50 to-white dark:from-slate-800 dark:to-slate-900 transition-colors" data-block-type="pricing">
+  <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <!-- Section Header -->
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <h2 class="text-3xl sm:text-4xl 3xl:text-5xl font-bold text-gray-900 dark:text-white mb-4">{{ title }}</h2>
+      {% if description %}
+        <p class="text-gray-600 dark:text-gray-300">{{ description }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Billing Toggle -->
+    <div class="flex items-center justify-center gap-4 mb-12">
+      <div class="inline-flex items-center bg-white dark:bg-slate-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-slate-700">
+        <button id="billing-annual" class="billing-toggle px-4 py-2 rounded-md text-sm font-medium transition-all bg-blue-500 text-white">
+          {{ annual_label }}
+          {% if discount_text %}
+            <span class="ml-1 px-2 py-0.5 bg-blue-400 text-white text-xs rounded-md">{{ discount_text }}</span>
+          {% endif %}
+        </button>
+        <button id="billing-monthly" class="billing-toggle px-4 py-2 rounded-md text-sm font-medium transition-all text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+          {{ monthly_label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Pricing Cards -->
+    {% if plans|length > 0 %}
+      <div class="grid md:grid-cols-{{ plans|length > 3 ? 3 : plans|length }} gap-8 3xl:gap-12 items-start">
+        {% for plan in plans %}
+          <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 {{ plan.is_recommended ? 'shadow-xl border-2 border-blue-500 relative' : 'shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-lg' }} transition-shadow">
+            {% if plan.is_recommended and plan.badge_text %}
+              <!-- Recommended Badge -->
+              <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span class="px-4 py-1 bg-blue-500 text-white text-sm font-medium rounded-full whitespace-nowrap">
+                  {{ plan.badge_text }}
+                </span>
+              </div>
+            {% endif %}
+
+            <h3 class="text-xl 3xl:text-2xl font-bold text-gray-900 dark:text-white mb-2 {{ plan.is_recommended ? 'mt-2' : '' }}">{{ plan.title }}</h3>
+            {% if plan.description %}
+              <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">{{ plan.description }}</p>
+            {% endif %}
+
+            <div class="mb-6">
+              <span class="text-4xl 3xl:text-5xl font-bold text-gray-900 dark:text-white price-amount" data-monthly="{{ plan.monthly_price }}" data-annual="{{ plan.annual_price ?: plan.monthly_price }}" data-symbol="{{ plan.currency_symbol }}">{{ plan.currency_symbol }}{{ plan.annual_price ?: plan.monthly_price }}</span>
+              <span class="text-gray-500 dark:text-gray-400">/{{ 'month'|t }}</span>
+            </div>
+
+            {% if plan.features|length > 0 %}
+              <p class="text-sm font-semibold text-gray-900 dark:text-white mb-4">{{ 'What\'s included:'|t }}</p>
+              <ul class="space-y-3 mb-8">
+                {% for feature in plan.features %}
+                  <li class="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-300">
+                    <svg class="w-5 h-5 {{ plan.is_recommended ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    {{ feature }}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+
+            <button type="button" class="pricing-cta-btn block w-full py-3 px-6 text-center rounded-lg font-medium transition-colors {{ plan.is_recommended ? 'bg-blue-500 text-white hover:bg-blue-600' : 'border border-blue-500 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10' }}" data-plan-id="{{ plan.id }}" data-plan-title="{{ plan.title }}" data-plan-price="{{ plan.currency_symbol }}{{ plan.annual_price ?: plan.monthly_price }}">
+              {{ plan.cta_text ?: 'Get started'|t }}
+            </button>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-gray-500 dark:text-gray-400">{{ 'No pricing plans available.'|t }}</p>
+    {% endif %}
+  </div>
+</section>

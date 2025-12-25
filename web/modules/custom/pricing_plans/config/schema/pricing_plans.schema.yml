@@ -1,0 +1,39 @@
+block.settings.pricing_block:
+  type: block_settings
+  label: 'Pricing block settings'
+  mapping:
+    title:
+      type: text
+      label: 'Title'
+    description:
+      type: text
+      label: 'Description'
+    annual_label:
+      type: text
+      label: 'Annual billing label'
+    monthly_label:
+      type: text
+      label: 'Monthly billing label'
+    discount_text:
+      type: text
+      label: 'Discount badge text'
+    success_title:
+      type: text
+      label: 'Success modal title'
+    success_subtitle:
+      type: text
+      label: 'Success modal subtitle'
+    success_message:
+      type: text
+      label: 'Success modal message'
+    success_button_text:
+      type: text
+      label: 'Success modal button text'
+
+pricing_plans.settings:
+  type: config_object
+  label: 'Pricing Plans settings'
+  mapping:
+    default_currency:
+      type: string
+      label: 'Default currency symbol'

@@ -1,0 +1,10 @@
+name: 'Pricing Plans'
+type: module
+description: 'Provides Pricing Plan content type with configurable pricing block and Form Sender integration.'
+core_version_requirement: ^10 || ^11
+package: Constructor
+dependencies:
+  - drupal:node
+  - drupal:block
+  - drupal:text
+  - form_sender:form_sender

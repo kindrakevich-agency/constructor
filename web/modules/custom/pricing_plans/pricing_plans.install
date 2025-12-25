@@ -1,0 +1,425 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for pricing_plans module.
+ */
+
+use Drupal\block\Entity\Block;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+
+/**
+ * Implements hook_install().
+ */
+function pricing_plans_install() {
+  // Create Pricing Plan content type.
+  _pricing_plans_create_content_type();
+
+  // Create fields for Pricing Plan.
+  _pricing_plans_create_fields();
+
+  // Configure form and view displays.
+  _pricing_plans_configure_displays();
+
+  // Create example pricing plans with AI.
+  _pricing_plans_create_example_nodes();
+
+  // Place Pricing Block on frontpage.
+  _pricing_plans_place_frontpage_block();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function pricing_plans_uninstall() {
+  // Delete all pricing plan nodes.
+  $storage = \Drupal::entityTypeManager()->getStorage('node');
+  $nids = $storage->getQuery()
+    ->condition('type', 'pricing_plan')
+    ->accessCheck(FALSE)
+    ->execute();
+  if ($nids) {
+    $nodes = $storage->loadMultiple($nids);
+    $storage->delete($nodes);
+  }
+
+  // Delete Pricing Plan content type.
+  $content_type = NodeType::load('pricing_plan');
+  if ($content_type) {
+    $content_type->delete();
+  }
+
+  // Delete config.
+  \Drupal::configFactory()->getEditable('pricing_plans.settings')->delete();
+}
+
+/**
+ * Creates Pricing Plan content type.
+ */
+function _pricing_plans_create_content_type() {
+  $type = NodeType::load('pricing_plan');
+  if (!$type) {
+    $type = NodeType::create([
+      'type' => 'pricing_plan',
+      'name' => 'Pricing Plan',
+      'description' => 'A pricing plan with features, prices, and call-to-action.',
+    ]);
+    $type->save();
+  }
+}
+
+/**
+ * Creates fields for Pricing Plan content type.
+ */
+function _pricing_plans_create_fields() {
+  $fields = [
+    'field_plan_description' => [
+      'type' => 'string',
+      'label' => 'Description',
+      'description' => 'Short description of the plan.',
+      'required' => FALSE,
+      'weight' => 1,
+    ],
+    'field_plan_monthly_price' => [
+      'type' => 'decimal',
+      'label' => 'Monthly Price',
+      'description' => 'Monthly price for this plan.',
+      'required' => TRUE,
+      'weight' => 2,
+      'settings' => [
+        'precision' => 10,
+        'scale' => 2,
+      ],
+    ],
+    'field_plan_annual_price' => [
+      'type' => 'decimal',
+      'label' => 'Annual Price',
+      'description' => 'Annual price (per month) for this plan.',
+      'required' => FALSE,
+      'weight' => 3,
+      'settings' => [
+        'precision' => 10,
+        'scale' => 2,
+      ],
+    ],
+    'field_plan_features' => [
+      'type' => 'string_long',
+      'label' => 'Features',
+      'description' => 'List of features, one per line.',
+      'required' => FALSE,
+      'weight' => 4,
+    ],
+    'field_plan_cta_text' => [
+      'type' => 'string',
+      'label' => 'CTA Button Text',
+      'description' => 'Text for the call-to-action button.',
+      'required' => FALSE,
+      'weight' => 5,
+    ],
+    'field_plan_is_recommended' => [
+      'type' => 'boolean',
+      'label' => 'Recommended',
+      'description' => 'Mark this plan as recommended.',
+      'required' => FALSE,
+      'weight' => 6,
+      'default_value' => FALSE,
+    ],
+    'field_plan_badge_text' => [
+      'type' => 'string',
+      'label' => 'Badge Text',
+      'description' => 'Badge text for recommended plan (e.g., "Recommended for you").',
+      'required' => FALSE,
+      'weight' => 7,
+    ],
+    'field_plan_weight' => [
+      'type' => 'integer',
+      'label' => 'Weight',
+      'description' => 'Order weight for sorting plans.',
+      'required' => FALSE,
+      'weight' => 8,
+      'default_value' => 0,
+    ],
+    'field_plan_currency_symbol' => [
+      'type' => 'string',
+      'label' => 'Currency Symbol',
+      'description' => 'Currency symbol (e.g., $, €, £).',
+      'required' => FALSE,
+      'weight' => 9,
+    ],
+  ];
+
+  foreach ($fields as $field_name => $field_info) {
+    // Create field storage.
+    $field_storage = FieldStorageConfig::loadByName('node', $field_name);
+    if (!$field_storage) {
+      $storage_settings = [
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'type' => $field_info['type'],
+        'cardinality' => $field_info['cardinality'] ?? 1,
+      ];
+
+      if ($field_info['type'] === 'decimal' && isset($field_info['settings'])) {
+        $storage_settings['settings'] = [
+          'precision' => $field_info['settings']['precision'] ?? 10,
+          'scale' => $field_info['settings']['scale'] ?? 2,
+        ];
+      }
+
+      $field_storage = FieldStorageConfig::create($storage_settings);
+      $field_storage->save();
+    }
+
+    // Create field instance.
+    $field = FieldConfig::loadByName('node', 'pricing_plan', $field_name);
+    if (!$field) {
+      $field_config = [
+        'field_storage' => $field_storage,
+        'bundle' => 'pricing_plan',
+        'label' => $field_info['label'],
+        'description' => $field_info['description'],
+        'required' => $field_info['required'],
+      ];
+
+      if (isset($field_info['default_value'])) {
+        $field_config['default_value'] = [['value' => $field_info['default_value']]];
+      }
+
+      $field = FieldConfig::create($field_config);
+      $field->save();
+    }
+  }
+}
+
+/**
+ * Configures form and view displays for Pricing Plan content type.
+ */
+function _pricing_plans_configure_displays() {
+  // Form display.
+  $form_display = EntityFormDisplay::load('node.pricing_plan.default');
+  if (!$form_display) {
+    $form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'pricing_plan',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $form_display->setComponent('title', ['type' => 'string_textfield', 'weight' => 0]);
+  $form_display->setComponent('field_plan_description', ['type' => 'string_textfield', 'weight' => 1]);
+  $form_display->setComponent('field_plan_monthly_price', ['type' => 'number', 'weight' => 2]);
+  $form_display->setComponent('field_plan_annual_price', ['type' => 'number', 'weight' => 3]);
+  $form_display->setComponent('field_plan_features', ['type' => 'string_textarea', 'weight' => 4]);
+  $form_display->setComponent('field_plan_cta_text', ['type' => 'string_textfield', 'weight' => 5]);
+  $form_display->setComponent('field_plan_is_recommended', ['type' => 'boolean_checkbox', 'weight' => 6]);
+  $form_display->setComponent('field_plan_badge_text', ['type' => 'string_textfield', 'weight' => 7]);
+  $form_display->setComponent('field_plan_weight', ['type' => 'number', 'weight' => 8]);
+  $form_display->setComponent('field_plan_currency_symbol', ['type' => 'string_textfield', 'weight' => 9]);
+  $form_display->save();
+
+  // View display.
+  $view_display = EntityViewDisplay::load('node.pricing_plan.default');
+  if (!$view_display) {
+    $view_display = EntityViewDisplay::create([
+      'targetEntityType' => 'node',
+      'bundle' => 'pricing_plan',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+
+  $view_display->setComponent('field_plan_description', ['type' => 'string', 'weight' => 1, 'label' => 'hidden']);
+  $view_display->setComponent('field_plan_monthly_price', ['type' => 'number_decimal', 'weight' => 2, 'label' => 'inline']);
+  $view_display->setComponent('field_plan_annual_price', ['type' => 'number_decimal', 'weight' => 3, 'label' => 'inline']);
+  $view_display->setComponent('field_plan_features', ['type' => 'basic_string', 'weight' => 4, 'label' => 'above']);
+  $view_display->removeComponent('field_plan_cta_text');
+  $view_display->removeComponent('field_plan_is_recommended');
+  $view_display->removeComponent('field_plan_badge_text');
+  $view_display->removeComponent('field_plan_weight');
+  $view_display->removeComponent('field_plan_currency_symbol');
+  $view_display->save();
+}
+
+/**
+ * Creates example pricing plan nodes.
+ */
+function _pricing_plans_create_example_nodes() {
+  $language_manager = \Drupal::languageManager();
+  $languages = $language_manager->getLanguages();
+  $default_langcode = $language_manager->getDefaultLanguage()->getId();
+
+  // Example pricing plans data.
+  $plans = [
+    [
+      'title' => 'Basic',
+      'description' => 'For individuals and small teams getting started.',
+      'monthly_price' => 10,
+      'annual_price' => 9,
+      'features' => "Task management essentials\nTeam messaging & file sharing\nActivity feed & project overview\nMobile & desktop access\nEmail support",
+      'cta_text' => 'Get started',
+      'is_recommended' => FALSE,
+      'badge_text' => '',
+      'weight' => 0,
+      'currency_symbol' => '$',
+    ],
+    [
+      'title' => 'Pro',
+      'description' => 'For growing teams that need smarter workflows.',
+      'monthly_price' => 25,
+      'annual_price' => 22,
+      'features' => "Time tracking & workload management\nAdvanced reporting & filters\nCustom labels, priorities & checklists\nProject insights & team analytics\nBilling & usage tracking\nPriority support",
+      'cta_text' => 'Start with Pro',
+      'is_recommended' => TRUE,
+      'badge_text' => 'Recommended for you',
+      'weight' => 1,
+      'currency_symbol' => '$',
+    ],
+    [
+      'title' => 'Enterprise',
+      'description' => 'For large organizations with advanced needs.',
+      'monthly_price' => 50,
+      'annual_price' => 45,
+      'features' => "Dedicated account manager\nCustom integrations & automation\nSSO & role-based access control\nUnlimited projects & users\nKPI dashboards & reporting tools\nOnboarding support",
+      'cta_text' => 'Contact Sales',
+      'is_recommended' => FALSE,
+      'badge_text' => '',
+      'weight' => 2,
+      'currency_symbol' => '$',
+    ],
+  ];
+
+  // Ukrainian translations.
+  $plans_uk = [
+    [
+      'title' => 'Базовий',
+      'description' => 'Для окремих користувачів та невеликих команд.',
+      'features' => "Основи управління завданнями\nКомандні повідомлення та обмін файлами\nСтрічка активності та огляд проекту\nМобільний та десктопний доступ\nПідтримка електронною поштою",
+      'cta_text' => 'Розпочати',
+    ],
+    [
+      'title' => 'Професійний',
+      'description' => 'Для команд, яким потрібні розумніші робочі процеси.',
+      'features' => "Відстеження часу та управління навантаженням\nРозширена звітність та фільтри\nВласні мітки, пріоритети та контрольні списки\nАналітика проектів та команд\nВідстеження рахунків та використання\nПріоритетна підтримка",
+      'cta_text' => 'Почати з Pro',
+      'badge_text' => 'Рекомендовано для вас',
+    ],
+    [
+      'title' => 'Корпоративний',
+      'description' => 'Для великих організацій з розширеними потребами.',
+      'features' => "Виділений менеджер акаунту\nВласні інтеграції та автоматизація\nSSO та контроль доступу на основі ролей\nНеобмежена кількість проектів та користувачів\nДашборди KPI та інструменти звітності\nПідтримка при підключенні",
+      'cta_text' => 'Зв\'язатися з відділом продажів',
+    ],
+  ];
+
+  foreach ($plans as $index => $plan_data) {
+    // Check if node already exists.
+    $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery()
+      ->condition('type', 'pricing_plan')
+      ->condition('title', $plan_data['title'])
+      ->accessCheck(FALSE);
+    $existing = $query->execute();
+
+    if (!empty($existing)) {
+      continue;
+    }
+
+    // Create the node.
+    $node = Node::create([
+      'type' => 'pricing_plan',
+      'title' => $plan_data['title'],
+      'langcode' => $default_langcode,
+      'status' => 1,
+      'field_plan_description' => $plan_data['description'],
+      'field_plan_monthly_price' => $plan_data['monthly_price'],
+      'field_plan_annual_price' => $plan_data['annual_price'],
+      'field_plan_features' => $plan_data['features'],
+      'field_plan_cta_text' => $plan_data['cta_text'],
+      'field_plan_is_recommended' => $plan_data['is_recommended'],
+      'field_plan_badge_text' => $plan_data['badge_text'],
+      'field_plan_weight' => $plan_data['weight'],
+      'field_plan_currency_symbol' => $plan_data['currency_symbol'],
+    ]);
+    $node->save();
+
+    // Add Ukrainian translation if language exists.
+    if (isset($languages['uk']) && isset($plans_uk[$index])) {
+      $uk_data = $plans_uk[$index];
+      $node_uk = $node->addTranslation('uk', [
+        'title' => $uk_data['title'],
+        'field_plan_description' => $uk_data['description'],
+        'field_plan_features' => $uk_data['features'],
+        'field_plan_cta_text' => $uk_data['cta_text'],
+        'field_plan_badge_text' => $uk_data['badge_text'] ?? $plan_data['badge_text'],
+      ]);
+      $node_uk->save();
+    }
+  }
+
+  \Drupal::messenger()->addMessage(t('Example pricing plans have been created.'));
+}
+
+/**
+ * Places Pricing Block on frontpage.
+ */
+function _pricing_plans_place_frontpage_block() {
+  // Check if the block module is available.
+  if (!\Drupal::moduleHandler()->moduleExists('block')) {
+    return;
+  }
+
+  // Get the default theme.
+  $default_theme = \Drupal::config('system.theme')->get('default') ?: 'constructor_theme';
+
+  // Check if block already exists.
+  $block_id = $default_theme . '_pricing_block';
+  if (Block::load($block_id)) {
+    return;
+  }
+
+  // Create the block placement.
+  $block = Block::create([
+    'id' => $block_id,
+    'theme' => $default_theme,
+    'region' => 'content',
+    'weight' => 15,
+    'plugin' => 'pricing_block',
+    'settings' => [
+      'id' => 'pricing_block',
+      'label' => 'Pricing Plans',
+      'label_display' => '0',
+      'provider' => 'pricing_plans',
+      'title' => 'Choose Your Plan',
+      'description' => 'Affordable and adaptable pricing to suit your goals.',
+      'annual_label' => 'Bill annually',
+      'monthly_label' => 'Bill monthly',
+      'discount_text' => '10% OFF',
+      'success_title' => 'Thank You!',
+      'success_message' => 'We will contact you shortly to discuss your plan.',
+      'success_button_text' => 'Close',
+    ],
+    'visibility' => [
+      'request_path' => [
+        'id' => 'request_path',
+        'negate' => FALSE,
+        'pages' => '<front>',
+      ],
+    ],
+  ]);
+
+  $block->save();
+
+  \Drupal::messenger()->addMessage(t('Pricing Block has been placed on the frontpage.'));
+}
+
+/**
+ * Add Pricing Block to frontpage.
+ */
+function pricing_plans_update_10001() {
+  _pricing_plans_place_frontpage_block();
+}
