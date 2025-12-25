@@ -5,3 +5,4 @@ package: Constructor
 core_version_requirement: ^11
 dependencies:
   - drupal:block
+  - form_sender:form_sender

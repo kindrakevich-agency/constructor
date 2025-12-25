@@ -1,0 +1,7 @@
+constructor_hero.booking_submit:
+  path: '/api/booking/submit'
+  defaults:
+    _controller: '\Drupal\constructor_hero\Controller\BookingController::submit'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'

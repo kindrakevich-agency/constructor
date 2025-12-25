@@ -35,3 +35,11 @@ content_commerce.properties:
     _permission: 'administer site configuration'
   options:
     _admin_route: TRUE
+
+content_commerce.order_submit:
+  path: '/api/order/submit'
+  defaults:
+    _controller: '\Drupal\content_commerce\Controller\OrderController::submit'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'

@@ -6,6 +6,12 @@
 (function () {
   'use strict';
 
+  // Success modal elements (created dynamically).
+  var successOverlay = null;
+  var successDesktopModal = null;
+  var successMobileDrawer = null;
+  var successModalCreated = false;
+
   // Initialize when DOM is ready
   document.addEventListener('DOMContentLoaded', function () {
     initProductGallery();
@@ -22,15 +28,15 @@
    * Initialize product gallery thumbnail switching.
    */
   function initProductGallery() {
-    const thumbnails = document.querySelectorAll('.product-thumbnail');
+    var thumbnails = document.querySelectorAll('.product-thumbnail');
 
     thumbnails.forEach(function (thumbnail) {
       thumbnail.addEventListener('click', function () {
-        const imageUrl = this.getAttribute('data-image');
-        const productId = this.getAttribute('data-product-id');
+        var imageUrl = this.getAttribute('data-image');
+        var productId = this.getAttribute('data-product-id');
 
         // Find the main image
-        let mainImage;
+        var mainImage;
         if (productId) {
           mainImage = document.getElementById('product-main-image-' + productId);
         } else {
@@ -41,7 +47,7 @@
           mainImage.src = imageUrl;
 
           // Update thumbnail states
-          const container = this.closest('.flex');
+          var container = this.closest('.flex');
           if (container) {
             container.querySelectorAll('.product-thumbnail').forEach(function (thumb) {
               thumb.classList.remove('opacity-100', 'ring-2', 'ring-blue-500');
@@ -60,14 +66,14 @@
    * Initialize color swatch selection.
    */
   function initColorSwatches() {
-    const swatches = document.querySelectorAll('.product-color-swatch');
+    var swatches = document.querySelectorAll('.product-color-swatch');
 
     swatches.forEach(function (swatch) {
       swatch.addEventListener('click', function () {
-        const color = this.getAttribute('data-color');
+        var color = this.getAttribute('data-color');
 
         // Update swatch states
-        const container = this.closest('.flex');
+        var container = this.closest('.flex');
         if (container) {
           container.querySelectorAll('.product-color-swatch').forEach(function (s) {
             s.classList.remove('ring-blue-500');
@@ -79,7 +85,7 @@
         this.classList.add('ring-blue-500');
 
         // Update color dropdown if exists
-        const colorSelect = document.querySelector('.product-color-select');
+        var colorSelect = document.querySelector('.product-color-select');
         if (colorSelect && color) {
           colorSelect.value = color.toLowerCase();
         }
@@ -87,14 +93,14 @@
     });
 
     // Sync color dropdown with swatches
-    const colorSelect = document.querySelector('.product-color-select');
+    var colorSelect = document.querySelector('.product-color-select');
     if (colorSelect) {
       colorSelect.addEventListener('change', function () {
-        const selectedColor = this.value;
-        const swatches = document.querySelectorAll('.product-color-swatch');
+        var selectedColor = this.value;
+        var swatches = document.querySelectorAll('.product-color-swatch');
 
         swatches.forEach(function (swatch) {
-          const swatchColor = swatch.getAttribute('data-color').toLowerCase();
+          var swatchColor = swatch.getAttribute('data-color').toLowerCase();
           swatch.classList.remove('ring-blue-500');
           swatch.classList.add('ring-transparent');
 
@@ -114,8 +120,8 @@
     // Minus buttons
     document.querySelectorAll('.qty-minus').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        const productId = this.getAttribute('data-product-id');
-        let input;
+        var productId = this.getAttribute('data-product-id');
+        var input;
         if (productId) {
           input = document.querySelector('.qty-input[data-product-id="' + productId + '"]');
         } else {
@@ -123,7 +129,7 @@
         }
 
         if (input) {
-          const currentVal = parseInt(input.value) || 1;
+          var currentVal = parseInt(input.value) || 1;
           if (currentVal > 1) {
             input.value = currentVal - 1;
           }
@@ -134,8 +140,8 @@
     // Plus buttons
     document.querySelectorAll('.qty-plus').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        const productId = this.getAttribute('data-product-id');
-        let input;
+        var productId = this.getAttribute('data-product-id');
+        var input;
         if (productId) {
           input = document.querySelector('.qty-input[data-product-id="' + productId + '"]');
         } else {
@@ -143,7 +149,7 @@
         }
 
         if (input) {
-          const currentVal = parseInt(input.value) || 1;
+          var currentVal = parseInt(input.value) || 1;
           input.value = currentVal + 1;
         }
       });
@@ -152,7 +158,7 @@
     // Validate input
     document.querySelectorAll('.qty-input').forEach(function (input) {
       input.addEventListener('change', function () {
-        const val = parseInt(this.value) || 1;
+        var val = parseInt(this.value) || 1;
         if (val < 1) {
           this.value = 1;
         }
@@ -166,9 +172,9 @@
   function initShippingAccordion() {
     document.querySelectorAll('.shipping-toggle').forEach(function (toggle) {
       toggle.addEventListener('click', function () {
-        const container = this.closest('div');
-        const content = container.querySelector('.shipping-content');
-        const icon = this.querySelector('.shipping-icon');
+        var container = this.closest('div');
+        var content = container.querySelector('.shipping-content');
+        var icon = this.querySelector('.shipping-icon');
 
         if (content) {
           content.classList.toggle('hidden');
@@ -185,14 +191,14 @@
    * Initialize product category filters.
    */
   function initProductFilters() {
-    const filterButtons = document.querySelectorAll('.product-filter-btn');
-    const productsGrid = document.getElementById('products-grid');
+    var filterButtons = document.querySelectorAll('.product-filter-btn');
+    var productsGrid = document.getElementById('products-grid');
 
     if (!filterButtons.length || !productsGrid) return;
 
     filterButtons.forEach(function (btn) {
       btn.addEventListener('click', function () {
-        const filter = this.getAttribute('data-filter');
+        var filter = this.getAttribute('data-filter');
 
         // Update button states
         filterButtons.forEach(function (b) {
@@ -204,9 +210,9 @@
         this.classList.add('bg-blue-500', 'text-white');
 
         // Filter products
-        const products = productsGrid.querySelectorAll('.product-card');
+        var products = productsGrid.querySelectorAll('.product-card');
         products.forEach(function (product) {
-          const category = product.getAttribute('data-category');
+          var category = product.getAttribute('data-category');
 
           if (filter === 'all' || category === filter) {
             product.style.display = '';
@@ -240,9 +246,9 @@
         // Don't open if button is disabled
         if (this.disabled) return;
 
-        const productId = this.getAttribute('data-product-id');
-        const drawer = document.getElementById('buy-drawer-' + productId);
-        const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+        var productId = this.getAttribute('data-product-id');
+        var drawer = document.getElementById('buy-drawer-' + productId);
+        var overlay = document.getElementById('buy-drawer-overlay-' + productId);
 
         if (drawer && overlay) {
           if (isMobile()) {
@@ -257,8 +263,8 @@
     // Close drawer/popup on overlay click
     document.querySelectorAll('.buy-drawer-overlay').forEach(function (overlay) {
       overlay.addEventListener('click', function () {
-        const drawerId = this.id.replace('buy-drawer-overlay-', 'buy-drawer-');
-        const drawer = document.getElementById(drawerId);
+        var drawerId = this.id.replace('buy-drawer-overlay-', 'buy-drawer-');
+        var drawer = document.getElementById(drawerId);
         if (drawer) {
           closeBuyModal(drawer, this);
         }
@@ -268,9 +274,9 @@
     // Close drawer/popup on close button click
     document.querySelectorAll('.buy-drawer-close').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        const productId = this.getAttribute('data-product-id');
-        const drawer = document.getElementById('buy-drawer-' + productId);
-        const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+        var productId = this.getAttribute('data-product-id');
+        var drawer = document.getElementById('buy-drawer-' + productId);
+        var overlay = document.getElementById('buy-drawer-overlay-' + productId);
 
         if (drawer && overlay) {
           closeBuyModal(drawer, overlay);
@@ -281,12 +287,13 @@
     // Close drawer/popup on Escape key
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        const openDrawer = document.querySelector('.buy-drawer:not(.hidden)');
+        var openDrawer = document.querySelector('.buy-drawer:not(.hidden)');
         if (openDrawer) {
-          const productId = openDrawer.getAttribute('data-product-id');
-          const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+          var productId = openDrawer.getAttribute('data-product-id');
+          var overlay = document.getElementById('buy-drawer-overlay-' + productId);
           closeBuyModal(openDrawer, overlay);
         }
+        closeSuccessModal();
       }
     });
 
@@ -297,50 +304,107 @@
     document.querySelectorAll('.buy-form').forEach(function (form) {
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-
-        const productId = this.getAttribute('data-product-id');
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-
-        // Get form data
-        const formData = new FormData(this);
-        const data = {
-          name: formData.get('name'),
-          phone: formData.get('phone'),
-          address: formData.get('address'),
-          productId: productId
-        };
-
-        // Show loading state
-        submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-        submitBtn.disabled = true;
-
-        // Simulate processing (replace with actual API call)
-        setTimeout(function () {
-          submitBtn.innerHTML = '<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Order Placed!';
-          submitBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-          submitBtn.classList.add('bg-green-500');
-
-          // Log form data to console (for testing)
-          console.log('Order data:', data);
-
-          // Close drawer/popup after success
-          setTimeout(function () {
-            const drawer = document.getElementById('buy-drawer-' + productId);
-            const overlay = document.getElementById('buy-drawer-overlay-' + productId);
-            if (drawer && overlay) {
-              closeBuyModal(drawer, overlay);
-            }
-
-            // Reset form and button
-            form.reset();
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('bg-green-500');
-            submitBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
-          }, 1500);
-        }, 1000);
+        submitBuyForm(form);
       });
+    });
+  }
+
+  /**
+   * Submit buy form via API.
+   */
+  function submitBuyForm(form) {
+    var productId = form.getAttribute('data-product-id');
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var originalText = submitBtn.innerHTML;
+
+    // Clear previous errors
+    form.querySelectorAll('.buy-form-error').forEach(function(el) { el.remove(); });
+    form.querySelectorAll('.border-red-500').forEach(function(el) {
+      el.classList.remove('border-red-500');
+      el.classList.add('border-gray-300');
+    });
+
+    // Show loading state
+    submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+    submitBtn.disabled = true;
+
+    // Get form data
+    var formData = new FormData(form);
+
+    // Get product options
+    var qtyInput = document.querySelector('.qty-input[data-product-id="' + productId + '"]');
+    var colorSelect = document.querySelector('.product-color-select');
+    var sizeSelect = document.querySelector('[name="size"]');
+
+    var data = {
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+      address: formData.get('address'),
+      productId: productId,
+      quantity: qtyInput ? qtyInput.value : '1',
+      color: colorSelect ? colorSelect.value : '',
+      size: sizeSelect ? sizeSelect.value : ''
+    };
+
+    // Send via fetch
+    fetch('/api/order/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then(function(response) {
+      return response.json().then(function(responseData) {
+        return { status: response.status, data: responseData };
+      });
+    })
+    .then(function(result) {
+      // Re-enable button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+
+      if (result.data.success) {
+        // Close buy modal
+        var drawer = document.getElementById('buy-drawer-' + productId);
+        var overlay = document.getElementById('buy-drawer-overlay-' + productId);
+        if (drawer && overlay) {
+          closeBuyModal(drawer, overlay);
+        }
+
+        // Reset form
+        form.reset();
+
+        // Show success modal
+        showSuccessModal();
+      } else if (result.data.errors) {
+        // Show errors
+        showFormErrors(form, result.data.errors);
+      }
+    })
+    .catch(function(error) {
+      console.error('Error:', error);
+      // Re-enable button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    });
+  }
+
+  /**
+   * Show form errors.
+   */
+  function showFormErrors(form, errors) {
+    Object.keys(errors).forEach(function(field) {
+      var input = form.querySelector('[name="' + field + '"]');
+      if (input) {
+        input.classList.remove('border-gray-300');
+        input.classList.add('border-red-500');
+
+        var errorDiv = document.createElement('div');
+        errorDiv.className = 'buy-form-error text-red-500 text-sm mt-1';
+        errorDiv.textContent = errors[field];
+        input.parentNode.appendChild(errorDiv);
+      }
     });
   }
 
@@ -349,11 +413,11 @@
    */
   function initDrawerDrag() {
     document.querySelectorAll('.buy-drawer-handle').forEach(function (handle) {
-      let startY = 0;
-      let currentY = 0;
-      let isDragging = false;
-      const drawer = handle.closest('.buy-drawer');
-      const content = drawer ? drawer.querySelector('.buy-drawer-content') : null;
+      var startY = 0;
+      var currentY = 0;
+      var isDragging = false;
+      var drawer = handle.closest('.buy-drawer');
+      var content = drawer ? drawer.querySelector('.buy-drawer-content') : null;
 
       if (!drawer || !content) return;
 
@@ -366,7 +430,7 @@
       handle.addEventListener('touchmove', function (e) {
         if (!isDragging) return;
         currentY = e.touches[0].clientY;
-        const diff = currentY - startY;
+        var diff = currentY - startY;
 
         if (diff > 0) {
           content.style.transform = 'translateY(' + diff + 'px)';
@@ -377,13 +441,13 @@
         if (!isDragging) return;
         isDragging = false;
 
-        const diff = currentY - startY;
+        var diff = currentY - startY;
         content.style.transition = 'transform 0.3s ease';
 
         if (diff > 100) {
           // Close drawer
-          const productId = drawer.getAttribute('data-product-id');
-          const overlay = document.getElementById('buy-drawer-overlay-' + productId);
+          var productId = drawer.getAttribute('data-product-id');
+          var overlay = document.getElementById('buy-drawer-overlay-' + productId);
           closeBuyModal(drawer, overlay);
         } else {
           // Reset position
@@ -410,7 +474,7 @@
       overlay.style.opacity = '0';
       overlay.style.transition = 'opacity 0.3s ease';
 
-      const content = drawer.querySelector('.buy-drawer-content');
+      var content = drawer.querySelector('.buy-drawer-content');
       if (content) {
         // Reset popup styles if any
         content.style.position = '';
@@ -445,7 +509,7 @@
     drawer.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
-    const content = drawer.querySelector('.buy-drawer-content');
+    var content = drawer.querySelector('.buy-drawer-content');
 
     // Apply popup styles
     if (content) {
@@ -480,8 +544,8 @@
    * Close buy modal (drawer or popup) with animation.
    */
   function closeBuyModal(drawer, overlay) {
-    const content = drawer.querySelector('.buy-drawer-content');
-    const mode = drawer.getAttribute('data-mode') || 'drawer';
+    var content = drawer.querySelector('.buy-drawer-content');
+    var mode = drawer.getAttribute('data-mode') || 'drawer';
 
     if (overlay) {
       overlay.style.opacity = '0';
@@ -524,6 +588,190 @@
   }
 
   /**
+   * Create success modal elements (once).
+   */
+  function createSuccessModal() {
+    if (successModalCreated) return;
+
+    var successTitle = 'Order Placed!';
+    var successSubtitle = 'Your order has been received';
+    var successMessage = 'We will contact you shortly to confirm your order details.';
+    var successButtonText = 'Close';
+
+    // Check if drupalSettings has custom messages
+    if (typeof drupalSettings !== 'undefined' && drupalSettings.buyForm) {
+      successTitle = drupalSettings.buyForm.successTitle || successTitle;
+      successSubtitle = drupalSettings.buyForm.successSubtitle || successSubtitle;
+      successMessage = drupalSettings.buyForm.successMessage || successMessage;
+      successButtonText = drupalSettings.buyForm.successButtonText || successButtonText;
+    }
+
+    // Success icon SVG
+    var successIconSvg = '<svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+
+    // Close icon SVG
+    var closeIconSvg = '<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+
+    // Create overlay
+    successOverlay = document.createElement('div');
+    successOverlay.className = 'buy-success-overlay fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]';
+    document.body.appendChild(successOverlay);
+
+    // Create desktop modal
+    successDesktopModal = document.createElement('div');
+    successDesktopModal.className = 'buy-success-desktop fixed inset-0 z-[70] items-center justify-center p-4';
+    successDesktopModal.innerHTML = '\
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">\
+        <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700">\
+          <div>\
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">' + successTitle + '</h3>\
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">' + successSubtitle + '</p>\
+          </div>\
+          <button type="button" class="close-buy-success w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">\
+            ' + closeIconSvg + '\
+          </button>\
+        </div>\
+        <div class="p-6 text-center">\
+          <div class="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center">\
+            ' + successIconSvg + '\
+          </div>\
+          <p class="text-gray-600 dark:text-gray-300 mb-6">' + successMessage + '</p>\
+          <button type="button" class="close-buy-success w-full py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">\
+            ' + successButtonText + '\
+          </button>\
+        </div>\
+      </div>';
+    document.body.appendChild(successDesktopModal);
+
+    // Create mobile drawer
+    successMobileDrawer = document.createElement('div');
+    successMobileDrawer.className = 'buy-success-drawer fixed inset-x-0 bottom-0 z-[70] lg:hidden';
+    successMobileDrawer.setAttribute('role', 'dialog');
+    successMobileDrawer.setAttribute('aria-modal', 'true');
+    successMobileDrawer.innerHTML = '\
+      <div class="buy-success-drawer-content bg-white dark:bg-slate-900 rounded-t-[20px] shadow-2xl max-h-[85vh] flex flex-col">\
+        <div class="buy-success-drawer-handle flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing">\
+          <div class="w-12 h-1.5 bg-gray-300 dark:bg-slate-600 rounded-full"></div>\
+        </div>\
+        <div class="px-6 pb-4 border-b border-gray-100 dark:border-slate-700">\
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">' + successTitle + '</h3>\
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">' + successSubtitle + '</p>\
+        </div>\
+        <div class="p-6 text-center">\
+          <div class="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center">\
+            ' + successIconSvg + '\
+          </div>\
+          <p class="text-gray-600 dark:text-gray-300 mb-6">' + successMessage + '</p>\
+          <button type="button" class="close-buy-success w-full py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">\
+            ' + successButtonText + '\
+          </button>\
+        </div>\
+        <div class="h-6 bg-white dark:bg-slate-900"></div>\
+      </div>';
+    document.body.appendChild(successMobileDrawer);
+
+    successModalCreated = true;
+
+    // Initialize event listeners for success modal
+    initSuccessModalEventListeners();
+  }
+
+  /**
+   * Initialize success modal event listeners.
+   */
+  function initSuccessModalEventListeners() {
+    // Close button clicks
+    document.querySelectorAll('.close-buy-success').forEach(function(btn) {
+      btn.addEventListener('click', closeSuccessModal);
+    });
+
+    // Overlay click to close
+    if (successOverlay) {
+      successOverlay.addEventListener('click', closeSuccessModal);
+    }
+
+    // Desktop modal click outside content
+    if (successDesktopModal) {
+      successDesktopModal.addEventListener('click', function(e) {
+        if (e.target === successDesktopModal) {
+          closeSuccessModal();
+        }
+      });
+    }
+
+    // Mobile drawer drag to close
+    var handle = document.querySelector('.buy-success-drawer-handle');
+    if (handle) {
+      var startY = 0;
+      var currentY = 0;
+      var isDragging = false;
+      var drawer = handle.closest('.buy-success-drawer');
+
+      handle.addEventListener('touchstart', function(e) {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        if (drawer) drawer.classList.add('dragging');
+      }, { passive: true });
+
+      document.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+
+        currentY = e.touches[0].clientY;
+        var diff = currentY - startY;
+
+        if (diff > 0 && drawer) {
+          var drawerContent = drawer.querySelector('.buy-success-drawer-content');
+          if (drawerContent) drawerContent.style.transform = 'translateY(' + diff + 'px)';
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchend', function() {
+        if (!isDragging) return;
+
+        isDragging = false;
+        if (drawer) {
+          drawer.classList.remove('dragging');
+          var drawerContent = drawer.querySelector('.buy-success-drawer-content');
+          if (drawerContent) drawerContent.style.transform = '';
+        }
+
+        var diff = currentY - startY;
+        if (diff > 100) {
+          closeSuccessModal();
+        }
+      });
+    }
+  }
+
+  /**
+   * Show success modal.
+   */
+  function showSuccessModal() {
+    createSuccessModal();
+
+    if (successOverlay) successOverlay.classList.add('active');
+
+    if (window.innerWidth >= 1024) {
+      if (successDesktopModal) successDesktopModal.classList.add('active');
+    } else {
+      if (successMobileDrawer) successMobileDrawer.classList.add('active');
+      document.body.classList.add('drawer-scaled');
+    }
+
+    document.body.classList.add('drawer-open');
+  }
+
+  /**
+   * Close success modal.
+   */
+  function closeSuccessModal() {
+    if (successOverlay) successOverlay.classList.remove('active');
+    if (successDesktopModal) successDesktopModal.classList.remove('active');
+    if (successMobileDrawer) successMobileDrawer.classList.remove('active');
+    document.body.classList.remove('drawer-open', 'drawer-scaled');
+  }
+
+  /**
    * Initialize wishlist buttons.
    */
   function initWishlist() {
@@ -532,9 +780,9 @@
         e.preventDefault();
         e.stopPropagation();
 
-        const svg = this.querySelector('svg');
+        var svg = this.querySelector('svg');
         if (svg) {
-          const isActive = svg.getAttribute('fill') === 'currentColor';
+          var isActive = svg.getAttribute('fill') === 'currentColor';
 
           if (isActive) {
             svg.setAttribute('fill', 'none');
@@ -554,7 +802,7 @@
    * Initialize product carousel (Swiper integration).
    */
   function initProductCarousel() {
-    const productSwiper = document.querySelector('.product-swiper');
+    var productSwiper = document.querySelector('.product-swiper');
 
     if (!productSwiper || typeof Swiper === 'undefined') return;
 

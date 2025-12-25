@@ -11,3 +11,4 @@ dependencies:
   - drupal:file
   - drupal:taxonomy
   - drupal:options
+  - form_sender:form_sender

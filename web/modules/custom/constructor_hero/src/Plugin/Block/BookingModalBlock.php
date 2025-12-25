@@ -50,6 +50,9 @@ class BookingModalBlock extends BlockBase {
       'message_field_placeholder' => 'Tell us about your needs...',
       'message_field_required' => FALSE,
       'submit_button_text' => 'Submit Request',
+      'success_title' => 'Thank You!',
+      'success_message' => "We've received your request and will contact you shortly.",
+      'success_button_text' => 'Close',
     ] + parent::defaultConfiguration();
   }
 
@@ -345,6 +348,32 @@ class BookingModalBlock extends BlockBase {
       '#default_value' => $this->configuration['submit_button_text'],
     ];
 
+    // Success Message.
+    $form['success_section'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Success Message'),
+      '#open' => FALSE,
+    ];
+
+    $form['success_section']['success_title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Success title'),
+      '#default_value' => $this->configuration['success_title'],
+    ];
+
+    $form['success_section']['success_message'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Success message'),
+      '#default_value' => $this->configuration['success_message'],
+      '#rows' => 2,
+    ];
+
+    $form['success_section']['success_button_text'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Close button text'),
+      '#default_value' => $this->configuration['success_button_text'],
+    ];
+
     return $form;
   }
 
@@ -400,6 +429,12 @@ class BookingModalBlock extends BlockBase {
     // Submit Section.
     $submit_section = $form_state->getValue('submit_section');
     $this->configuration['submit_button_text'] = $submit_section['submit_button_text'];
+
+    // Success Section.
+    $success_section = $form_state->getValue('success_section');
+    $this->configuration['success_title'] = $success_section['success_title'];
+    $this->configuration['success_message'] = $success_section['success_message'];
+    $this->configuration['success_button_text'] = $success_section['success_button_text'];
   }
 
   /**
@@ -458,6 +493,14 @@ class BookingModalBlock extends BlockBase {
       ];
     }
 
+    // Build field requirements for validation.
+    $fieldRequirements = [];
+    foreach ($fields as $field) {
+      $fieldRequirements[$field['name']] = [
+        'required' => $field['required'],
+      ];
+    }
+
     return [
       '#theme' => 'booking_modal',
       '#title' => $this->configuration['modal_title'],
@@ -469,6 +512,15 @@ class BookingModalBlock extends BlockBase {
       '#attached' => [
         'library' => [
           'constructor_hero/booking-modal',
+        ],
+        'drupalSettings' => [
+          'bookingModal' => [
+            'successTitle' => $this->configuration['success_title'],
+            'successSubtitle' => $this->t('Your request has been received'),
+            'successMessage' => $this->configuration['success_message'],
+            'successButtonText' => $this->configuration['success_button_text'],
+            'fields' => $fieldRequirements,
+          ],
         ],
       ],
     ];
