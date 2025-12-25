@@ -1,0 +1,5 @@
+gallery.admin:
+  title: Gallery
+  route_name: gallery.admin
+  base_route: system.admin_content
+  weight: 15
