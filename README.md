@@ -34,6 +34,8 @@ A customizable Drupal 11 installation profile with a multi-step setup wizard for
   - **Constructor Hero**: Configurable Hero, What We Do, and Booking Modal blocks
   - **Form Sender**: Universal API for sending form data via Email and Telegram
   - **Contact Form**: Contact form block with configurable fields, map, and success modal
+  - **Gallery**: Image gallery with admin interface and PhotoSwipe lightbox
+  - **Pricing Plans**: Pricing plans with configurable block and Form Sender integration
 
 - **Pre-configured Core Modules**:
   - Pathauto: Automatic URL alias generation
@@ -139,8 +141,10 @@ constructor/
 │   │       ├── content_services/         # Services content type module
 │   │       ├── content_team/             # Team member content type module
 │   │       ├── form_sender/              # Form sending API (Email/Telegram)
+│   │       ├── gallery/                  # Image gallery with admin
 │   │       ├── language_switcher/        # Language switcher block
 │   │       ├── openai_provider/          # OpenAI integration
+│   │       ├── pricing_plans/            # Pricing plans block
 │   │       ├── simple_metatag/           # SEO module
 │   │       └── simple_sitemap_generator/ # Sitemap module
 │   ├── profiles/
@@ -222,6 +226,25 @@ Contact form block with:
 - Office address card with directions link
 - Success modal (desktop) / drawer (mobile) matching language switcher style
 - Pure JavaScript form submission via JSON API (no jQuery)
+
+### Gallery
+Image gallery module with:
+- Admin interface at `/admin/content/gallery` (tab under Content)
+- Add image form with managed file upload
+- Image list with thumbnails, alt text, date, delete button
+- **Gallery Block**: Configurable block with label, title, description, CTA button
+- Gallery page at `/gallery` with all images
+- PhotoSwipe lightbox integration for fullscreen viewing
+- Example images created during installation
+
+### Pricing Plans
+Pricing plans module with:
+- Pricing Plan content type (title, price, period, features, recommended flag)
+- **Pricing Block**: Configurable pricing cards display
+- Form Sender integration for plan selection
+- Success modal/drawer on form submission
+- Example plans (Basic, Pro, Enterprise) created during installation
+- Ukrainian translations included
 
 ### Language Switcher
 - Language selection modal (desktop)
