@@ -1,0 +1,228 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for gallery module.
+ */
+
+use Drupal\block\Entity\Block;
+use Drupal\file\Entity\File;
+
+/**
+ * Implements hook_install().
+ */
+function gallery_install() {
+  // Create example gallery images.
+  _gallery_create_example_images();
+
+  // Place Gallery Block on frontpage.
+  _gallery_place_frontpage_block();
+
+  // Add menu link.
+  _gallery_create_menu_link();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function gallery_uninstall() {
+  // Delete gallery config.
+  \Drupal::configFactory()->getEditable('gallery.settings')->delete();
+
+  // Delete gallery images from config.
+  $config = \Drupal::configFactory()->getEditable('gallery.images');
+  $images = $config->get('images') ?: [];
+
+  // Delete associated files.
+  foreach ($images as $image) {
+    if (!empty($image['fid'])) {
+      $file = File::load($image['fid']);
+      if ($file) {
+        $file->delete();
+      }
+    }
+  }
+
+  $config->delete();
+
+  // Delete menu link.
+  $menu_link_manager = \Drupal::service('plugin.manager.menu.link');
+  $menu_links = $menu_link_manager->loadLinksByRoute('gallery.page');
+  foreach ($menu_links as $menu_link) {
+    $menu_link->deleteLink();
+  }
+}
+
+/**
+ * Creates example gallery images.
+ */
+function _gallery_create_example_images() {
+  $images = [
+    [
+      'url' => 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1200&h=1200&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&h=400&fit=crop&q=80',
+      'alt' => 'House by the lake',
+      'width' => 1200,
+      'height' => 1200,
+    ],
+    [
+      'url' => 'https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=1200&h=1200&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=400&h=400&fit=crop&q=80',
+      'alt' => 'Modern architecture',
+      'width' => 1200,
+      'height' => 1200,
+    ],
+    [
+      'url' => 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=1200&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop&q=80',
+      'alt' => 'Spiral building in flowers',
+      'width' => 1200,
+      'height' => 1200,
+    ],
+    [
+      'url' => 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&h=1200&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=400&fit=crop&q=80',
+      'alt' => 'Interior with ocean view',
+      'width' => 1200,
+      'height' => 1200,
+    ],
+    [
+      'url' => 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=900&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop&q=80',
+      'alt' => 'Mountain landscape',
+      'width' => 1200,
+      'height' => 900,
+    ],
+    [
+      'url' => 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1200&h=900&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop&q=80',
+      'alt' => 'Futuristic architecture',
+      'width' => 1200,
+      'height' => 900,
+    ],
+    [
+      'url' => 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=1200&h=900&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=400&h=300&fit=crop&q=80',
+      'alt' => 'Light corridor',
+      'width' => 1200,
+      'height' => 900,
+    ],
+    [
+      'url' => 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=900&fit=crop&q=90',
+      'thumb' => 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop&q=80',
+      'alt' => 'Modern house exterior',
+      'width' => 1200,
+      'height' => 900,
+    ],
+  ];
+
+  $gallery_images = [];
+  foreach ($images as $index => $image) {
+    $gallery_images[] = [
+      'id' => 'gallery_' . ($index + 1),
+      'url' => $image['url'],
+      'thumb' => $image['thumb'],
+      'alt' => $image['alt'],
+      'width' => $image['width'],
+      'height' => $image['height'],
+      'fid' => NULL,
+      'created' => time(),
+    ];
+  }
+
+  // Save to config.
+  \Drupal::configFactory()
+    ->getEditable('gallery.images')
+    ->set('images', $gallery_images)
+    ->save();
+
+  \Drupal::messenger()->addMessage(t('Example gallery images have been created.'));
+}
+
+/**
+ * Places Gallery Block on frontpage.
+ */
+function _gallery_place_frontpage_block() {
+  // Check if the block module is available.
+  if (!\Drupal::moduleHandler()->moduleExists('block')) {
+    return;
+  }
+
+  // Get the default theme.
+  $default_theme = \Drupal::config('system.theme')->get('default') ?: 'constructor_theme';
+
+  // Check if block already exists.
+  $block_id = $default_theme . '_gallery_block';
+  if (Block::load($block_id)) {
+    return;
+  }
+
+  // Create the block placement.
+  $block = Block::create([
+    'id' => $block_id,
+    'theme' => $default_theme,
+    'region' => 'content',
+    'weight' => 20,
+    'plugin' => 'gallery_block',
+    'settings' => [
+      'id' => 'gallery_block',
+      'label' => 'Gallery',
+      'label_display' => '0',
+      'provider' => 'gallery',
+      'label_text' => 'Our Gallery',
+      'title' => "Explore the Gallery and\nSee the Future Unfold",
+      'description' => 'From sleek details to real-life moments of interaction, this gallery captures the essence of what makes the future feel real today.',
+      'button_text' => 'Explore the Gallery',
+      'button_url' => '/gallery',
+      'limit' => 8,
+    ],
+    'visibility' => [
+      'request_path' => [
+        'id' => 'request_path',
+        'negate' => FALSE,
+        'pages' => '<front>',
+      ],
+    ],
+  ]);
+
+  $block->save();
+
+  \Drupal::messenger()->addMessage(t('Gallery Block has been placed on the frontpage.'));
+}
+
+/**
+ * Creates gallery menu link.
+ */
+function _gallery_create_menu_link() {
+  $menu_link_manager = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+  // Check if link already exists.
+  $existing = $menu_link_manager->loadByProperties([
+    'link__uri' => 'internal:/gallery',
+    'menu_name' => 'main',
+  ]);
+
+  if (!empty($existing)) {
+    return;
+  }
+
+  // Create menu link.
+  $menu_link = $menu_link_manager->create([
+    'title' => 'Gallery',
+    'link' => ['uri' => 'internal:/gallery'],
+    'menu_name' => 'main',
+    'weight' => 5,
+    'expanded' => FALSE,
+  ]);
+  $menu_link->save();
+
+  \Drupal::messenger()->addMessage(t('Gallery menu link has been created.'));
+}
+
+/**
+ * Add Gallery Block to frontpage and create menu link.
+ */
+function gallery_update_10001() {
+  _gallery_place_frontpage_block();
+  _gallery_create_menu_link();
+}

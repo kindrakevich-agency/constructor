@@ -1,0 +1,5 @@
+gallery.admin.add:
+  route_name: gallery.admin.add
+  title: 'Add image'
+  appears_on:
+    - gallery.admin

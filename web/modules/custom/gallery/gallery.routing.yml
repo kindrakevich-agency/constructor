@@ -1,0 +1,37 @@
+gallery.page:
+  path: '/gallery'
+  defaults:
+    _controller: '\Drupal\gallery\Controller\GalleryController::page'
+    _title: 'Gallery'
+  requirements:
+    _permission: 'access content'
+
+gallery.admin:
+  path: '/admin/content/gallery'
+  defaults:
+    _controller: '\Drupal\gallery\Controller\GalleryAdminController::list'
+    _title: 'Gallery Images'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+gallery.admin.add:
+  path: '/admin/content/gallery/add'
+  defaults:
+    _form: '\Drupal\gallery\Form\GalleryImageForm'
+    _title: 'Add Gallery Image'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+gallery.admin.delete:
+  path: '/admin/content/gallery/delete/{id}'
+  defaults:
+    _form: '\Drupal\gallery\Form\GalleryImageDeleteForm'
+    _title: 'Delete Gallery Image'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

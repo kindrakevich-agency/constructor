@@ -1,0 +1,9 @@
+name: 'Gallery'
+type: module
+description: 'Provides a gallery with admin interface for managing images and a block for display.'
+core_version_requirement: ^10 || ^11
+package: Constructor
+dependencies:
+  - drupal:block
+  - drupal:file
+  - drupal:image

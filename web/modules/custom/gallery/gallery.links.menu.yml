@@ -1,0 +1,6 @@
+gallery.admin:
+  title: 'Gallery Images'
+  description: 'Manage gallery images.'
+  parent: system.admin_content
+  route_name: gallery.admin
+  weight: 10

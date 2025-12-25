@@ -1,0 +1,66 @@
+gallery.images:
+  type: config_object
+  label: 'Gallery images'
+  mapping:
+    images:
+      type: sequence
+      label: 'Images'
+      sequence:
+        type: mapping
+        label: 'Image'
+        mapping:
+          id:
+            type: string
+            label: 'Image ID'
+          url:
+            type: string
+            label: 'Image URL'
+          thumb:
+            type: string
+            label: 'Thumbnail URL'
+          alt:
+            type: string
+            label: 'Alt text'
+          width:
+            type: integer
+            label: 'Width'
+          height:
+            type: integer
+            label: 'Height'
+          fid:
+            type: integer
+            label: 'File ID'
+          created:
+            type: integer
+            label: 'Created timestamp'
+
+gallery.settings:
+  type: config_object
+  label: 'Gallery settings'
+  mapping:
+    default_limit:
+      type: integer
+      label: 'Default image limit'
+
+block.settings.gallery_block:
+  type: block_settings
+  label: 'Gallery block settings'
+  mapping:
+    label_text:
+      type: text
+      label: 'Label text'
+    title:
+      type: text
+      label: 'Title'
+    description:
+      type: text
+      label: 'Description'
+    button_text:
+      type: text
+      label: 'Button text'
+    button_url:
+      type: text
+      label: 'Button URL'
+    limit:
+      type: integer
+      label: 'Number of images'

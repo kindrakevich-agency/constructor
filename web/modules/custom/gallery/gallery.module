@@ -1,0 +1,115 @@
+<?php
+
+/**
+ * @file
+ * Contains gallery.module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function gallery_theme($existing, $type, $theme, $path) {
+  return [
+    'gallery_block' => [
+      'variables' => [
+        'label_text' => 'Our Gallery',
+        'title' => '',
+        'description' => '',
+        'button_text' => 'Explore the Gallery',
+        'button_url' => '/gallery',
+        'images' => [],
+      ],
+      'template' => 'gallery-block',
+      'path' => $path . '/templates',
+    ],
+    'gallery_page' => [
+      'variables' => [
+        'title' => 'Gallery',
+        'description' => '',
+        'images' => [],
+      ],
+      'template' => 'gallery-page',
+      'path' => $path . '/templates',
+    ],
+    'gallery_admin' => [
+      'variables' => [
+        'images' => [],
+      ],
+      'template' => 'gallery-admin',
+      'path' => $path . '/templates',
+    ],
+  ];
+}
+
+/**
+ * Get all gallery images.
+ *
+ * @return array
+ *   Array of gallery images.
+ */
+function gallery_get_images() {
+  $config = \Drupal::config('gallery.images');
+  $images = $config->get('images') ?: [];
+
+  // Sort by created date descending.
+  usort($images, function ($a, $b) {
+    return ($b['created'] ?? 0) - ($a['created'] ?? 0);
+  });
+
+  return $images;
+}
+
+/**
+ * Add a gallery image.
+ *
+ * @param array $image
+ *   Image data array.
+ *
+ * @return string
+ *   The image ID.
+ */
+function gallery_add_image(array $image) {
+  $config = \Drupal::configFactory()->getEditable('gallery.images');
+  $images = $config->get('images') ?: [];
+
+  $id = 'gallery_' . time() . '_' . rand(1000, 9999);
+  $image['id'] = $id;
+  $image['created'] = time();
+
+  $images[] = $image;
+  $config->set('images', $images)->save();
+
+  return $id;
+}
+
+/**
+ * Delete a gallery image.
+ *
+ * @param string $id
+ *   The image ID.
+ *
+ * @return bool
+ *   TRUE if deleted, FALSE otherwise.
+ */
+function gallery_delete_image($id) {
+  $config = \Drupal::configFactory()->getEditable('gallery.images');
+  $images = $config->get('images') ?: [];
+
+  foreach ($images as $index => $image) {
+    if ($image['id'] === $id) {
+      // Delete associated file if exists.
+      if (!empty($image['fid'])) {
+        $file = \Drupal\file\Entity\File::load($image['fid']);
+        if ($file) {
+          $file->delete();
+        }
+      }
+
+      unset($images[$index]);
+      $config->set('images', array_values($images))->save();
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}

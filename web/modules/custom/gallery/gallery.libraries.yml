@@ -1,0 +1,7 @@
+gallery:
+  version: 1.x
+  js:
+    js/gallery.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
