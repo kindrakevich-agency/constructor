@@ -8,6 +8,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -43,13 +44,21 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
   protected $configFactory;
 
   /**
+   * The file URL generator.
+   *
+   * @var \Drupal\file\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
    * Constructs a new ProductsListBlock instance.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager, ConfigFactoryInterface $config_factory, FileUrlGeneratorInterface $file_url_generator) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->languageManager = $language_manager;
     $this->configFactory = $config_factory;
+    $this->fileUrlGenerator = $file_url_generator;
   }
 
   /**
@@ -62,7 +71,8 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
       $plugin_definition,
       $container->get('entity_type.manager'),
       $container->get('language_manager'),
-      $container->get('config.factory')
+      $container->get('config.factory'),
+      $container->get('file_url_generator')
     );
   }
 
@@ -76,14 +86,17 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
       'hero_image' => '',
       'hero_cta_text' => 'Explore the Collection',
       'hero_cta_url' => '/products',
+      'hero_products' => [],
       'feature_card_1_title' => 'Laid-Back Luxe',
       'feature_card_1_subtitle' => 'Comfort meets effortless style',
       'feature_card_1_image' => '',
       'feature_card_1_url' => '/products',
+      'feature_card_1_products' => [],
       'feature_card_2_title' => 'Everyday Cool',
       'feature_card_2_subtitle' => 'Relaxed fits for work, play, and everything in between.',
       'feature_card_2_image' => '',
       'feature_card_2_url' => '/products',
+      'feature_card_2_products' => [],
       'products_title' => 'Trending Now – Step Into Style',
       'limit' => 8,
     ] + parent::defaultConfiguration();
@@ -93,9 +106,10 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
    * {@inheritdoc}
    */
   public function blockForm($form, FormStateInterface $form_state) {
+    // Hero Banner Section.
     $form['hero'] = [
       '#type' => 'details',
-      '#title' => $this->t('Hero Banner'),
+      '#title' => $this->t('Hero Banner - "Find your Color"'),
       '#open' => TRUE,
     ];
 
@@ -103,6 +117,7 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
       '#type' => 'textfield',
       '#title' => $this->t('Hero Title'),
       '#default_value' => $this->configuration['hero_title'],
+      '#description' => $this->t('Use line breaks for multi-line titles.'),
     ];
 
     $form['hero']['hero_subtitle'] = [
@@ -112,11 +127,23 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
       '#rows' => 2,
     ];
 
+    $form['hero']['hero_products'] = [
+      '#type' => 'entity_autocomplete',
+      '#title' => $this->t('Featured Products'),
+      '#target_type' => 'node',
+      '#selection_settings' => [
+        'target_bundles' => ['product'],
+      ],
+      '#tags' => TRUE,
+      '#default_value' => $this->getProductEntities($this->configuration['hero_products']),
+      '#description' => $this->t('Select products to feature in the hero banner. First product image will be used as hero image if no custom image is set.'),
+    ];
+
     $form['hero']['hero_image'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Hero Image URL'),
+      '#title' => $this->t('Hero Image URL (override)'),
       '#default_value' => $this->configuration['hero_image'],
-      '#description' => $this->t('External image URL for hero banner.'),
+      '#description' => $this->t('External image URL. Leave empty to use first selected product image.'),
     ];
 
     $form['hero']['hero_cta_text'] = [
@@ -131,63 +158,98 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
       '#default_value' => $this->configuration['hero_cta_url'],
     ];
 
-    $form['feature_cards'] = [
+    // Feature Card 1 Section.
+    $form['feature_card_1'] = [
       '#type' => 'details',
-      '#title' => $this->t('Feature Cards'),
+      '#title' => $this->t('Feature Card 1 - "Laid-Back Luxe"'),
       '#open' => FALSE,
     ];
 
-    $form['feature_cards']['feature_card_1_title'] = [
+    $form['feature_card_1']['feature_card_1_title'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Card 1 Title'),
+      '#title' => $this->t('Card Title'),
       '#default_value' => $this->configuration['feature_card_1_title'],
     ];
 
-    $form['feature_cards']['feature_card_1_subtitle'] = [
+    $form['feature_card_1']['feature_card_1_subtitle'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Card 1 Subtitle'),
+      '#title' => $this->t('Card Subtitle'),
       '#default_value' => $this->configuration['feature_card_1_subtitle'],
     ];
 
-    $form['feature_cards']['feature_card_1_image'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Card 1 Image URL'),
-      '#default_value' => $this->configuration['feature_card_1_image'],
+    $form['feature_card_1']['feature_card_1_products'] = [
+      '#type' => 'entity_autocomplete',
+      '#title' => $this->t('Featured Products'),
+      '#target_type' => 'node',
+      '#selection_settings' => [
+        'target_bundles' => ['product'],
+      ],
+      '#tags' => TRUE,
+      '#default_value' => $this->getProductEntities($this->configuration['feature_card_1_products']),
+      '#description' => $this->t('Select products to feature. First product image will be used as card image if no custom image is set.'),
     ];
 
-    $form['feature_cards']['feature_card_1_url'] = [
+    $form['feature_card_1']['feature_card_1_image'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Card 1 URL'),
+      '#title' => $this->t('Card Image URL (override)'),
+      '#default_value' => $this->configuration['feature_card_1_image'],
+      '#description' => $this->t('Leave empty to use first selected product image.'),
+    ];
+
+    $form['feature_card_1']['feature_card_1_url'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Card URL'),
       '#default_value' => $this->configuration['feature_card_1_url'],
     ];
 
-    $form['feature_cards']['feature_card_2_title'] = [
+    // Feature Card 2 Section.
+    $form['feature_card_2'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Feature Card 2 - "Everyday Cool"'),
+      '#open' => FALSE,
+    ];
+
+    $form['feature_card_2']['feature_card_2_title'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Card 2 Title'),
+      '#title' => $this->t('Card Title'),
       '#default_value' => $this->configuration['feature_card_2_title'],
     ];
 
-    $form['feature_cards']['feature_card_2_subtitle'] = [
+    $form['feature_card_2']['feature_card_2_subtitle'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Card 2 Subtitle'),
+      '#title' => $this->t('Card Subtitle'),
       '#default_value' => $this->configuration['feature_card_2_subtitle'],
     ];
 
-    $form['feature_cards']['feature_card_2_image'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Card 2 Image URL'),
-      '#default_value' => $this->configuration['feature_card_2_image'],
+    $form['feature_card_2']['feature_card_2_products'] = [
+      '#type' => 'entity_autocomplete',
+      '#title' => $this->t('Featured Products'),
+      '#target_type' => 'node',
+      '#selection_settings' => [
+        'target_bundles' => ['product'],
+      ],
+      '#tags' => TRUE,
+      '#default_value' => $this->getProductEntities($this->configuration['feature_card_2_products']),
+      '#description' => $this->t('Select products to feature. First product image will be used as card image if no custom image is set.'),
     ];
 
-    $form['feature_cards']['feature_card_2_url'] = [
+    $form['feature_card_2']['feature_card_2_image'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Card 2 URL'),
+      '#title' => $this->t('Card Image URL (override)'),
+      '#default_value' => $this->configuration['feature_card_2_image'],
+      '#description' => $this->t('Leave empty to use first selected product image.'),
+    ];
+
+    $form['feature_card_2']['feature_card_2_url'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Card URL'),
       '#default_value' => $this->configuration['feature_card_2_url'],
     ];
 
+    // Products Grid Section.
     $form['products'] = [
       '#type' => 'details',
-      '#title' => $this->t('Products'),
+      '#title' => $this->t('Products Grid'),
       '#open' => TRUE,
     ];
 
@@ -209,24 +271,69 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
   }
 
   /**
+   * Get product entities from stored IDs.
+   */
+  protected function getProductEntities(array $product_ids) {
+    if (empty($product_ids)) {
+      return NULL;
+    }
+    return $this->entityTypeManager->getStorage('node')->loadMultiple($product_ids);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
+    // Hero Banner.
     $this->configuration['hero_title'] = $form_state->getValue(['hero', 'hero_title']);
     $this->configuration['hero_subtitle'] = $form_state->getValue(['hero', 'hero_subtitle']);
     $this->configuration['hero_image'] = $form_state->getValue(['hero', 'hero_image']);
     $this->configuration['hero_cta_text'] = $form_state->getValue(['hero', 'hero_cta_text']);
     $this->configuration['hero_cta_url'] = $form_state->getValue(['hero', 'hero_cta_url']);
-    $this->configuration['feature_card_1_title'] = $form_state->getValue(['feature_cards', 'feature_card_1_title']);
-    $this->configuration['feature_card_1_subtitle'] = $form_state->getValue(['feature_cards', 'feature_card_1_subtitle']);
-    $this->configuration['feature_card_1_image'] = $form_state->getValue(['feature_cards', 'feature_card_1_image']);
-    $this->configuration['feature_card_1_url'] = $form_state->getValue(['feature_cards', 'feature_card_1_url']);
-    $this->configuration['feature_card_2_title'] = $form_state->getValue(['feature_cards', 'feature_card_2_title']);
-    $this->configuration['feature_card_2_subtitle'] = $form_state->getValue(['feature_cards', 'feature_card_2_subtitle']);
-    $this->configuration['feature_card_2_image'] = $form_state->getValue(['feature_cards', 'feature_card_2_image']);
-    $this->configuration['feature_card_2_url'] = $form_state->getValue(['feature_cards', 'feature_card_2_url']);
+    $this->configuration['hero_products'] = $this->extractProductIds($form_state->getValue(['hero', 'hero_products']));
+
+    // Feature Card 1.
+    $this->configuration['feature_card_1_title'] = $form_state->getValue(['feature_card_1', 'feature_card_1_title']);
+    $this->configuration['feature_card_1_subtitle'] = $form_state->getValue(['feature_card_1', 'feature_card_1_subtitle']);
+    $this->configuration['feature_card_1_image'] = $form_state->getValue(['feature_card_1', 'feature_card_1_image']);
+    $this->configuration['feature_card_1_url'] = $form_state->getValue(['feature_card_1', 'feature_card_1_url']);
+    $this->configuration['feature_card_1_products'] = $this->extractProductIds($form_state->getValue(['feature_card_1', 'feature_card_1_products']));
+
+    // Feature Card 2.
+    $this->configuration['feature_card_2_title'] = $form_state->getValue(['feature_card_2', 'feature_card_2_title']);
+    $this->configuration['feature_card_2_subtitle'] = $form_state->getValue(['feature_card_2', 'feature_card_2_subtitle']);
+    $this->configuration['feature_card_2_image'] = $form_state->getValue(['feature_card_2', 'feature_card_2_image']);
+    $this->configuration['feature_card_2_url'] = $form_state->getValue(['feature_card_2', 'feature_card_2_url']);
+    $this->configuration['feature_card_2_products'] = $this->extractProductIds($form_state->getValue(['feature_card_2', 'feature_card_2_products']));
+
+    // Products Grid.
     $this->configuration['products_title'] = $form_state->getValue(['products', 'products_title']);
     $this->configuration['limit'] = $form_state->getValue(['products', 'limit']);
+  }
+
+  /**
+   * Extract product IDs from entity autocomplete value.
+   */
+  protected function extractProductIds($value) {
+    if (empty($value)) {
+      return [];
+    }
+    if (is_array($value)) {
+      $ids = [];
+      foreach ($value as $item) {
+        if (is_array($item) && isset($item['target_id'])) {
+          $ids[] = $item['target_id'];
+        }
+        elseif (is_object($item)) {
+          $ids[] = $item->id();
+        }
+        elseif (is_numeric($item)) {
+          $ids[] = (int) $item;
+        }
+      }
+      return $ids;
+    }
+    return [];
   }
 
   /**
@@ -252,21 +359,62 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
     $nids = $query->execute();
     $products = $this->loadProducts($nids, $current_langcode, $currency_symbol);
 
+    // Get hero image from products or fallback.
+    $hero_image = $this->configuration['hero_image'];
+    $hero_products = [];
+    if (!empty($this->configuration['hero_products'])) {
+      $hero_products = $this->loadBannerProducts($this->configuration['hero_products'], $current_langcode, $currency_symbol);
+      if (empty($hero_image) && !empty($hero_products)) {
+        $hero_image = $hero_products[0]['image_url'] ?? NULL;
+      }
+    }
+    if (empty($hero_image)) {
+      $hero_image = 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&h=400&fit=crop&q=80';
+    }
+
+    // Get feature card 1 image from products or fallback.
+    $feature_card_1_image = $this->configuration['feature_card_1_image'];
+    $feature_card_1_products = [];
+    if (!empty($this->configuration['feature_card_1_products'])) {
+      $feature_card_1_products = $this->loadBannerProducts($this->configuration['feature_card_1_products'], $current_langcode, $currency_symbol);
+      if (empty($feature_card_1_image) && !empty($feature_card_1_products)) {
+        $feature_card_1_image = $feature_card_1_products[0]['image_url'] ?? NULL;
+      }
+    }
+    if (empty($feature_card_1_image)) {
+      $feature_card_1_image = 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=350&fit=crop&q=80';
+    }
+
+    // Get feature card 2 image from products or fallback.
+    $feature_card_2_image = $this->configuration['feature_card_2_image'];
+    $feature_card_2_products = [];
+    if (!empty($this->configuration['feature_card_2_products'])) {
+      $feature_card_2_products = $this->loadBannerProducts($this->configuration['feature_card_2_products'], $current_langcode, $currency_symbol);
+      if (empty($feature_card_2_image) && !empty($feature_card_2_products)) {
+        $feature_card_2_image = $feature_card_2_products[0]['image_url'] ?? NULL;
+      }
+    }
+    if (empty($feature_card_2_image)) {
+      $feature_card_2_image = 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=350&fit=crop&q=80';
+    }
+
     // Build feature cards.
     $feature_cards = [
       [
         'title' => $this->configuration['feature_card_1_title'],
         'subtitle' => $this->configuration['feature_card_1_subtitle'],
-        'image' => $this->configuration['feature_card_1_image'] ?: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=350&fit=crop&q=80',
+        'image' => $feature_card_1_image,
         'url' => $this->configuration['feature_card_1_url'],
         'gradient' => 'from-rose-100 to-rose-200 dark:from-rose-900/30 dark:to-rose-800/30',
+        'products' => $feature_card_1_products,
       ],
       [
         'title' => $this->configuration['feature_card_2_title'],
         'subtitle' => $this->configuration['feature_card_2_subtitle'],
-        'image' => $this->configuration['feature_card_2_image'] ?: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=350&fit=crop&q=80',
+        'image' => $feature_card_2_image,
         'url' => $this->configuration['feature_card_2_url'],
         'gradient' => 'from-sky-100 to-sky-200 dark:from-sky-900/30 dark:to-sky-800/30',
+        'products' => $feature_card_2_products,
       ],
     ];
 
@@ -274,9 +422,10 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
       '#theme' => 'products_list_block',
       '#hero_title' => $this->configuration['hero_title'],
       '#hero_subtitle' => $this->configuration['hero_subtitle'],
-      '#hero_image' => $this->configuration['hero_image'] ?: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&h=400&fit=crop&q=80',
+      '#hero_image' => $hero_image,
       '#hero_cta_text' => $this->configuration['hero_cta_text'],
       '#hero_cta_url' => $this->configuration['hero_cta_url'],
+      '#hero_products' => $hero_products,
       '#feature_cards' => $feature_cards,
       '#products_title' => $this->configuration['products_title'],
       '#categories' => $categories,
@@ -292,6 +441,52 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
         'contexts' => ['languages:language_content'],
       ],
     ];
+  }
+
+  /**
+   * Load banner products with their data.
+   */
+  protected function loadBannerProducts(array $product_ids, $langcode, $currency_symbol) {
+    $products = [];
+    if (empty($product_ids)) {
+      return $products;
+    }
+
+    $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($product_ids);
+    foreach ($nodes as $node) {
+      if ($node->bundle() !== 'product' || !$node->isPublished()) {
+        continue;
+      }
+
+      if ($node->hasTranslation($langcode)) {
+        $node = $node->getTranslation($langcode);
+      }
+
+      // Get first image.
+      $image_url = NULL;
+      if ($node->hasField('field_product_images')) {
+        $images = $node->get('field_product_images')->referencedEntities();
+        if (!empty($images)) {
+          $image_url = $this->fileUrlGenerator->generateAbsoluteString($images[0]->getFileUri());
+        }
+      }
+
+      $price = $node->get('field_product_price')->value ?? 0;
+      $sale_price = $node->get('field_product_sale_price')->value;
+
+      $products[] = [
+        'id' => $node->id(),
+        'title' => $node->getTitle(),
+        'url' => $node->toUrl()->toString(),
+        'image_url' => $image_url,
+        'price' => $price,
+        'sale_price' => $sale_price,
+        'formatted_price' => $currency_symbol . number_format((float) $price, 2),
+        'formatted_sale_price' => $sale_price ? $currency_symbol . number_format((float) $sale_price, 2) : NULL,
+      ];
+    }
+
+    return $products;
   }
 
   /**
@@ -332,7 +527,7 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
       $image_url = NULL;
       $images = $node->get('field_product_images')->referencedEntities();
       if (!empty($images)) {
-        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($images[0]->getFileUri());
+        $image_url = $this->fileUrlGenerator->generateAbsoluteString($images[0]->getFileUri());
       }
 
       // Get category.

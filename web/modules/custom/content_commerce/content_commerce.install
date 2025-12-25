@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for content_commerce module.
  */
 
+use Drupal\block\Entity\Block;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\NodeType;
@@ -30,6 +31,9 @@ function content_commerce_install() {
 
   // Set default commerce configuration.
   _content_commerce_set_default_config();
+
+  // Place Products List Block on frontpage.
+  _content_commerce_place_frontpage_block();
 }
 
 /**
@@ -411,4 +415,74 @@ function _content_commerce_set_default_config() {
   $config->set('default_colors', 'Black:#1f2937,Green:#059669,Gold:#fcd34d,Pink:#f9a8d4,Gray:#9ca3af');
   $config->set('default_sizes', 'Small,Medium,Large,XL,XXL');
   $config->save();
+}
+
+/**
+ * Places Products List Block on frontpage.
+ */
+function _content_commerce_place_frontpage_block() {
+  // Check if the block module is available.
+  if (!\Drupal::moduleHandler()->moduleExists('block')) {
+    return;
+  }
+
+  // Get the default theme.
+  $default_theme = \Drupal::config('system.theme')->get('default') ?: 'constructor_theme';
+
+  // Check if block already exists.
+  $block_id = $default_theme . '_products_list_block';
+  if (Block::load($block_id)) {
+    return;
+  }
+
+  // Create the block placement.
+  $block = Block::create([
+    'id' => $block_id,
+    'theme' => $default_theme,
+    'region' => 'content',
+    'weight' => 10,
+    'plugin' => 'products_list_block',
+    'settings' => [
+      'id' => 'products_list_block',
+      'label' => 'Products Collection',
+      'label_display' => '0',
+      'provider' => 'content_commerce',
+      'hero_title' => "Find your Color,\nOwn the Season",
+      'hero_subtitle' => 'From sunrise to sunset — looks made for every summer moment.',
+      'hero_image' => '',
+      'hero_cta_text' => 'Explore the Collection',
+      'hero_cta_url' => '/products',
+      'hero_products' => [],
+      'feature_card_1_title' => 'Laid-Back Luxe',
+      'feature_card_1_subtitle' => 'Comfort meets effortless style',
+      'feature_card_1_image' => '',
+      'feature_card_1_url' => '/products',
+      'feature_card_1_products' => [],
+      'feature_card_2_title' => 'Everyday Cool',
+      'feature_card_2_subtitle' => 'Relaxed fits for work, play, and everything in between.',
+      'feature_card_2_image' => '',
+      'feature_card_2_url' => '/products',
+      'feature_card_2_products' => [],
+      'products_title' => 'Trending Now – Step Into Style',
+      'limit' => 8,
+    ],
+    'visibility' => [
+      'request_path' => [
+        'id' => 'request_path',
+        'negate' => FALSE,
+        'pages' => '<front>',
+      ],
+    ],
+  ]);
+
+  $block->save();
+
+  \Drupal::messenger()->addMessage(t('Products List Block has been placed on the frontpage.'));
+}
+
+/**
+ * Add Products List Block with product selection to frontpage.
+ */
+function content_commerce_update_10001() {
+  _content_commerce_place_frontpage_block();
 }
