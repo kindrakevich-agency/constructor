@@ -517,6 +517,11 @@ function constructor_translate_content_batch(&$install_state) {
     return !empty($langcode) && $langcode !== $default_language;
   });
 
+  // Translate menu items (doesn't require AI, just predefined translations).
+  if (!empty($additional_languages)) {
+    $operations[] = ['constructor_batch_translate_menus', [$constructor_settings]];
+  }
+
   // Only add translation operations if we have API key and additional languages.
   if (!empty($ai_settings['api_key']) && !empty($additional_languages)) {
     // Each content type gets its own batch operation.
@@ -2100,6 +2105,9 @@ function constructor_batch_configure_theme_settings($constructor_settings, &$con
 
 /**
  * Batch operation: Create main menu links.
+ *
+ * Note: Menu translations are handled separately by constructor_batch_translate_menus()
+ * which runs after content_translation module is installed.
  */
 function constructor_batch_create_main_menu($constructor_settings, &$context) {
   $context['message'] = t('Creating main menu links...');
@@ -2111,7 +2119,7 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
 
     // Create Home link.
     $home_link = $menu_link_storage->create([
-      'title' => t('Home'),
+      'title' => 'Home',
       'link' => ['uri' => 'internal:/'],
       'menu_name' => 'main',
       'weight' => -10,
@@ -2123,7 +2131,7 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
     // Create FAQ link if FAQ module is enabled.
     if (in_array('content_faq', $content_type_modules)) {
       $faq_link = $menu_link_storage->create([
-        'title' => t('FAQ'),
+        'title' => 'FAQ',
         'link' => ['uri' => 'internal:/faq'],
         'menu_name' => 'main',
         'weight' => 0,
@@ -2136,7 +2144,7 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
     // Create Team link if Team module is enabled.
     if (in_array('content_team', $content_type_modules)) {
       $team_link = $menu_link_storage->create([
-        'title' => t('Team'),
+        'title' => 'Team',
         'link' => ['uri' => 'internal:/team'],
         'menu_name' => 'main',
         'weight' => 5,
@@ -2149,7 +2157,7 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
     // Create Services link if Services module is enabled.
     if (in_array('content_services', $content_type_modules)) {
       $services_link = $menu_link_storage->create([
-        'title' => t('Services'),
+        'title' => 'Services',
         'link' => ['uri' => 'internal:/services'],
         'menu_name' => 'main',
         'weight' => 6,
@@ -2162,7 +2170,7 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
     // Create Articles link if Article module is enabled.
     if (in_array('content_article', $content_type_modules)) {
       $articles_link = $menu_link_storage->create([
-        'title' => t('Articles'),
+        'title' => 'Articles',
         'link' => ['uri' => 'internal:/articles'],
         'menu_name' => 'main',
         'weight' => 7,
@@ -2175,7 +2183,7 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
     // Create Products link if Commerce module is enabled.
     if (in_array('content_commerce', $content_type_modules)) {
       $products_link = $menu_link_storage->create([
-        'title' => t('Products'),
+        'title' => 'Products',
         'link' => ['uri' => 'internal:/products'],
         'menu_name' => 'main',
         'weight' => 8,
@@ -2186,11 +2194,10 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
     }
 
     // Note: Block placement skipped during installation to avoid entity type issues.
-    // Main menu and branding blocks will be available via Block Layout UI.
     \Drupal::logger('constructor')->notice('Block placement skipped during installation.');
 
-    // Create footer menu links.
-    _constructor_create_footer_menu($menu_link_storage);
+    // Create footer menu links (translations handled separately).
+    _constructor_create_footer_menu_simple($menu_link_storage);
   }
   catch (\Exception $e) {
     \Drupal::logger('constructor')->error('Failed to create main menu links: @message', ['@message' => $e->getMessage()]);
@@ -2200,12 +2207,12 @@ function constructor_batch_create_main_menu($constructor_settings, &$context) {
 }
 
 /**
- * Create footer menu links with parent sections.
+ * Create footer menu links with parent sections (simple version without translations).
  *
  * @param \Drupal\Core\Entity\EntityStorageInterface $menu_link_storage
  *   The menu link content storage.
  */
-function _constructor_create_footer_menu($menu_link_storage) {
+function _constructor_create_footer_menu_simple($menu_link_storage) {
   $footer_sections = [
     'Product' => [
       'weight' => 0,
@@ -2247,7 +2254,7 @@ function _constructor_create_footer_menu($menu_link_storage) {
   foreach ($footer_sections as $section_title => $section_data) {
     // Create parent menu item.
     $parent_link = $menu_link_storage->create([
-      'title' => t($section_title),
+      'title' => $section_title,
       'link' => ['uri' => 'internal:/'],
       'menu_name' => 'footer',
       'weight' => $section_data['weight'],
@@ -2260,7 +2267,7 @@ function _constructor_create_footer_menu($menu_link_storage) {
     // Create child menu items.
     foreach ($section_data['items'] as $item_title => $item_weight) {
       $child_link = $menu_link_storage->create([
-        'title' => t($item_title),
+        'title' => $item_title,
         'link' => ['uri' => 'internal:/'],
         'menu_name' => 'footer',
         'parent' => 'menu_link_content:' . $parent_uuid,
@@ -2268,6 +2275,488 @@ function _constructor_create_footer_menu($menu_link_storage) {
         'expanded' => FALSE,
       ]);
       $child_link->save();
+    }
+  }
+
+  \Drupal::logger('constructor')->notice('Created footer menu links.');
+}
+
+/**
+ * Enable translation for menu_link_content entity type.
+ */
+function _constructor_enable_menu_translation() {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping menu translation setup.');
+    return FALSE;
+  }
+
+  // Check if language module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('language')) {
+    \Drupal::logger('constructor')->notice('Language module not enabled, skipping menu translation setup.');
+    return FALSE;
+  }
+
+  try {
+    // Enable translation for menu_link_content.
+    $config = \Drupal::configFactory()->getEditable('language.content_settings.menu_link_content.menu_link_content');
+    $config->set('id', 'menu_link_content.menu_link_content');
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'menu_link_content');
+    $config->set('target_bundle', 'menu_link_content');
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for menu_link_content.');
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable menu translation: @message', ['@message' => $e->getMessage()]);
+    return FALSE;
+  }
+}
+
+/**
+ * Batch operation: Translate menu items.
+ */
+function constructor_batch_translate_menus($constructor_settings, &$context) {
+  $context['message'] = t('Translating menu items...');
+
+  $languages = $constructor_settings['languages'] ?? [];
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+
+  // Filter additional languages.
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages)) {
+    $context['results'][] = 'menu_translation_skipped';
+    return;
+  }
+
+  // Enable menu translation first.
+  _constructor_enable_menu_translation();
+
+  // Main menu translations.
+  $main_menu_translations = [
+    'Home' => [
+      'uk' => 'Головна',
+      'de' => 'Startseite',
+      'fr' => 'Accueil',
+      'es' => 'Inicio',
+      'pl' => 'Strona główna',
+      'it' => 'Home',
+      'pt' => 'Início',
+      'nl' => 'Home',
+      'cs' => 'Domů',
+      'sk' => 'Domov',
+    ],
+    'FAQ' => [
+      'uk' => 'Питання та відповіді',
+      'de' => 'FAQ',
+      'fr' => 'FAQ',
+      'es' => 'Preguntas frecuentes',
+      'pl' => 'FAQ',
+      'it' => 'FAQ',
+      'pt' => 'Perguntas frequentes',
+      'nl' => 'FAQ',
+      'cs' => 'Časté dotazy',
+      'sk' => 'Časté otázky',
+    ],
+    'Team' => [
+      'uk' => 'Команда',
+      'de' => 'Team',
+      'fr' => 'Équipe',
+      'es' => 'Equipo',
+      'pl' => 'Zespół',
+      'it' => 'Team',
+      'pt' => 'Equipe',
+      'nl' => 'Team',
+      'cs' => 'Tým',
+      'sk' => 'Tím',
+    ],
+    'Services' => [
+      'uk' => 'Послуги',
+      'de' => 'Dienstleistungen',
+      'fr' => 'Services',
+      'es' => 'Servicios',
+      'pl' => 'Usługi',
+      'it' => 'Servizi',
+      'pt' => 'Serviços',
+      'nl' => 'Diensten',
+      'cs' => 'Služby',
+      'sk' => 'Služby',
+    ],
+    'Articles' => [
+      'uk' => 'Статті',
+      'de' => 'Artikel',
+      'fr' => 'Articles',
+      'es' => 'Artículos',
+      'pl' => 'Artykuły',
+      'it' => 'Articoli',
+      'pt' => 'Artigos',
+      'nl' => 'Artikelen',
+      'cs' => 'Články',
+      'sk' => 'Články',
+    ],
+    'Products' => [
+      'uk' => 'Продукти',
+      'de' => 'Produkte',
+      'fr' => 'Produits',
+      'es' => 'Productos',
+      'pl' => 'Produkty',
+      'it' => 'Prodotti',
+      'pt' => 'Produtos',
+      'nl' => 'Producten',
+      'cs' => 'Produkty',
+      'sk' => 'Produkty',
+    ],
+    'Gallery' => [
+      'uk' => 'Галерея',
+      'de' => 'Galerie',
+      'fr' => 'Galerie',
+      'es' => 'Galería',
+      'pl' => 'Galeria',
+      'it' => 'Galleria',
+      'pt' => 'Galeria',
+      'nl' => 'Galerij',
+      'cs' => 'Galerie',
+      'sk' => 'Galéria',
+    ],
+  ];
+
+  // Footer menu translations.
+  $footer_translations = [
+    'Product' => ['uk' => 'Продукт', 'de' => 'Produkt', 'fr' => 'Produit', 'es' => 'Producto', 'pl' => 'Produkt'],
+    'Features' => ['uk' => 'Можливості', 'de' => 'Funktionen', 'fr' => 'Fonctionnalités', 'es' => 'Características', 'pl' => 'Funkcje'],
+    'Integrations' => ['uk' => 'Інтеграції', 'de' => 'Integrationen', 'fr' => 'Intégrations', 'es' => 'Integraciones', 'pl' => 'Integracje'],
+    'Pricing' => ['uk' => 'Ціни', 'de' => 'Preise', 'fr' => 'Tarifs', 'es' => 'Precios', 'pl' => 'Cennik'],
+    'Changelog' => ['uk' => 'Журнал змін', 'de' => 'Änderungsprotokoll', 'fr' => 'Journal des modifications', 'es' => 'Registro de cambios', 'pl' => 'Dziennik zmian'],
+    'Company' => ['uk' => 'Компанія', 'de' => 'Unternehmen', 'fr' => 'Entreprise', 'es' => 'Empresa', 'pl' => 'Firma'],
+    'About us' => ['uk' => 'Про нас', 'de' => 'Über uns', 'fr' => 'À propos', 'es' => 'Sobre nosotros', 'pl' => 'O nas'],
+    'Blog' => ['uk' => 'Блог', 'de' => 'Blog', 'fr' => 'Blog', 'es' => 'Blog', 'pl' => 'Blog'],
+    'Careers' => ['uk' => "Кар'єра", 'de' => 'Karriere', 'fr' => 'Carrières', 'es' => 'Carreras', 'pl' => 'Kariera'],
+    'Press' => ['uk' => 'Преса', 'de' => 'Presse', 'fr' => 'Presse', 'es' => 'Prensa', 'pl' => 'Prasa'],
+    'Resources' => ['uk' => 'Ресурси', 'de' => 'Ressourcen', 'fr' => 'Ressources', 'es' => 'Recursos', 'pl' => 'Zasoby'],
+    'Documentation' => ['uk' => 'Документація', 'de' => 'Dokumentation', 'fr' => 'Documentation', 'es' => 'Documentación', 'pl' => 'Dokumentacja'],
+    'Help Center' => ['uk' => 'Центр допомоги', 'de' => 'Hilfezentrum', 'fr' => "Centre d'aide", 'es' => 'Centro de ayuda', 'pl' => 'Centrum pomocy'],
+    'Contact' => ['uk' => 'Контакти', 'de' => 'Kontakt', 'fr' => 'Contact', 'es' => 'Contacto', 'pl' => 'Kontakt'],
+    'Status' => ['uk' => 'Статус', 'de' => 'Status', 'fr' => 'Statut', 'es' => 'Estado', 'pl' => 'Status'],
+    'Legal' => ['uk' => 'Правова інформація', 'de' => 'Rechtliches', 'fr' => 'Mentions légales', 'es' => 'Legal', 'pl' => 'Prawne'],
+    'Privacy' => ['uk' => 'Конфіденційність', 'de' => 'Datenschutz', 'fr' => 'Confidentialité', 'es' => 'Privacidad', 'pl' => 'Prywatność'],
+    'Terms' => ['uk' => 'Умови', 'de' => 'Nutzungsbedingungen', 'fr' => 'Conditions', 'es' => 'Términos', 'pl' => 'Regulamin'],
+    'Cookie Policy' => ['uk' => 'Політика cookies', 'de' => 'Cookie-Richtlinie', 'fr' => 'Politique de cookies', 'es' => 'Política de cookies', 'pl' => 'Polityka cookies'],
+  ];
+
+  // Merge all translations.
+  $all_translations = array_merge($main_menu_translations, $footer_translations);
+
+  try {
+    $menu_link_storage = \Drupal::entityTypeManager()->getStorage('menu_link_content');
+
+    // Load all menu items.
+    $menu_links = $menu_link_storage->loadMultiple();
+
+    foreach ($menu_links as $menu_link) {
+      $title = $menu_link->getTitle();
+
+      if (!isset($all_translations[$title])) {
+        continue;
+      }
+
+      foreach ($additional_languages as $langcode) {
+        if (!isset($all_translations[$title][$langcode])) {
+          continue;
+        }
+
+        // Check if translation already exists.
+        if ($menu_link->hasTranslation($langcode)) {
+          continue;
+        }
+
+        try {
+          $menu_link->addTranslation($langcode, [
+            'title' => $all_translations[$title][$langcode],
+          ]);
+          $menu_link->save();
+          \Drupal::logger('constructor')->notice('Translated menu "@title" to @lang: @translated', [
+            '@title' => $title,
+            '@lang' => $langcode,
+            '@translated' => $all_translations[$title][$langcode],
+          ]);
+        }
+        catch (\Exception $e) {
+          \Drupal::logger('constructor')->warning('Failed to translate menu "@title" to @lang: @error', [
+            '@title' => $title,
+            '@lang' => $langcode,
+            '@error' => $e->getMessage(),
+          ]);
+        }
+      }
+    }
+
+    \Drupal::logger('constructor')->notice('Completed menu translations.');
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to translate menus: @message', ['@message' => $e->getMessage()]);
+  }
+
+  $context['results'][] = 'menu_translations';
+}
+
+/**
+ * Create footer menu links with parent sections.
+ *
+ * @param \Drupal\Core\Entity\EntityStorageInterface $menu_link_storage
+ *   The menu link content storage.
+ * @param string $default_language
+ *   The default language code.
+ * @param array $additional_languages
+ *   Array of additional language codes.
+ */
+function _constructor_create_footer_menu($menu_link_storage, $default_language = 'en', $additional_languages = []) {
+  // Footer menu translations.
+  $footer_translations = [
+    'Product' => [
+      'uk' => 'Продукт',
+      'de' => 'Produkt',
+      'fr' => 'Produit',
+      'es' => 'Producto',
+      'pl' => 'Produkt',
+    ],
+    'Features' => [
+      'uk' => 'Можливості',
+      'de' => 'Funktionen',
+      'fr' => 'Fonctionnalités',
+      'es' => 'Características',
+      'pl' => 'Funkcje',
+    ],
+    'Integrations' => [
+      'uk' => 'Інтеграції',
+      'de' => 'Integrationen',
+      'fr' => 'Intégrations',
+      'es' => 'Integraciones',
+      'pl' => 'Integracje',
+    ],
+    'Pricing' => [
+      'uk' => 'Ціни',
+      'de' => 'Preise',
+      'fr' => 'Tarifs',
+      'es' => 'Precios',
+      'pl' => 'Cennik',
+    ],
+    'Changelog' => [
+      'uk' => 'Журнал змін',
+      'de' => 'Änderungsprotokoll',
+      'fr' => 'Journal des modifications',
+      'es' => 'Registro de cambios',
+      'pl' => 'Dziennik zmian',
+    ],
+    'Company' => [
+      'uk' => 'Компанія',
+      'de' => 'Unternehmen',
+      'fr' => 'Entreprise',
+      'es' => 'Empresa',
+      'pl' => 'Firma',
+    ],
+    'About us' => [
+      'uk' => 'Про нас',
+      'de' => 'Über uns',
+      'fr' => 'À propos',
+      'es' => 'Sobre nosotros',
+      'pl' => 'O nas',
+    ],
+    'Blog' => [
+      'uk' => 'Блог',
+      'de' => 'Blog',
+      'fr' => 'Blog',
+      'es' => 'Blog',
+      'pl' => 'Blog',
+    ],
+    'Careers' => [
+      'uk' => "Кар'єра",
+      'de' => 'Karriere',
+      'fr' => 'Carrières',
+      'es' => 'Carreras',
+      'pl' => 'Kariera',
+    ],
+    'Press' => [
+      'uk' => 'Преса',
+      'de' => 'Presse',
+      'fr' => 'Presse',
+      'es' => 'Prensa',
+      'pl' => 'Prasa',
+    ],
+    'Resources' => [
+      'uk' => 'Ресурси',
+      'de' => 'Ressourcen',
+      'fr' => 'Ressources',
+      'es' => 'Recursos',
+      'pl' => 'Zasoby',
+    ],
+    'Documentation' => [
+      'uk' => 'Документація',
+      'de' => 'Dokumentation',
+      'fr' => 'Documentation',
+      'es' => 'Documentación',
+      'pl' => 'Dokumentacja',
+    ],
+    'Help Center' => [
+      'uk' => 'Центр допомоги',
+      'de' => 'Hilfezentrum',
+      'fr' => "Centre d'aide",
+      'es' => 'Centro de ayuda',
+      'pl' => 'Centrum pomocy',
+    ],
+    'Contact' => [
+      'uk' => 'Контакти',
+      'de' => 'Kontakt',
+      'fr' => 'Contact',
+      'es' => 'Contacto',
+      'pl' => 'Kontakt',
+    ],
+    'Status' => [
+      'uk' => 'Статус',
+      'de' => 'Status',
+      'fr' => 'Statut',
+      'es' => 'Estado',
+      'pl' => 'Status',
+    ],
+    'Legal' => [
+      'uk' => 'Правова інформація',
+      'de' => 'Rechtliches',
+      'fr' => 'Mentions légales',
+      'es' => 'Legal',
+      'pl' => 'Prawne',
+    ],
+    'Privacy' => [
+      'uk' => 'Конфіденційність',
+      'de' => 'Datenschutz',
+      'fr' => 'Confidentialité',
+      'es' => 'Privacidad',
+      'pl' => 'Prywatność',
+    ],
+    'Terms' => [
+      'uk' => 'Умови',
+      'de' => 'Nutzungsbedingungen',
+      'fr' => 'Conditions',
+      'es' => 'Términos',
+      'pl' => 'Regulamin',
+    ],
+    'Cookie Policy' => [
+      'uk' => 'Політика cookies',
+      'de' => 'Cookie-Richtlinie',
+      'fr' => 'Politique de cookies',
+      'es' => 'Política de cookies',
+      'pl' => 'Polityka cookies',
+    ],
+  ];
+
+  $footer_sections = [
+    'Product' => [
+      'weight' => 0,
+      'items' => [
+        'Features' => 0,
+        'Integrations' => 1,
+        'Pricing' => 2,
+        'Changelog' => 3,
+      ],
+    ],
+    'Company' => [
+      'weight' => 1,
+      'items' => [
+        'About us' => 0,
+        'Blog' => 1,
+        'Careers' => 2,
+        'Press' => 3,
+      ],
+    ],
+    'Resources' => [
+      'weight' => 2,
+      'items' => [
+        'Documentation' => 0,
+        'Help Center' => 1,
+        'Contact' => 2,
+        'Status' => 3,
+      ],
+    ],
+    'Legal' => [
+      'weight' => 3,
+      'items' => [
+        'Privacy' => 0,
+        'Terms' => 1,
+        'Cookie Policy' => 2,
+      ],
+    ],
+  ];
+
+  $has_translations = !empty($additional_languages) && \Drupal::moduleHandler()->moduleExists('content_translation');
+
+  foreach ($footer_sections as $section_title => $section_data) {
+    // Create parent menu item.
+    $parent_link = $menu_link_storage->create([
+      'title' => $section_title,
+      'link' => ['uri' => 'internal:/'],
+      'menu_name' => 'footer',
+      'weight' => $section_data['weight'],
+      'expanded' => TRUE,
+      'langcode' => $default_language,
+    ]);
+    $parent_link->save();
+
+    // Add translations for parent.
+    if ($has_translations && isset($footer_translations[$section_title])) {
+      foreach ($additional_languages as $langcode) {
+        if (isset($footer_translations[$section_title][$langcode])) {
+          try {
+            $parent_link->addTranslation($langcode, [
+              'title' => $footer_translations[$section_title][$langcode],
+            ]);
+            $parent_link->save();
+          }
+          catch (\Exception $e) {
+            // Log but continue.
+          }
+        }
+      }
+    }
+
+    $parent_uuid = $parent_link->uuid();
+
+    // Create child menu items.
+    foreach ($section_data['items'] as $item_title => $item_weight) {
+      $child_link = $menu_link_storage->create([
+        'title' => $item_title,
+        'link' => ['uri' => 'internal:/'],
+        'menu_name' => 'footer',
+        'parent' => 'menu_link_content:' . $parent_uuid,
+        'weight' => $item_weight,
+        'expanded' => FALSE,
+        'langcode' => $default_language,
+      ]);
+      $child_link->save();
+
+      // Add translations for child.
+      if ($has_translations && isset($footer_translations[$item_title])) {
+        foreach ($additional_languages as $langcode) {
+          if (isset($footer_translations[$item_title][$langcode])) {
+            try {
+              $child_link->addTranslation($langcode, [
+                'title' => $footer_translations[$item_title][$langcode],
+              ]);
+              $child_link->save();
+            }
+            catch (\Exception $e) {
+              // Log but continue.
+            }
+          }
+        }
+      }
     }
   }
 
