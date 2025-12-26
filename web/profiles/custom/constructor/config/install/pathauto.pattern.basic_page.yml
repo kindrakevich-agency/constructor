@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: basic_page
+label: 'Basic Page'
+type: 'canonical_entities:node'
+pattern: 'page/[node:title]'
+selection_criteria:
+  d3a72297-eb3c-4943-b1d4-7e12e8bdb84b:
+    id: entity_bundle:node
+    bundles:
+      page: page
+    negate: false
+    context_mapping:
+      node: node
+selection_logic: and
+weight: -10
