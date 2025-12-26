@@ -464,10 +464,12 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
 
       // Get first image.
       $image_url = NULL;
+      $image_uri = NULL;
       if ($node->hasField('field_product_images')) {
         $images = $node->get('field_product_images')->referencedEntities();
         if (!empty($images)) {
-          $image_url = $this->fileUrlGenerator->generateAbsoluteString($images[0]->getFileUri());
+          $image_uri = $images[0]->getFileUri();
+          $image_url = $this->fileUrlGenerator->generateAbsoluteString($image_uri);
         }
       }
 
@@ -479,6 +481,7 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
         'title' => $node->getTitle(),
         'url' => $node->toUrl()->toString(),
         'image_url' => $image_url,
+        'image_uri' => $image_uri,
         'price' => $price,
         'sale_price' => $sale_price,
         'formatted_price' => $currency_symbol . number_format((float) $price, 2),
@@ -525,9 +528,11 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
 
       // Get first image.
       $image_url = NULL;
+      $image_uri = NULL;
       $images = $node->get('field_product_images')->referencedEntities();
       if (!empty($images)) {
-        $image_url = $this->fileUrlGenerator->generateAbsoluteString($images[0]->getFileUri());
+        $image_uri = $images[0]->getFileUri();
+        $image_url = $this->fileUrlGenerator->generateAbsoluteString($image_uri);
       }
 
       // Get category.
@@ -551,6 +556,7 @@ class ProductsListBlock extends BlockBase implements ContainerFactoryPluginInter
         'title' => $node->getTitle(),
         'url' => $node->toUrl()->toString(),
         'image_url' => $image_url,
+        'image_uri' => $image_uri,
         'price' => $price,
         'sale_price' => $sale_price,
         'formatted_price' => $currency_symbol . number_format((float) $price, 2),

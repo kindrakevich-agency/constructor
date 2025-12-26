@@ -72,6 +72,7 @@ class ArticlesPageController extends ControllerBase {
 
         // Get image URL.
         $image_url = '';
+        $image_uri = '';
         $image_alt = '';
         if ($node->hasField('field_article_image') && !$node->get('field_article_image')->isEmpty()) {
           $image_field = $node->get('field_article_image')->first();
@@ -80,7 +81,8 @@ class ArticlesPageController extends ControllerBase {
             if ($file_id) {
               $file = File::load($file_id);
               if ($file) {
-                $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+                $image_uri = $file->getFileUri();
+                $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
               }
             }
             $image_alt = $image_field->get('alt')->getValue() ?? $node->getTitle();
@@ -103,6 +105,7 @@ class ArticlesPageController extends ControllerBase {
           'body' => $body,
           'url' => $node->toUrl()->toString(),
           'image_url' => $image_url,
+          'image_uri' => $image_uri,
           'image_alt' => $image_alt,
           'youtube_id' => $youtube_id,
           'has_video' => !empty($youtube_id),

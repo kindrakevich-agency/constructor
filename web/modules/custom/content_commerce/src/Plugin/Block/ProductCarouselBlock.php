@@ -204,9 +204,11 @@ class ProductCarouselBlock extends BlockBase implements ContainerFactoryPluginIn
 
       // Get first image.
       $image_url = NULL;
+      $image_uri = NULL;
       $images = $node->get('field_product_images')->referencedEntities();
       if (!empty($images)) {
-        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($images[0]->getFileUri());
+        $image_uri = $images[0]->getFileUri();
+        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
       }
 
       // Get category.
@@ -225,6 +227,7 @@ class ProductCarouselBlock extends BlockBase implements ContainerFactoryPluginIn
         'title' => $node->getTitle(),
         'url' => $node->toUrl()->toString(),
         'image_url' => $image_url,
+        'image_uri' => $image_uri,
         'category' => $category,
       ];
     }

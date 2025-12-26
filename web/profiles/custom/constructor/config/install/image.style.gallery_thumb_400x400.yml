@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: gallery_thumb_400x400
+label: 'Gallery Thumbnail (400x400)'
+effects:
+  gallery-thumb-scale-crop:
+    uuid: gallery-thumb-scale-crop-400
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 400
+      height: 400
+      anchor: center-center

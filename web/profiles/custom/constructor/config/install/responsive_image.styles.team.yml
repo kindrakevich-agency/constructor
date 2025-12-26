@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - image.style.team_avatar_200x200
+    - image.style.team_avatar_400x400
+  module:
+    - responsive_image
+id: team
+label: 'Team Member Images'
+image_style_mappings:
+  -
+    image_mapping_type: sizes
+    image_mapping:
+      sizes: '(min-width: 768px) 200px, 150px'
+      sizes_image_styles:
+        - team_avatar_200x200
+        - team_avatar_400x400
+    breakpoint_id: responsive_image.viewport_sizing
+    multiplier: 1x
+breakpoint_group: responsive_image
+fallback_image_style: team_avatar_200x200

@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: hero_1920x1080
+label: 'Hero Large (1920x1080, 16:9)'
+effects:
+  hero-lg-scale-crop:
+    uuid: hero-lg-scale-crop-1920
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 1920
+      height: 1080
+      anchor: center-center

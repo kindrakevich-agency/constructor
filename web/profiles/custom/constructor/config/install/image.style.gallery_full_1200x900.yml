@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: gallery_full_1200x900
+label: 'Gallery Full (1200x900, 4:3)'
+effects:
+  gallery-full-scale-crop:
+    uuid: gallery-full-scale-crop-1200
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 1200
+      height: 900
+      anchor: center-center

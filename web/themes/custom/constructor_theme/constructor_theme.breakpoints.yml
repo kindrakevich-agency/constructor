@@ -1,0 +1,50 @@
+# Constructor theme breakpoints for responsive images.
+# These match Tailwind CSS default breakpoints.
+
+constructor_theme.mobile:
+  label: Mobile
+  mediaQuery: ''
+  weight: 0
+  multipliers:
+    - 1x
+    - 2x
+
+constructor_theme.sm:
+  label: Small (640px)
+  mediaQuery: 'all and (min-width: 640px)'
+  weight: 1
+  multipliers:
+    - 1x
+    - 2x
+
+constructor_theme.md:
+  label: Medium (768px)
+  mediaQuery: 'all and (min-width: 768px)'
+  weight: 2
+  multipliers:
+    - 1x
+    - 2x
+
+constructor_theme.lg:
+  label: Large (1024px)
+  mediaQuery: 'all and (min-width: 1024px)'
+  weight: 3
+  multipliers:
+    - 1x
+    - 2x
+
+constructor_theme.xl:
+  label: X-Large (1280px)
+  mediaQuery: 'all and (min-width: 1280px)'
+  weight: 4
+  multipliers:
+    - 1x
+    - 2x
+
+constructor_theme.2xl:
+  label: 2X-Large (1536px)
+  mediaQuery: 'all and (min-width: 1536px)'
+  weight: 5
+  multipliers:
+    - 1x
+    - 2x

@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: hero_640x360
+label: 'Hero Small (640x360, 16:9)'
+effects:
+  hero-sm-scale-crop:
+    uuid: hero-sm-scale-crop-640
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 640
+      height: 360
+      anchor: center-center

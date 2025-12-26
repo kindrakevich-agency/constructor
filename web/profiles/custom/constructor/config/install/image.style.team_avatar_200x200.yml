@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: team_avatar_200x200
+label: 'Team Avatar (200x200)'
+effects:
+  team-avatar-scale-crop:
+    uuid: team-avatar-scale-crop-200
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 200
+      height: 200
+      anchor: center-center

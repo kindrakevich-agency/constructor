@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: team_avatar_400x400
+label: 'Team Avatar Large (400x400)'
+effects:
+  team-avatar-lg-scale-crop:
+    uuid: team-avatar-lg-scale-crop-400
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 400
+      height: 400
+      anchor: center-center

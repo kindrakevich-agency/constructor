@@ -54,8 +54,10 @@
                     </svg>
                   </div>
                 </div>
+              {% elseif article.image_uri %}
+                {{ responsive_image(article.image_uri, 'article', article.image_alt ?: article.title, 'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105') }}
               {% elseif article.image_url %}
-                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
               {% else %}
                 <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600"></div>
               {% endif %}
@@ -84,8 +86,10 @@
                     </svg>
                   </div>
                 </div>
+              {% elseif article.image_uri %}
+                {{ responsive_image(article.image_uri, 'article', article.image_alt ?: article.title, 'absolute inset-0 w-full h-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105') }}
               {% elseif article.image_url %}
-                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105">
+                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105" loading="lazy">
               {% else %}
                 <div class="absolute inset-0 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30"></div>
               {% endif %}
@@ -106,9 +110,11 @@
             <!-- Bottom Right Card - Third Article / Learn More -->
             <a href="{{ article.url }}" class="relative rounded-3xl overflow-hidden min-h-[280px] block group">
               {% if article.has_video and article.youtube_id %}
-                <img src="https://img.youtube.com/vi/{{ article.youtube_id }}/hqdefault.jpg" alt="{{ article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                <img src="https://img.youtube.com/vi/{{ article.youtube_id }}/hqdefault.jpg" alt="{{ article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+              {% elseif article.image_uri %}
+                {{ responsive_image(article.image_uri, 'article', article.image_alt ?: article.title, 'absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105') }}
               {% elseif article.image_url %}
-                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
               {% else %}
                 <div class="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-600"></div>
               {% endif %}

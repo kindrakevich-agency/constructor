@@ -29,7 +29,11 @@
           <div class="flex items-center gap-4 mb-6">
             <div class="flex -space-x-3">
               {% for member in team_members|slice(0, 4) %}
-                <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 object-cover">
+                {% if member.image_uri %}
+                  {{ responsive_image(member.image_uri, 'team', member.name, 'w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 object-cover') }}
+                {% else %}
+                  <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 object-cover" loading="lazy">
+                {% endif %}
               {% endfor %}
             </div>
             <div>
@@ -78,7 +82,11 @@
               {% for member in team_members %}
                 <div class="swiper-slide">
                   <div class="team-card relative rounded-3xl overflow-hidden aspect-[3/4] {{ member.gradient_class }}">
-                    <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-full h-full object-cover object-top">
+                    {% if member.image_uri %}
+                      {{ responsive_image(member.image_uri, 'team', member.name, 'w-full h-full object-cover object-top') }}
+                    {% else %}
+                      <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-full h-full object-cover object-top" loading="lazy">
+                    {% endif %}
                     <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
                       <h3 class="text-xl font-semibold text-white">{{ member.name }}</h3>
                       <p class="text-white/80">{{ member.position }}</p>

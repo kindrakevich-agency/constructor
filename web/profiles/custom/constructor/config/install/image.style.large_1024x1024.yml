@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: large_1024x1024
+label: 'Large (1024x1024)'
+effects:
+  large-scale-crop:
+    uuid: large-scale-crop-1024
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 1024
+      height: 1024
+      anchor: center-center

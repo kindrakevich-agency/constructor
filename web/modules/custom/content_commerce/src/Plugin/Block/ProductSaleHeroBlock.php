@@ -156,9 +156,11 @@ class ProductSaleHeroBlock extends BlockBase implements ContainerFactoryPluginIn
 
     // Get first image.
     $image_url = NULL;
+    $image_uri = NULL;
     $images = $node->get('field_product_images')->referencedEntities();
     if (!empty($images)) {
-      $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($images[0]->getFileUri());
+      $image_uri = $images[0]->getFileUri();
+      $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
     }
 
     $price = $node->get('field_product_price')->value ?? 0;
@@ -174,6 +176,7 @@ class ProductSaleHeroBlock extends BlockBase implements ContainerFactoryPluginIn
       '#sale_price' => $sale_price ? $currency_symbol . number_format((float) $sale_price, 2) : NULL,
       '#currency_symbol' => $currency_symbol,
       '#image_url' => $image_url,
+      '#image_uri' => $image_uri,
       '#product_url' => $node->toUrl()->toString(),
       '#cta_text' => $this->configuration['cta_text'],
       '#attached' => [

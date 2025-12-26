@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: article_card_800x600
+label: 'Article Card Large (800x600, 4:3)'
+effects:
+  article-card-lg-scale-crop:
+    uuid: article-card-lg-scale-crop-800
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 800
+      height: 600
+      anchor: center-center

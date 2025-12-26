@@ -1,0 +1,8 @@
+name: Constructor Core
+type: module
+description: 'Core utilities for Constructor profile including responsive image helpers.'
+package: Constructor
+core_version_requirement: ^11
+dependencies:
+  - drupal:image
+  - drupal:responsive_image

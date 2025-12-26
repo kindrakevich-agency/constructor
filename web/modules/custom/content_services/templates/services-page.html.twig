@@ -20,7 +20,11 @@
       {% for service in services %}
         <a href="{{ service.url }}" class="group block bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-slate-700">
           <div class="aspect-[4/3] overflow-hidden">
-            <img src="{{ service.image_url }}" alt="{{ service.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            {% if service.image_uri %}
+              {{ responsive_image(service.image_uri, 'service', service.name, 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300') }}
+            {% else %}
+              <img src="{{ service.image_url }}" alt="{{ service.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+            {% endif %}
           </div>
           <div class="p-6">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-500 transition-colors">{{ service.name }}</h2>

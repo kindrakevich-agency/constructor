@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: product_card_400x533
+label: 'Product Card (400x533, 3:4)'
+effects:
+  product-card-scale-crop:
+    uuid: product-card-scale-crop-400
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 400
+      height: 533
+      anchor: center-center

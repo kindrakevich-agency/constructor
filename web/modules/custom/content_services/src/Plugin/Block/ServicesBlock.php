@@ -148,10 +148,12 @@ class ServicesBlock extends BlockBase implements ContainerFactoryPluginInterface
 
         // Get image URL from field_service_image (image field) or fallback.
         $image_url = 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=400&fit=crop&q=80';
+        $image_uri = '';
         if ($node->hasField('field_service_image') && !$node->get('field_service_image')->isEmpty()) {
           $file = $node->get('field_service_image')->entity;
           if ($file) {
-            $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+            $image_uri = $file->getFileUri();
+            $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
           }
         }
 
@@ -159,6 +161,7 @@ class ServicesBlock extends BlockBase implements ContainerFactoryPluginInterface
           'name' => $node->getTitle(),
           'description' => $node->get('field_service_description')->value,
           'image_url' => $image_url,
+          'image_uri' => $image_uri,
           'url' => $node->toUrl()->toString(),
         ];
       }

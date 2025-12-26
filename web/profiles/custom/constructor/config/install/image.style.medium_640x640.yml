@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: medium_640x640
+label: 'Medium (640x640)'
+effects:
+  medium-scale-crop:
+    uuid: medium-scale-crop-640
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 640
+      height: 640
+      anchor: center-center

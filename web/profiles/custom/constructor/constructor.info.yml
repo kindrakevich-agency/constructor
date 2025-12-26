@@ -8,6 +8,7 @@ install:
   - node
   - block
   - block_content
+  - breakpoint
   - ckeditor5
   - config
   - datetime
@@ -21,6 +22,7 @@ install:
   - help
   - image
   - link
+  - responsive_image
   - menu_ui
   - options
   - page_cache

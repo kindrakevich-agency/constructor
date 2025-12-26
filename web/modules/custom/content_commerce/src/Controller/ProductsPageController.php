@@ -148,9 +148,11 @@ class ProductsPageController extends ControllerBase {
 
       // Get first image.
       $image_url = NULL;
+      $image_uri = NULL;
       $images = $node->get('field_product_images')->referencedEntities();
       if (!empty($images)) {
-        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($images[0]->getFileUri());
+        $image_uri = $images[0]->getFileUri();
+        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
       }
 
       // Get category.
@@ -172,6 +174,7 @@ class ProductsPageController extends ControllerBase {
         'title' => $node->getTitle(),
         'url' => $node->toUrl()->toString(),
         'image_url' => $image_url,
+        'image_uri' => $image_uri,
         'price' => $price,
         'sale_price' => $sale_price,
         'formatted_price' => $currency_symbol . number_format((float) $price, 2),

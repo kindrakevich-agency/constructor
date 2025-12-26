@@ -90,12 +90,14 @@ class TeamPageController extends ControllerBase {
         }
 
         $image_url = '';
+        $image_uri = '';
 
         // Check for actual photo field.
         if ($node->hasField('field_team_photo') && !$node->get('field_team_photo')->isEmpty()) {
           $file = $node->get('field_team_photo')->entity;
           if ($file instanceof File) {
-            $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+            $image_uri = $file->getFileUri();
+            $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
           }
         }
 
@@ -111,6 +113,7 @@ class TeamPageController extends ControllerBase {
           'name' => $node->getTitle(),
           'position' => $node->get('field_team_position')->value,
           'image_url' => $image_url,
+          'image_uri' => $image_uri,
           'gradient_class' => $gradient_class,
           'url' => $node->toUrl()->toString(),
         ];

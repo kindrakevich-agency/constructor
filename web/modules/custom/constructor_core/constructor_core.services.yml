@@ -1,0 +1,10 @@
+services:
+  constructor_core.responsive_image:
+    class: Drupal\constructor_core\ResponsiveImageHelper
+    arguments: ['@entity_type.manager', '@file_url_generator']
+
+  constructor_core.twig.responsive_image:
+    class: Drupal\constructor_core\TwigExtension\ResponsiveImageExtension
+    arguments: ['@constructor_core.responsive_image', '@file_url_generator']
+    tags:
+      - { name: twig.extension }

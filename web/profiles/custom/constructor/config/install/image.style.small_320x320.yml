@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: small_320x320
+label: 'Small (320x320)'
+effects:
+  small-scale-crop:
+    uuid: small-scale-crop-320
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 320
+      height: 320
+      anchor: center-center

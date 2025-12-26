@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: xlarge_1920x1920
+label: 'X-Large (1920x1920)'
+effects:
+  xlarge-scale-crop:
+    uuid: xlarge-scale-crop-1920
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 1920
+      height: 1920
+      anchor: center-center

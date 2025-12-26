@@ -1,0 +1,14 @@
+langcode: en
+status: true
+dependencies: {  }
+name: service_card_400x300
+label: 'Service Card (400x300, 4:3)'
+effects:
+  service-card-scale-crop:
+    uuid: service-card-scale-crop-400
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 400
+      height: 300
+      anchor: center-center

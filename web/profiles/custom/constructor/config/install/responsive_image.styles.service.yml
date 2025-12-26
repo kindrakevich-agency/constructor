@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - image.style.service_card_400x300
+    - image.style.service_card_800x600
+  module:
+    - responsive_image
+id: service
+label: 'Service Images'
+image_style_mappings:
+  -
+    image_mapping_type: sizes
+    image_mapping:
+      sizes: '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw'
+      sizes_image_styles:
+        - service_card_400x300
+        - service_card_800x600
+    breakpoint_id: responsive_image.viewport_sizing
+    multiplier: 1x
+breakpoint_group: responsive_image
+fallback_image_style: service_card_400x300
