@@ -4,7 +4,7 @@
  * Template for Team Block.
  *
  * Available variables:
- * - team_members: Array of team member items with 'name', 'position', 'image_url', 'gradient'.
+ * - team_members: Array of team member items with 'name', 'position', 'image_url', 'gradient_class'.
  * - title: Block title.
  * - subtitle: Block subtitle.
  * - description: Block description.
@@ -77,7 +77,7 @@
             <div class="swiper-wrapper">
               {% for member in team_members %}
                 <div class="swiper-slide">
-                  <div class="team-card relative rounded-3xl overflow-hidden aspect-[3/4]" style="background: {{ member.gradient }};">
+                  <div class="team-card relative rounded-3xl overflow-hidden aspect-[3/4] {{ member.gradient_class }}">
                     <img src="{{ member.image_url }}" alt="{{ member.name }}" class="w-full h-full object-cover object-top">
                     <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
                       <h3 class="text-xl font-semibold text-white">{{ member.name }}</h3>

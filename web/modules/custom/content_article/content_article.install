@@ -117,7 +117,9 @@ function _content_article_create_fields() {
       'bundle' => 'article',
       'label' => 'Body',
       'required' => FALSE,
-      'settings' => [],
+      'settings' => [
+        'allowed_formats' => ['full_html'],
+      ],
     ])->save();
   }
 

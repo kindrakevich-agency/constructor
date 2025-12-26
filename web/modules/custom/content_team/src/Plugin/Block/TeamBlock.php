@@ -145,13 +145,13 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop&q=80',
     ];
 
-    // Default gradients.
-    $default_gradients = [
-      'linear-gradient(180deg, #fde4cf 0%, #ffcfd2 100%)',
-      'linear-gradient(180deg, #fbc2eb 0%, #a6c1ee 100%)',
-      'linear-gradient(180deg, #a1c4fd 0%, #c2e9fb 100%)',
-      'linear-gradient(180deg, #d4fc79 0%, #96e6a1 100%)',
-      'linear-gradient(180deg, #ffecd2 0%, #fcb69f 100%)',
+    // Gradient CSS classes (defined in constructor_theme/css/team-gradients.css).
+    $gradient_classes = [
+      'team-gradient-peach',
+      'team-gradient-pink-blue',
+      'team-gradient-blue',
+      'team-gradient-green',
+      'team-gradient-cream',
     ];
 
     // Load team member nodes.
@@ -176,7 +176,7 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
         $image_url = '';
 
-        // Check for actual photo field first.
+        // Check for actual photo field.
         if ($node->hasField('field_team_photo') && !$node->get('field_team_photo')->isEmpty()) {
           $file = $node->get('field_team_photo')->entity;
           if ($file instanceof File) {
@@ -184,31 +184,19 @@ class TeamBlock extends BlockBase implements ContainerFactoryPluginInterface {
           }
         }
 
-        // Fall back to image URL field.
-        if (empty($image_url) && $node->hasField('field_team_image_url')) {
-          $image_url = $node->get('field_team_image_url')->value;
-        }
-
-        // Use default image if still not set.
+        // Use default image if no photo uploaded.
         if (empty($image_url)) {
           $image_url = $default_images[$index % count($default_images)];
         }
 
-        $gradient = '';
-        if ($node->hasField('field_team_gradient')) {
-          $gradient = $node->get('field_team_gradient')->value;
-        }
-
-        // Use default gradient if not set.
-        if (empty($gradient)) {
-          $gradient = $default_gradients[$index % count($default_gradients)];
-        }
+        // Use CSS class for gradient based on index.
+        $gradient_class = $gradient_classes[$index % count($gradient_classes)];
 
         $team_members[] = [
           'name' => $node->getTitle(),
           'position' => $node->get('field_team_position')->value,
           'image_url' => $image_url,
-          'gradient' => $gradient,
+          'gradient_class' => $gradient_class,
         ];
         $index++;
       }

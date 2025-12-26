@@ -179,54 +179,6 @@ function _content_team_create_fields() {
     ])->save();
   }
 
-  // Field: Image URL (fallback URL).
-  if (!FieldStorageConfig::loadByName('node', 'field_team_image_url')) {
-    FieldStorageConfig::create([
-      'field_name' => 'field_team_image_url',
-      'entity_type' => 'node',
-      'type' => 'string',
-      'cardinality' => 1,
-      'settings' => [
-        'max_length' => 500,
-      ],
-    ])->save();
-  }
-
-  if (!FieldConfig::loadByName('node', 'team_member', 'field_team_image_url')) {
-    FieldConfig::create([
-      'field_name' => 'field_team_image_url',
-      'entity_type' => 'node',
-      'bundle' => 'team_member',
-      'label' => 'Image URL',
-      'description' => 'URL to the team member photo (e.g., Unsplash image). Used as fallback if no photo is uploaded.',
-      'required' => FALSE,
-    ])->save();
-  }
-
-  // Field: Gradient (background gradient CSS).
-  if (!FieldStorageConfig::loadByName('node', 'field_team_gradient')) {
-    FieldStorageConfig::create([
-      'field_name' => 'field_team_gradient',
-      'entity_type' => 'node',
-      'type' => 'string',
-      'cardinality' => 1,
-      'settings' => [
-        'max_length' => 255,
-      ],
-    ])->save();
-  }
-
-  if (!FieldConfig::loadByName('node', 'team_member', 'field_team_gradient')) {
-    FieldConfig::create([
-      'field_name' => 'field_team_gradient',
-      'entity_type' => 'node',
-      'bundle' => 'team_member',
-      'label' => 'Background Gradient',
-      'description' => 'CSS gradient for the card background (optional).',
-      'required' => FALSE,
-    ])->save();
-  }
-
   // Field: Bio (body text).
   if (!FieldStorageConfig::loadByName('node', 'field_team_bio')) {
     FieldStorageConfig::create([
@@ -245,6 +197,9 @@ function _content_team_create_fields() {
       'label' => 'Biography',
       'description' => 'A detailed biography of the team member.',
       'required' => FALSE,
+      'settings' => [
+        'allowed_formats' => ['full_html'],
+      ],
     ])->save();
   }
 }
@@ -298,31 +253,9 @@ function _content_team_configure_form_display() {
     'third_party_settings' => [],
   ]);
 
-  $form_display->setComponent('field_team_image_url', [
-    'type' => 'string_textfield',
-    'weight' => 3,
-    'region' => 'content',
-    'settings' => [
-      'size' => 60,
-      'placeholder' => 'https://images.unsplash.com/...',
-    ],
-    'third_party_settings' => [],
-  ]);
-
-  $form_display->setComponent('field_team_gradient', [
-    'type' => 'string_textfield',
-    'weight' => 4,
-    'region' => 'content',
-    'settings' => [
-      'size' => 60,
-      'placeholder' => 'linear-gradient(180deg, #fde4cf 0%, #ffcfd2 100%)',
-    ],
-    'third_party_settings' => [],
-  ]);
-
   $form_display->setComponent('field_team_bio', [
     'type' => 'text_textarea',
-    'weight' => 5,
+    'weight' => 3,
     'region' => 'content',
     'settings' => [
       'rows' => 9,
@@ -380,10 +313,6 @@ function _content_team_configure_view_display() {
       'image_link' => '',
     ],
   ]);
-
-  // Hide image URL and gradient from display (they're for internal use).
-  $view_display->removeComponent('field_team_image_url');
-  $view_display->removeComponent('field_team_gradient');
 
   $view_display->setComponent('field_team_bio', [
     'type' => 'text_default',

@@ -271,6 +271,27 @@ body.toolbar-horizontal.toolbar-tray-open .header {
   top: var(--spacing-md);
 }
 
+/* Team Card Gradient Backgrounds */
+.team-gradient-peach {
+  background: linear-gradient(180deg, #fde4cf 0%, #ffcfd2 100%);
+}
+
+.team-gradient-pink-blue {
+  background: linear-gradient(180deg, #fbc2eb 0%, #a6c1ee 100%);
+}
+
+.team-gradient-blue {
+  background: linear-gradient(180deg, #a1c4fd 0%, #c2e9fb 100%);
+}
+
+.team-gradient-green {
+  background: linear-gradient(180deg, #d4fc79 0%, #96e6a1 100%);
+}
+
+.team-gradient-cream {
+  background: linear-gradient(180deg, #ffecd2 0%, #fcb69f 100%);
+}
+
 /* Print Styles */
 @media print {
   .header,

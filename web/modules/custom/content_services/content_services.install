@@ -38,7 +38,7 @@ function content_services_uninstall() {
   $storage->delete($nodes);
 
   // Delete field configs.
-  $fields = ['field_service_description', 'field_service_image_url', 'field_service_body'];
+  $fields = ['field_service_description', 'field_service_image_url', 'field_service_image', 'field_service_body'];
   foreach ($fields as $field_name) {
     $field_config = FieldConfig::loadByName('node', 'service', $field_name);
     if ($field_config) {
@@ -103,27 +103,47 @@ function _content_services_create_fields() {
     ])->save();
   }
 
-  // Field: Image URL.
-  if (!FieldStorageConfig::loadByName('node', 'field_service_image_url')) {
+  // Field: Image (actual upload field).
+  if (!FieldStorageConfig::loadByName('node', 'field_service_image')) {
     FieldStorageConfig::create([
-      'field_name' => 'field_service_image_url',
+      'field_name' => 'field_service_image',
       'entity_type' => 'node',
-      'type' => 'string',
+      'type' => 'image',
       'cardinality' => 1,
       'settings' => [
-        'max_length' => 2048,
+        'uri_scheme' => 'public',
+        'default_image' => [
+          'uuid' => NULL,
+          'alt' => '',
+          'title' => '',
+          'width' => NULL,
+          'height' => NULL,
+        ],
       ],
     ])->save();
   }
 
-  if (!FieldConfig::loadByName('node', 'service', 'field_service_image_url')) {
+  if (!FieldConfig::loadByName('node', 'service', 'field_service_image')) {
     FieldConfig::create([
-      'field_name' => 'field_service_image_url',
+      'field_name' => 'field_service_image',
       'entity_type' => 'node',
       'bundle' => 'service',
-      'label' => 'Image URL',
+      'label' => 'Image',
+      'description' => 'Service image.',
       'required' => FALSE,
-      'settings' => [],
+      'settings' => [
+        'file_directory' => 'services',
+        'file_extensions' => 'png gif jpg jpeg webp',
+        'max_filesize' => '5 MB',
+        'max_resolution' => '2560x1440',
+        'min_resolution' => '640x360',
+        'alt_field' => TRUE,
+        'alt_field_required' => TRUE,
+        'title_field' => FALSE,
+        'title_field_required' => FALSE,
+        'handler' => 'default:file',
+        'handler_settings' => [],
+      ],
     ])->save();
   }
 
@@ -144,7 +164,9 @@ function _content_services_create_fields() {
       'bundle' => 'service',
       'label' => 'Body',
       'required' => FALSE,
-      'settings' => [],
+      'settings' => [
+        'allowed_formats' => ['full_html'],
+      ],
     ])->save();
   }
 }
@@ -172,12 +194,12 @@ function _content_services_configure_form_display() {
     ],
   ]);
 
-  $form_display->setComponent('field_service_image_url', [
-    'type' => 'string_textfield',
+  $form_display->setComponent('field_service_image', [
+    'type' => 'image_image',
     'weight' => 1,
     'settings' => [
-      'size' => 100,
-      'placeholder' => 'https://example.com/image.jpg',
+      'progress_indicator' => 'throbber',
+      'preview_image_style' => 'medium',
     ],
   ]);
 
@@ -189,6 +211,9 @@ function _content_services_configure_form_display() {
       'placeholder' => '',
     ],
   ]);
+
+  // Hide legacy image URL field from form.
+  $form_display->removeComponent('field_service_image_url');
 
   $form_display->save();
 }
@@ -207,14 +232,18 @@ function _content_services_configure_view_display() {
     ]);
   }
 
-  $view_display->setComponent('field_service_description', [
-    'type' => 'text_default',
+  $view_display->setComponent('field_service_image', [
+    'type' => 'image',
     'weight' => 0,
     'label' => 'hidden',
+    'settings' => [
+      'image_style' => 'large',
+      'image_link' => '',
+    ],
   ]);
 
-  $view_display->setComponent('field_service_image_url', [
-    'type' => 'string',
+  $view_display->setComponent('field_service_description', [
+    'type' => 'text_default',
     'weight' => 1,
     'label' => 'hidden',
   ]);
@@ -224,6 +253,9 @@ function _content_services_configure_view_display() {
     'weight' => 2,
     'label' => 'hidden',
   ]);
+
+  // Hide legacy image URL field from display.
+  $view_display->removeComponent('field_service_image_url');
 
   $view_display->save();
 }

@@ -103,7 +103,9 @@ function _content_faq_create_fields() {
       'bundle' => 'faq',
       'label' => 'Answer',
       'required' => TRUE,
-      'settings' => [],
+      'settings' => [
+        'allowed_formats' => ['full_html'],
+      ],
     ])->save();
   }
 }

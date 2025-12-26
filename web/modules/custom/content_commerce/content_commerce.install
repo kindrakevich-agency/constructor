@@ -32,8 +32,8 @@ function content_commerce_install() {
   // Set default commerce configuration.
   _content_commerce_set_default_config();
 
-  // Place Products List Block on frontpage.
-  _content_commerce_place_frontpage_block();
+  // Note: Product nodes and block placement are handled by the Constructor
+  // profile's batch operations, including AI image generation.
 }
 
 /**
@@ -282,6 +282,13 @@ function _content_commerce_create_product_fields() {
 
       if (isset($field_info['default_value'])) {
         $field_config['default_value'] = [['value' => $field_info['default_value']]];
+      }
+
+      // Set Full HTML as allowed format for text_long fields.
+      if ($field_info['type'] === 'text_long') {
+        $field_config['settings'] = [
+          'allowed_formats' => ['full_html'],
+        ];
       }
 
       $field = FieldConfig::create($field_config);
