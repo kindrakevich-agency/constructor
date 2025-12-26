@@ -6,7 +6,7 @@
 #}
 <article{{ attributes.addClass('node', 'node--page') }}>
   <div class="py-16 lg:py-24 bg-white dark:bg-slate-900 transition-colors">
-    <div class="max-w-4xl 3xl:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
+    <div class="max-w-7xl 3xl:max-w-8xl 4xl:max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 3xl:px-12">
       {# Edit Button #}
       {% if can_edit %}
         <div class="mb-8 flex justify-end">
@@ -26,10 +26,19 @@
         </h1>
       </header>
 
+      {# Featured Image #}
+      {% if node.field_image.entity %}
+        <div class="mb-12 rounded-2xl overflow-hidden shadow-lg">
+          {{ responsive_image(node.field_image.entity.fileuri, 'article', node.field_image.alt ?: label, 'w-full h-auto object-cover') }}
+        </div>
+      {% endif %}
+
       {# Page Body #}
-      {% if content.body %}
+      {% if node.body.value %}
         <div class="prose prose-lg dark:prose-invert max-w-none">
-          {{ content.body }}
+          <div class="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
+            {{ node.body.value|raw }}
+          </div>
         </div>
       {% endif %}
     </div>
