@@ -38,11 +38,13 @@
         </nav>
 
         <!-- Mobile CTA & Language -->
+        {% if header_button.show %}
         <div class="flex flex-col gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
             <button class="open-booking-modal w-full py-3 px-6 bg-blue-500 text-white text-center font-medium rounded-lg hover:bg-blue-600 transition-colors">
-                {{ 'Book a demo'|t }}
+                {{ header_button.text|t }}
             </button>
         </div>
+        {% endif %}
     </div>
 
     <!-- Mobile Menu Footer - Contacts -->
@@ -133,9 +135,11 @@
                 {% endif %}
 
                 <!-- Book a Demo Button -->
+                {% if header_button.show %}
                 <button class="open-booking-modal inline-flex items-center justify-center px-5 py-2.5 3xl:px-6 3xl:py-3 3xl:text-lg bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors">
-                    {{ 'Book a demo'|t }}
+                    {{ header_button.text|t }}
                 </button>
+                {% endif %}
 
                 <!-- Language Switcher - Uses Drupal block -->
                 {% if page.secondary_menu %}

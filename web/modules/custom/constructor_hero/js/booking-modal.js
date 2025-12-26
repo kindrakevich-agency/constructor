@@ -164,6 +164,22 @@
         }
 
         document.body.classList.add('booking-modal-open');
+
+        // Pre-fill field from hero input if available
+        var heroInput = document.querySelector('.hero-input');
+        if (heroInput && heroInput.value.trim()) {
+          var fillType = heroInput.dataset.fillType || 'email';
+          var inputValue = heroInput.value.trim();
+
+          // Fill the appropriate field in both desktop and mobile forms
+          var forms = document.querySelectorAll('[data-booking-form], [data-booking-form-mobile]');
+          forms.forEach(function(form) {
+            var targetField = form.querySelector('[name="' + fillType + '"]');
+            if (targetField) {
+              targetField.value = inputValue;
+            }
+          });
+        }
       }
 
       function closeBookingModal() {

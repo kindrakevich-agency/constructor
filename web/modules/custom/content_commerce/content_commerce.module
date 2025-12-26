@@ -290,6 +290,22 @@ function content_commerce_preprocess_node(&$variables) {
     $options_json = $node->get('field_product_options')->value ?? '';
     $variables['product_options'] = !empty($options_json) ? (json_decode($options_json, TRUE) ?: []) : [];
 
+    // Get translated category.
+    $variables['product_category'] = NULL;
+    if ($node->hasField('field_product_category') && !$node->get('field_product_category')->isEmpty()) {
+      $category_entity = $node->get('field_product_category')->entity;
+      if ($category_entity) {
+        $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+        if ($category_entity->hasTranslation($langcode)) {
+          $category_entity = $category_entity->getTranslation($langcode);
+        }
+        $variables['product_category'] = [
+          'name' => $category_entity->label(),
+          'id' => $category_entity->id(),
+        ];
+      }
+    }
+
     // Attach library.
     $variables['#attached']['library'][] = 'content_commerce/product';
   }

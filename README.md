@@ -170,9 +170,13 @@ constructor/
 
 ### Constructor Hero
 Provides configurable hero blocks:
-- **Hero Block**: Full-width hero with title, description, email form, stats, rating, image
+- **Hero Block**: Full-width hero with title, description, input form, stats, rating, image
+  - Input form with "Fill email" or "Fill phone" option - pre-fills the booking modal
+  - "Show button in header" option - displays CTA button in header (desktop & mobile)
 - **What We Do Block**: Section with badge, title, description, CTA buttons
 - **Booking Modal Block**: Configurable booking form modal/drawer
+  - Fields: Name, Email, Phone, Message (Company field available but hidden by default)
+  - Auto-fills from Hero Block input when user clicks the CTA button
 
 All elements are configurable via block settings in the admin UI.
 
@@ -385,7 +389,9 @@ Ukrainian translations are included for:
 - Constructor theme
 - Installation profile
 
-Import translations:
+Translations are **automatically imported during installation** when you select additional languages.
+
+To manually import translations:
 ```bash
 lando drush locale:import uk /app/web/modules/custom/MODULE_NAME/translations/uk.po --override=all
 ```

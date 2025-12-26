@@ -1,0 +1,706 @@
+# German translations for Constructor Profile.
+# Copyright (C) 2024
+# This file is distributed under the same license as the Drupal package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Constructor Profile 1.0\n"
+"POT-Creation-Date: 2024-12-26 10:00+0000\n"
+"PO-Revision-Date: 2024-12-26 10:00+0000\n"
+"Language-Team: German\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: de\n"
+
+# Installation steps
+msgid "Importing translations"
+msgstr "Übersetzungen importieren"
+
+msgid "Site Basics"
+msgstr "Website-Grundlagen"
+
+msgid "Languages"
+msgstr "Sprachen"
+
+msgid "Content Types"
+msgstr "Inhaltstypen"
+
+msgid "Modules"
+msgstr "Module"
+
+msgid "Enable optional features"
+msgstr "Optionale Funktionen aktivieren"
+
+msgid "Set up AI content generation"
+msgstr "KI-Inhaltsgenerierung einrichten"
+
+msgid "Finalize"
+msgstr "Abschließen"
+
+msgid "Complete installation"
+msgstr "Installation abschließen"
+
+msgid "AI Integration"
+msgstr "KI-Integration"
+
+msgid "Applying Configuration"
+msgstr "Konfiguration anwenden"
+
+msgid "Installing Translation Module"
+msgstr "Übersetzungsmodul installieren"
+
+msgid "Updating Translations"
+msgstr "Übersetzungen aktualisieren"
+
+msgid "Finalizing"
+msgstr "Wird abgeschlossen"
+
+msgid "CLI Setup"
+msgstr "CLI-Einrichtung"
+
+msgid "Setting up Constructor"
+msgstr "Constructor einrichten"
+
+msgid "Applying default configuration..."
+msgstr "Standardkonfiguration wird angewendet..."
+
+msgid "Translation module installed."
+msgstr "Übersetzungsmodul installiert."
+
+msgid "Translating Content"
+msgstr "Inhalte übersetzen"
+
+msgid "Content translation completed."
+msgstr "Inhaltsübersetzung abgeschlossen."
+
+msgid "Content translation had some issues."
+msgstr "Bei der Inhaltsübersetzung gab es einige Probleme."
+
+msgid "Configuring languages..."
+msgstr "Sprachen werden konfiguriert..."
+
+msgid "Installing language switcher..."
+msgstr "Sprachumschalter wird installiert..."
+
+msgid "Installing content type modules..."
+msgstr "Inhaltstyp-Module werden installiert..."
+
+msgid "Creating content types..."
+msgstr "Inhaltstypen werden erstellt..."
+
+msgid "Enabling modules..."
+msgstr "Module werden aktiviert..."
+
+msgid "Setting up theme..."
+msgstr "Theme wird eingerichtet..."
+
+msgid "Placing blocks..."
+msgstr "Blöcke werden platziert..."
+
+msgid "Configuring AI settings..."
+msgstr "KI-Einstellungen werden konfiguriert..."
+
+msgid "Generating AI content..."
+msgstr "KI-Inhalte werden generiert..."
+
+msgid "Translating menu items..."
+msgstr "Menüelemente werden übersetzt..."
+
+msgid "Site Name"
+msgstr "Website-Name"
+
+msgid "Site Email"
+msgstr "Website-E-Mail"
+
+msgid "Admin Username"
+msgstr "Administrator-Benutzername"
+
+msgid "Admin Password"
+msgstr "Administrator-Passwort"
+
+msgid "Enable Multilingual Support"
+msgstr "Mehrsprachige Unterstützung aktivieren"
+
+msgid "Default Language"
+msgstr "Standardsprache"
+
+msgid "Additional Languages"
+msgstr "Zusätzliche Sprachen"
+
+msgid "Select Content Types"
+msgstr "Inhaltstypen auswählen"
+
+msgid "FAQ"
+msgstr "Häufig gestellte Fragen"
+
+msgid "Team Members"
+msgstr "Teammitglieder"
+
+msgid "Services"
+msgstr "Dienstleistungen"
+
+msgid "Blog"
+msgstr "Blog"
+
+msgid "Pages"
+msgstr "Seiten"
+
+msgid "Enable AI Content Generation"
+msgstr "KI-Inhaltsgenerierung aktivieren"
+
+msgid "OpenAI API Key"
+msgstr "OpenAI API-Schlüssel"
+
+msgid "Generate sample content"
+msgstr "Beispielinhalt generieren"
+
+msgid "Next"
+msgstr "Weiter"
+
+msgid "Back"
+msgstr "Zurück"
+
+msgid "Finish"
+msgstr "Fertig"
+
+msgid "Skip"
+msgstr "Überspringen"
+
+msgid "Save and continue"
+msgstr "Speichern und fortfahren"
+
+msgid "Installation complete!"
+msgstr "Installation abgeschlossen!"
+
+msgid "Your site has been successfully installed."
+msgstr "Ihre Website wurde erfolgreich installiert."
+
+msgid "Visit your new site"
+msgstr "Ihre neue Website besuchen"
+
+msgid "Go to administration"
+msgstr "Zur Administration gehen"
+
+# Theme and UI strings
+msgid "Home"
+msgstr "Startseite"
+
+msgid "About us"
+msgstr "Über uns"
+
+msgid "Contact"
+msgstr "Kontakt"
+
+msgid "Contact Us"
+msgstr "Kontaktieren Sie uns"
+
+msgid "Products"
+msgstr "Produkte"
+
+msgid "Product"
+msgstr "Produkt"
+
+msgid "Articles"
+msgstr "Artikel"
+
+msgid "Article"
+msgstr "Artikel"
+
+msgid "Team"
+msgstr "Team"
+
+msgid "Team Member"
+msgstr "Teammitglied"
+
+msgid "Service"
+msgstr "Dienstleistung"
+
+msgid "Gallery"
+msgstr "Galerie"
+
+msgid "Pricing"
+msgstr "Preise"
+
+msgid "Features"
+msgstr "Funktionen"
+
+msgid "Legal"
+msgstr "Rechtliches"
+
+msgid "Privacy"
+msgstr "Datenschutz"
+
+msgid "Terms"
+msgstr "AGB"
+
+msgid "Company"
+msgstr "Unternehmen"
+
+msgid "Book a demo"
+msgstr "Demo buchen"
+
+msgid "Toggle dark mode"
+msgstr "Dunkelmodus umschalten"
+
+msgid "Change language"
+msgstr "Sprache ändern"
+
+msgid "Skip to main content"
+msgstr "Zum Hauptinhalt springen"
+
+# Navigation
+msgid "Breadcrumb"
+msgstr "Brotkrümel-Navigation"
+
+msgid "Pagination"
+msgstr "Seitennummerierung"
+
+msgid "First page"
+msgstr "Erste Seite"
+
+msgid "Previous page"
+msgstr "Vorherige Seite"
+
+msgid "Next page"
+msgstr "Nächste Seite"
+
+msgid "Last page"
+msgstr "Letzte Seite"
+
+msgid "Current page"
+msgstr "Aktuelle Seite"
+
+msgid "Go to first page"
+msgstr "Zur ersten Seite gehen"
+
+msgid "Go to previous page"
+msgstr "Zur vorherigen Seite gehen"
+
+msgid "Go to next page"
+msgstr "Zur nächsten Seite gehen"
+
+msgid "Go to last page"
+msgstr "Zur letzten Seite gehen"
+
+msgid "Previous"
+msgstr "Vorherige"
+
+msgid "Primary tabs"
+msgstr "Primäre Tabs"
+
+msgid "Secondary tabs"
+msgstr "Sekundäre Tabs"
+
+msgid "Primary actions"
+msgstr "Primäre Aktionen"
+
+# Content - Articles
+msgid "Back to Articles"
+msgstr "Zurück zu Artikeln"
+
+msgid "Other Articles"
+msgstr "Weitere Artikel"
+
+msgid "View All Articles"
+msgstr "Alle Artikel anzeigen"
+
+msgid "Continue reading more stories"
+msgstr "Weitere Geschichten lesen"
+
+msgid "Explore our latest stories, insights, and updates."
+msgstr "Entdecken Sie unsere neuesten Geschichten, Einblicke und Updates."
+
+msgid "No articles available yet."
+msgstr "Noch keine Artikel verfügbar."
+
+msgid "No articles available."
+msgstr "Keine Artikel verfügbar."
+
+msgid "Share this article"
+msgstr "Diesen Artikel teilen"
+
+msgid "Read more"
+msgstr "Mehr lesen"
+
+msgid "Video"
+msgstr "Video"
+
+# Content - Services
+msgid "Back to Services"
+msgstr "Zurück zu Dienstleistungen"
+
+msgid "Other Services"
+msgstr "Weitere Dienstleistungen"
+
+msgid "View All Services"
+msgstr "Alle Dienstleistungen anzeigen"
+
+msgid "Our Services"
+msgstr "Unsere Dienstleistungen"
+
+msgid "Share this service"
+msgstr "Diese Dienstleistung teilen"
+
+msgid "Explore more of our services"
+msgstr "Entdecken Sie mehr unserer Dienstleistungen"
+
+msgid "Discover how we can help you achieve your goals with our comprehensive range of services."
+msgstr "Entdecken Sie, wie wir Ihnen mit unserem umfassenden Dienstleistungsangebot helfen können, Ihre Ziele zu erreichen."
+
+msgid "No services available."
+msgstr "Keine Dienstleistungen verfügbar."
+
+msgid "No services available"
+msgstr "Keine Dienstleistungen verfügbar"
+
+msgid "Check back later for our services."
+msgstr "Schauen Sie später für unsere Dienstleistungen vorbei."
+
+msgid "Learn more"
+msgstr "Mehr erfahren"
+
+# Content - Team
+msgid "Back to Team"
+msgstr "Zurück zum Team"
+
+msgid "Other Team Members"
+msgstr "Weitere Teammitglieder"
+
+msgid "View All Team Members"
+msgstr "Alle Teammitglieder anzeigen"
+
+msgid "Our Team"
+msgstr "Unser Team"
+
+msgid "Meet the Team"
+msgstr "Lernen Sie das Team kennen"
+
+msgid "Share this profile"
+msgstr "Dieses Profil teilen"
+
+msgid "Meet more people from our team"
+msgstr "Lernen Sie weitere Teammitglieder kennen"
+
+msgid "Meet the talented people behind our success. We are a diverse team of professionals dedicated to excellence."
+msgstr "Lernen Sie die talentierten Menschen hinter unserem Erfolg kennen. Wir sind ein vielfältiges Team von Fachleuten, die sich der Exzellenz verschrieben haben."
+
+msgid "No team members available yet."
+msgstr "Noch keine Teammitglieder verfügbar."
+
+msgid "No team members available."
+msgstr "Keine Teammitglieder verfügbar."
+
+# Content - Products
+msgid "Back to Products"
+msgstr "Zurück zu Produkten"
+
+msgid "Our Products"
+msgstr "Unsere Produkte"
+
+msgid "View Product"
+msgstr "Produkt anzeigen"
+
+msgid "View product"
+msgstr "Produkt anzeigen"
+
+msgid "Discover our collection of high-quality products carefully curated for you."
+msgstr "Entdecken Sie unsere Kollektion hochwertiger Produkte, die sorgfältig für Sie ausgewählt wurden."
+
+msgid "No products found."
+msgstr "Keine Produkte gefunden."
+
+msgid "No products found in this category."
+msgstr "Keine Produkte in dieser Kategorie gefunden."
+
+msgid "All"
+msgstr "Alle"
+
+msgid "Featured"
+msgstr "Empfohlen"
+
+msgid "Sale"
+msgstr "Angebot"
+
+msgid "In Stock"
+msgstr "Auf Lager"
+
+msgid "Out of Stock"
+msgstr "Nicht auf Lager"
+
+msgid "Add to Wishlist"
+msgstr "Zur Wunschliste hinzufügen"
+
+msgid "Compare"
+msgstr "Vergleichen"
+
+msgid "Buy"
+msgstr "Kaufen"
+
+msgid "Quantity"
+msgstr "Menge"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "Details"
+msgstr "Details"
+
+msgid "SKU"
+msgstr "Artikelnummer"
+
+msgid "Brand"
+msgstr "Marke"
+
+msgid "Color"
+msgstr "Farbe"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Material"
+msgstr "Material"
+
+msgid "Select brand"
+msgstr "Marke auswählen"
+
+msgid "Select material"
+msgstr "Material auswählen"
+
+# Content - FAQ
+msgid "FAQs"
+msgstr "Häufig gestellte Fragen"
+
+msgid "Frequently Asked Questions"
+msgstr "Häufig gestellte Fragen"
+
+msgid "Find answers to commonly asked questions about our services and products."
+msgstr "Finden Sie Antworten auf häufig gestellte Fragen zu unseren Dienstleistungen und Produkten."
+
+msgid "No FAQs available yet."
+msgstr "Noch keine FAQs verfügbar."
+
+msgid "No FAQs available."
+msgstr "Keine FAQs verfügbar."
+
+# Content - Gallery
+msgid "No gallery images available yet."
+msgstr "Noch keine Galeriebilder verfügbar."
+
+msgid "No gallery images available."
+msgstr "Keine Galeriebilder verfügbar."
+
+# Content - Pricing
+msgid "No pricing plans available."
+msgstr "Keine Preispläne verfügbar."
+
+msgid "month"
+msgstr "Monat"
+
+msgid "incl."
+msgstr "inkl."
+
+msgid "Get started"
+msgstr "Jetzt starten"
+
+# Order/Commerce
+msgid "Complete Your Order"
+msgstr "Bestellung abschließen"
+
+msgid "Confirm Order"
+msgstr "Bestellung bestätigen"
+
+msgid "Delivery Address"
+msgstr "Lieferadresse"
+
+msgid "City, street, building, apartment"
+msgstr "Stadt, Straße, Gebäude, Wohnung"
+
+msgid "Your Name"
+msgstr "Ihr Name"
+
+msgid "Enter your full name"
+msgstr "Geben Sie Ihren vollständigen Namen ein"
+
+msgid "Phone Number"
+msgstr "Telefonnummer"
+
+msgid "Fill in your details below"
+msgstr "Füllen Sie unten Ihre Daten aus"
+
+msgid "By placing an order, you agree to our terms of service"
+msgstr "Mit der Bestellung akzeptieren Sie unsere Nutzungsbedingungen"
+
+msgid "Shipping Information"
+msgstr "Versandinformationen"
+
+msgid "Shipping information"
+msgstr "Versandinformationen"
+
+# Contact Form
+msgid "Get a Direction"
+msgstr "Route berechnen"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Email"
+msgstr "E-Mail"
+
+msgid "Message"
+msgstr "Nachricht"
+
+msgid "Submit"
+msgstr "Absenden"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Subject"
+msgstr "Betreff"
+
+msgid "Send Message"
+msgstr "Nachricht senden"
+
+msgid "Your message has been sent successfully."
+msgstr "Ihre Nachricht wurde erfolgreich gesendet."
+
+msgid "Name is required."
+msgstr "Name ist erforderlich."
+
+msgid "Email is required."
+msgstr "E-Mail ist erforderlich."
+
+msgid "Message is required."
+msgstr "Nachricht ist erforderlich."
+
+msgid "Phone is required."
+msgstr "Telefon ist erforderlich."
+
+msgid "Subject is required."
+msgstr "Betreff ist erforderlich."
+
+msgid "Please enter a valid email address."
+msgstr "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+
+# Common UI elements
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "Remove"
+msgstr "Entfernen"
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Filter"
+msgstr "Filtern"
+
+msgid "Sort"
+msgstr "Sortieren"
+
+msgid "Loading..."
+msgstr "Wird geladen..."
+
+msgid "Error"
+msgstr "Fehler"
+
+msgid "Success"
+msgstr "Erfolg"
+
+msgid "Warning"
+msgstr "Warnung"
+
+msgid "Info"
+msgstr "Information"
+
+msgid "Yes"
+msgstr "Ja"
+
+msgid "No"
+msgstr "Nein"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Required"
+msgstr "Erforderlich"
+
+msgid "Optional"
+msgstr "Optional"
+
+# Date/Time
+msgid "Today"
+msgstr "Heute"
+
+msgid "Yesterday"
+msgstr "Gestern"
+
+msgid "Tomorrow"
+msgstr "Morgen"
+
+# Status
+msgid "Active"
+msgstr "Aktiv"
+
+msgid "Inactive"
+msgstr "Inaktiv"
+
+msgid "Enabled"
+msgstr "Aktiviert"
+
+msgid "Disabled"
+msgstr "Deaktiviert"
+
+msgid "Published"
+msgstr "Veröffentlicht"
+
+msgid "Unpublished"
+msgstr "Nicht veröffentlicht"
+
+msgid "Draft"
+msgstr "Entwurf"
+
+# Footer sections
+msgid "Integrations"
+msgstr "Integrationen"
+
+msgid "Changelog"
+msgstr "Änderungsprotokoll"
+
+msgid "Careers"
+msgstr "Karriere"
+
+msgid "Press"
+msgstr "Presse"
+
+msgid "Resources"
+msgstr "Ressourcen"
+
+msgid "Documentation"
+msgstr "Dokumentation"
+
+msgid "Help Center"
+msgstr "Hilfezentrum"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Cookie Policy"
+msgstr "Cookie-Richtlinie"

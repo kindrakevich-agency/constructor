@@ -27,8 +27,10 @@ class HeroBlock extends BlockBase {
       'title_suffix' => 'first',
       'description' => 'Fast, user-friendly and engaging - turn HR into people and culture and streamline your daily operations with your own branded app.',
       'show_email_form' => TRUE,
-      'email_placeholder' => 'Enter work email',
+      'input_placeholder' => 'Enter your email',
+      'input_fill_type' => 'email',
       'button_text' => 'Book a demo',
+      'show_button_in_header' => FALSE,
       'show_stats' => TRUE,
       'stat1_value' => '75.2%',
       'stat1_label' => 'Average daily activity',
@@ -97,10 +99,26 @@ class HeroBlock extends BlockBase {
       '#default_value' => $this->configuration['show_email_form'],
     ];
 
-    $form['email_section']['email_placeholder'] = [
+    $form['email_section']['input_placeholder'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Email placeholder'),
-      '#default_value' => $this->configuration['email_placeholder'],
+      '#title' => $this->t('Input placeholder'),
+      '#default_value' => $this->configuration['input_placeholder'],
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[email_section][show_email_form]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['email_section']['input_fill_type'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Fill field in popup'),
+      '#options' => [
+        'email' => $this->t('Fill email'),
+        'phone' => $this->t('Fill phone'),
+      ],
+      '#default_value' => $this->configuration['input_fill_type'],
+      '#description' => $this->t('When the user enters a value and clicks the button, this field will be pre-filled in the booking popup.'),
       '#states' => [
         'visible' => [
           ':input[name="settings[email_section][show_email_form]"]' => ['checked' => TRUE],
@@ -117,6 +135,13 @@ class HeroBlock extends BlockBase {
           ':input[name="settings[email_section][show_email_form]"]' => ['checked' => TRUE],
         ],
       ],
+    ];
+
+    $form['email_section']['show_button_in_header'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show button in header'),
+      '#description' => $this->t('Display the button in the site header (desktop and mobile). The button will use the "Button text" value above.'),
+      '#default_value' => $this->configuration['show_button_in_header'],
     ];
 
     // Stats Section.
@@ -288,8 +313,10 @@ class HeroBlock extends BlockBase {
     // Email Section.
     $email_section = $form_state->getValue('email_section');
     $this->configuration['show_email_form'] = $email_section['show_email_form'];
-    $this->configuration['email_placeholder'] = $email_section['email_placeholder'];
+    $this->configuration['input_placeholder'] = $email_section['input_placeholder'];
+    $this->configuration['input_fill_type'] = $email_section['input_fill_type'];
     $this->configuration['button_text'] = $email_section['button_text'];
+    $this->configuration['show_button_in_header'] = $email_section['show_button_in_header'];
 
     // Stats Section.
     $stats_section = $form_state->getValue('stats_section');
@@ -363,7 +390,8 @@ class HeroBlock extends BlockBase {
       '#title_suffix' => $this->configuration['title_suffix'],
       '#description' => $this->configuration['description'],
       '#show_email_form' => $this->configuration['show_email_form'],
-      '#email_placeholder' => $this->configuration['email_placeholder'],
+      '#input_placeholder' => $this->configuration['input_placeholder'],
+      '#input_fill_type' => $this->configuration['input_fill_type'],
       '#button_text' => $this->configuration['button_text'],
       '#show_stats' => $this->configuration['show_stats'],
       '#stats' => $stats,

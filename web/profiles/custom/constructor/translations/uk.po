@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Constructor Profile 1.0\n"
-"POT-Creation-Date: 2024-12-22 10:00+0000\n"
-"PO-Revision-Date: 2024-12-22 10:00+0000\n"
+"POT-Creation-Date: 2024-12-26 10:00+0000\n"
+"PO-Revision-Date: 2024-12-26 10:00+0000\n"
 "Language-Team: Ukrainian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -105,6 +105,9 @@ msgstr "Налаштування ШІ..."
 msgid "Generating AI content..."
 msgstr "Генерація контенту ШІ..."
 
+msgid "Translating menu items..."
+msgstr "Переклад пунктів меню..."
+
 msgid "Site Name"
 msgstr "Назва сайту"
 
@@ -179,3 +182,525 @@ msgstr "Відвідати ваш новий сайт"
 
 msgid "Go to administration"
 msgstr "Перейти до адміністрування"
+
+# Theme and UI strings
+msgid "Home"
+msgstr "Головна"
+
+msgid "About us"
+msgstr "Про нас"
+
+msgid "Contact"
+msgstr "Контакти"
+
+msgid "Contact Us"
+msgstr "Зв'яжіться з нами"
+
+msgid "Products"
+msgstr "Продукти"
+
+msgid "Product"
+msgstr "Продукт"
+
+msgid "Articles"
+msgstr "Статті"
+
+msgid "Article"
+msgstr "Стаття"
+
+msgid "Team"
+msgstr "Команда"
+
+msgid "Team Member"
+msgstr "Член команди"
+
+msgid "Service"
+msgstr "Послуга"
+
+msgid "Gallery"
+msgstr "Галерея"
+
+msgid "Pricing"
+msgstr "Ціни"
+
+msgid "Features"
+msgstr "Можливості"
+
+msgid "Legal"
+msgstr "Правова інформація"
+
+msgid "Privacy"
+msgstr "Конфіденційність"
+
+msgid "Terms"
+msgstr "Умови"
+
+msgid "Company"
+msgstr "Компанія"
+
+msgid "Book a demo"
+msgstr "Замовити демо"
+
+msgid "Toggle dark mode"
+msgstr "Перемкнути темний режим"
+
+msgid "Change language"
+msgstr "Змінити мову"
+
+msgid "Skip to main content"
+msgstr "Перейти до основного вмісту"
+
+# Navigation
+msgid "Breadcrumb"
+msgstr "Навігаційний шлях"
+
+msgid "Pagination"
+msgstr "Пагінація"
+
+msgid "First page"
+msgstr "Перша сторінка"
+
+msgid "Previous page"
+msgstr "Попередня сторінка"
+
+msgid "Next page"
+msgstr "Наступна сторінка"
+
+msgid "Last page"
+msgstr "Остання сторінка"
+
+msgid "Current page"
+msgstr "Поточна сторінка"
+
+msgid "Go to first page"
+msgstr "Перейти на першу сторінку"
+
+msgid "Go to previous page"
+msgstr "Перейти на попередню сторінку"
+
+msgid "Go to next page"
+msgstr "Перейти на наступну сторінку"
+
+msgid "Go to last page"
+msgstr "Перейти на останню сторінку"
+
+msgid "Previous"
+msgstr "Попередня"
+
+msgid "Primary tabs"
+msgstr "Основні вкладки"
+
+msgid "Secondary tabs"
+msgstr "Додаткові вкладки"
+
+msgid "Primary actions"
+msgstr "Основні дії"
+
+# Content - Articles
+msgid "Back to Articles"
+msgstr "Повернутися до статей"
+
+msgid "Other Articles"
+msgstr "Інші статті"
+
+msgid "View All Articles"
+msgstr "Переглянути всі статті"
+
+msgid "Continue reading more stories"
+msgstr "Продовжити читати інші історії"
+
+msgid "Explore our latest stories, insights, and updates."
+msgstr "Ознайомтеся з нашими останніми історіями, думками та оновленнями."
+
+msgid "No articles available yet."
+msgstr "Статті поки недоступні."
+
+msgid "No articles available."
+msgstr "Статті недоступні."
+
+msgid "Share this article"
+msgstr "Поділитися статтею"
+
+msgid "Read more"
+msgstr "Читати далі"
+
+msgid "Video"
+msgstr "Відео"
+
+# Content - Services
+msgid "Back to Services"
+msgstr "Повернутися до послуг"
+
+msgid "Other Services"
+msgstr "Інші послуги"
+
+msgid "View All Services"
+msgstr "Переглянути всі послуги"
+
+msgid "Our Services"
+msgstr "Наші послуги"
+
+msgid "Share this service"
+msgstr "Поділитися послугою"
+
+msgid "Explore more of our services"
+msgstr "Ознайомтеся з іншими нашими послугами"
+
+msgid "Discover how we can help you achieve your goals with our comprehensive range of services."
+msgstr "Дізнайтеся, як ми можемо допомогти вам досягти ваших цілей завдяки нашому широкому спектру послуг."
+
+msgid "No services available."
+msgstr "Послуги недоступні."
+
+msgid "No services available"
+msgstr "Послуги недоступні"
+
+msgid "Check back later for our services."
+msgstr "Поверніться пізніше, щоб переглянути наші послуги."
+
+msgid "Learn more"
+msgstr "Дізнатися більше"
+
+# Content - Team
+msgid "Back to Team"
+msgstr "Повернутися до команди"
+
+msgid "Other Team Members"
+msgstr "Інші члени команди"
+
+msgid "View All Team Members"
+msgstr "Переглянути всіх членів команди"
+
+msgid "Our Team"
+msgstr "Наша команда"
+
+msgid "Meet the Team"
+msgstr "Познайомтеся з командою"
+
+msgid "Share this profile"
+msgstr "Поділитися профілем"
+
+msgid "Meet more people from our team"
+msgstr "Познайомтеся з іншими членами нашої команди"
+
+msgid "Meet the talented people behind our success. We are a diverse team of professionals dedicated to excellence."
+msgstr "Познайомтеся з талановитими людьми, які стоять за нашим успіхом. Ми різнопланова команда професіоналів, відданих досконалості."
+
+msgid "No team members available yet."
+msgstr "Члени команди поки недоступні."
+
+msgid "No team members available."
+msgstr "Члени команди недоступні."
+
+# Content - Products
+msgid "Back to Products"
+msgstr "Повернутися до продуктів"
+
+msgid "Our Products"
+msgstr "Наші продукти"
+
+msgid "View Product"
+msgstr "Переглянути продукт"
+
+msgid "View product"
+msgstr "Переглянути продукт"
+
+msgid "Discover our collection of high-quality products carefully curated for you."
+msgstr "Відкрийте для себе нашу колекцію високоякісних продуктів, ретельно підібраних для вас."
+
+msgid "No products found."
+msgstr "Продукти не знайдено."
+
+msgid "No products found in this category."
+msgstr "У цій категорії продуктів не знайдено."
+
+msgid "All"
+msgstr "Всі"
+
+msgid "Featured"
+msgstr "Рекомендовані"
+
+msgid "Sale"
+msgstr "Розпродаж"
+
+msgid "In Stock"
+msgstr "В наявності"
+
+msgid "Out of Stock"
+msgstr "Немає в наявності"
+
+msgid "Add to Wishlist"
+msgstr "Додати до списку бажань"
+
+msgid "Compare"
+msgstr "Порівняти"
+
+msgid "Buy"
+msgstr "Купити"
+
+msgid "Quantity"
+msgstr "Кількість"
+
+msgid "Description"
+msgstr "Опис"
+
+msgid "Details"
+msgstr "Деталі"
+
+msgid "SKU"
+msgstr "Артикул"
+
+msgid "Brand"
+msgstr "Бренд"
+
+msgid "Color"
+msgstr "Колір"
+
+msgid "Size"
+msgstr "Розмір"
+
+msgid "Material"
+msgstr "Матеріал"
+
+msgid "Select brand"
+msgstr "Вибрати бренд"
+
+msgid "Select material"
+msgstr "Вибрати матеріал"
+
+# Content - FAQ
+msgid "FAQs"
+msgstr "Часті запитання"
+
+msgid "Frequently Asked Questions"
+msgstr "Часті запитання"
+
+msgid "Find answers to commonly asked questions about our services and products."
+msgstr "Знайдіть відповіді на найпоширеніші запитання про наші послуги та продукти."
+
+msgid "No FAQs available yet."
+msgstr "Часті запитання поки недоступні."
+
+msgid "No FAQs available."
+msgstr "Часті запитання недоступні."
+
+# Content - Gallery
+msgid "No gallery images available yet."
+msgstr "Зображення галереї поки недоступні."
+
+msgid "No gallery images available."
+msgstr "Зображення галереї недоступні."
+
+# Content - Pricing
+msgid "No pricing plans available."
+msgstr "Тарифні плани недоступні."
+
+msgid "month"
+msgstr "місяць"
+
+msgid "incl."
+msgstr "вкл."
+
+msgid "Get started"
+msgstr "Почати"
+
+# Order/Commerce
+msgid "Complete Your Order"
+msgstr "Завершіть замовлення"
+
+msgid "Confirm Order"
+msgstr "Підтвердити замовлення"
+
+msgid "Delivery Address"
+msgstr "Адреса доставки"
+
+msgid "City, street, building, apartment"
+msgstr "Місто, вулиця, будинок, квартира"
+
+msgid "Your Name"
+msgstr "Ваше ім'я"
+
+msgid "Enter your full name"
+msgstr "Введіть ваше повне ім'я"
+
+msgid "Phone Number"
+msgstr "Номер телефону"
+
+msgid "Fill in your details below"
+msgstr "Заповніть ваші дані нижче"
+
+msgid "By placing an order, you agree to our terms of service"
+msgstr "Оформлюючи замовлення, ви погоджуєтесь з нашими умовами обслуговування"
+
+msgid "Shipping Information"
+msgstr "Інформація про доставку"
+
+msgid "Shipping information"
+msgstr "Інформація про доставку"
+
+# Contact Form
+msgid "Get a Direction"
+msgstr "Отримати маршрут"
+
+msgid "Name"
+msgstr "Ім'я"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Message"
+msgstr "Повідомлення"
+
+msgid "Submit"
+msgstr "Надіслати"
+
+msgid "Phone"
+msgstr "Телефон"
+
+msgid "Subject"
+msgstr "Тема"
+
+msgid "Send Message"
+msgstr "Надіслати повідомлення"
+
+msgid "Your message has been sent successfully."
+msgstr "Ваше повідомлення успішно надіслано."
+
+msgid "Name is required."
+msgstr "Ім'я обов'язкове."
+
+msgid "Email is required."
+msgstr "Email обов'язковий."
+
+msgid "Message is required."
+msgstr "Повідомлення обов'язкове."
+
+msgid "Phone is required."
+msgstr "Телефон обов'язковий."
+
+msgid "Subject is required."
+msgstr "Тема обов'язкова."
+
+msgid "Please enter a valid email address."
+msgstr "Будь ласка, введіть дійсну email адресу."
+
+# Common UI elements
+msgid "Save"
+msgstr "Зберегти"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Delete"
+msgstr "Видалити"
+
+msgid "Edit"
+msgstr "Редагувати"
+
+msgid "Close"
+msgstr "Закрити"
+
+msgid "Add"
+msgstr "Додати"
+
+msgid "Remove"
+msgstr "Видалити"
+
+msgid "Search"
+msgstr "Пошук"
+
+msgid "Filter"
+msgstr "Фільтр"
+
+msgid "Sort"
+msgstr "Сортувати"
+
+msgid "Loading..."
+msgstr "Завантаження..."
+
+msgid "Error"
+msgstr "Помилка"
+
+msgid "Success"
+msgstr "Успіх"
+
+msgid "Warning"
+msgstr "Попередження"
+
+msgid "Info"
+msgstr "Інформація"
+
+msgid "Yes"
+msgstr "Так"
+
+msgid "No"
+msgstr "Ні"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Required"
+msgstr "Обов'язкове"
+
+msgid "Optional"
+msgstr "Необов'язкове"
+
+# Date/Time
+msgid "Today"
+msgstr "Сьогодні"
+
+msgid "Yesterday"
+msgstr "Вчора"
+
+msgid "Tomorrow"
+msgstr "Завтра"
+
+# Status
+msgid "Active"
+msgstr "Активний"
+
+msgid "Inactive"
+msgstr "Неактивний"
+
+msgid "Enabled"
+msgstr "Увімкнено"
+
+msgid "Disabled"
+msgstr "Вимкнено"
+
+msgid "Published"
+msgstr "Опубліковано"
+
+msgid "Unpublished"
+msgstr "Не опубліковано"
+
+msgid "Draft"
+msgstr "Чернетка"
+
+# Footer sections
+msgid "Integrations"
+msgstr "Інтеграції"
+
+msgid "Changelog"
+msgstr "Журнал змін"
+
+msgid "Careers"
+msgstr "Кар'єра"
+
+msgid "Press"
+msgstr "Преса"
+
+msgid "Resources"
+msgstr "Ресурси"
+
+msgid "Documentation"
+msgstr "Документація"
+
+msgid "Help Center"
+msgstr "Центр допомоги"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Cookie Policy"
+msgstr "Політика cookies"

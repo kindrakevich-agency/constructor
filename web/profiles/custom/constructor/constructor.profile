@@ -5756,6 +5756,50 @@ function _constructor_enable_content_translation(string $bundle): bool {
 }
 
 /**
+ * Generate Pathauto alias for a translated entity.
+ *
+ * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+ *   The entity (node, term, etc.) that was translated.
+ * @param string $langcode
+ *   The language code of the translation.
+ */
+function _constructor_generate_pathauto_alias($entity, string $langcode): void {
+  try {
+    // Check if pathauto module is enabled.
+    if (!\Drupal::moduleHandler()->moduleExists('pathauto')) {
+      return;
+    }
+
+    // Get the translation.
+    if (!$entity->hasTranslation($langcode)) {
+      return;
+    }
+    $translation = $entity->getTranslation($langcode);
+
+    // Use pathauto generator service.
+    /** @var \Drupal\pathauto\PathautoGeneratorInterface $pathauto_generator */
+    $pathauto_generator = \Drupal::service('pathauto.generator');
+
+    // Generate the alias for the translation.
+    $pathauto_generator->updateEntityAlias($translation, 'insert');
+
+    \Drupal::logger('constructor')->notice('Generated Pathauto alias for @type @id in @lang', [
+      '@type' => $entity->getEntityTypeId(),
+      '@id' => $entity->id(),
+      '@lang' => $langcode,
+    ]);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->warning('Failed to generate Pathauto alias for @type @id in @lang: @message', [
+      '@type' => $entity->getEntityTypeId(),
+      '@id' => $entity->id(),
+      '@lang' => $langcode,
+      '@message' => $e->getMessage(),
+    ]);
+  }
+}
+
+/**
  * Translates a single node to a single language.
  *
  * Used by progressive batch translation operations.
@@ -5984,6 +6028,9 @@ function _constructor_translate_single_node($node, string $langcode, array $ai_s
     $node->addTranslation($langcode, $translation_values);
     $node->save();
 
+    // Generate Pathauto alias for the translation.
+    _constructor_generate_pathauto_alias($node, $langcode);
+
     \Drupal::logger('constructor')->notice('Translated @type to @lang: @title', [
       '@type' => $content_type,
       '@lang' => $langcode,
@@ -6083,6 +6130,8 @@ function _constructor_translate_faq_node($node, array $languages, array $ai_sett
           'uid' => $node->getOwnerId(),
         ]);
         $node->save();
+        // Generate Pathauto alias for the translation.
+        _constructor_generate_pathauto_alias($node, $langcode);
         $translated = TRUE;
         \Drupal::logger('constructor')->notice('Translated FAQ to @lang: @title', [
           '@lang' => $langcode,
@@ -6180,6 +6229,8 @@ function _constructor_translate_team_node($node, array $languages, array $ai_set
           'uid' => $node->getOwnerId(),
         ]);
         $node->save();
+        // Generate Pathauto alias for the translation.
+        _constructor_generate_pathauto_alias($node, $langcode);
         $translated = TRUE;
         \Drupal::logger('constructor')->notice('Translated Team to @lang: @name', [
           '@lang' => $langcode,
@@ -6288,6 +6339,8 @@ function _constructor_translate_service_node($node, array $languages, array $ai_
           'uid' => $node->getOwnerId(),
         ]);
         $node->save();
+        // Generate Pathauto alias for the translation.
+        _constructor_generate_pathauto_alias($node, $langcode);
         $translated = TRUE;
         \Drupal::logger('constructor')->notice('Translated Service to @lang: @name', [
           '@lang' => $langcode,
@@ -6396,6 +6449,8 @@ function _constructor_translate_article_node($node, array $languages, array $ai_
           'uid' => $node->getOwnerId(),
         ]);
         $node->save();
+        // Generate Pathauto alias for the translation.
+        _constructor_generate_pathauto_alias($node, $langcode);
         $translated = TRUE;
         \Drupal::logger('constructor')->notice('Translated Article to @lang: @title', [
           '@lang' => $langcode,
@@ -6509,6 +6564,8 @@ function _constructor_translate_product_node($node, array $languages, array $ai_
         }
         $node->addTranslation($langcode, $translation_values);
         $node->save();
+        // Generate Pathauto alias for the translation.
+        _constructor_generate_pathauto_alias($node, $langcode);
         $translated = TRUE;
         \Drupal::logger('constructor')->notice('Translated Product to @lang: @title', [
           '@lang' => $langcode,
@@ -6579,21 +6636,130 @@ function constructor_batch_update_translations(&$context) {
   $context['message'] = t('Updating translations...');
 
   // Check if locale module is enabled.
-  if (\Drupal::moduleHandler()->moduleExists('locale')) {
-    // Update translations from available sources.
-    try {
-      if (function_exists('locale_translation_batch_status_check')) {
-        // Check for updates.
-        \Drupal::moduleHandler()->loadInclude('locale', 'bulk.inc');
-        \Drupal::moduleHandler()->loadInclude('locale', 'compare.inc');
-      }
-    }
-    catch (\Exception $e) {
-      \Drupal::logger('constructor')->notice('Translation update: @message', ['@message' => $e->getMessage()]);
+  if (!\Drupal::moduleHandler()->moduleExists('locale')) {
+    $context['results'][] = 'translations_skipped';
+    return;
+  }
+
+  // Get all installed languages except English.
+  $languages = \Drupal::languageManager()->getLanguages();
+  $langcodes = [];
+  foreach ($languages as $langcode => $language) {
+    if ($langcode !== 'en') {
+      $langcodes[] = $langcode;
     }
   }
 
+  if (empty($langcodes)) {
+    $context['results'][] = 'translations_no_languages';
+    return;
+  }
+
+  // Import custom translations from modules and theme.
+  _constructor_import_custom_translations($langcodes);
+
   $context['results'][] = 'translations';
+}
+
+/**
+ * Import custom translations from modules and theme.
+ *
+ * @param array $langcodes
+ *   Array of language codes to import translations for.
+ */
+function _constructor_import_custom_translations(array $langcodes) {
+  $app_root = \Drupal::root();
+
+  // Define paths to search for translation files.
+  $translation_paths = [
+    // Profile translations.
+    $app_root . '/profiles/custom/constructor/translations',
+    // Custom modules.
+    $app_root . '/modules/custom/constructor_core/translations',
+    $app_root . '/modules/custom/constructor_hero/translations',
+    $app_root . '/modules/custom/content_article/translations',
+    $app_root . '/modules/custom/content_commerce/translations',
+    $app_root . '/modules/custom/content_faq/translations',
+    $app_root . '/modules/custom/content_services/translations',
+    $app_root . '/modules/custom/content_team/translations',
+    $app_root . '/modules/custom/contact_form/translations',
+    $app_root . '/modules/custom/gallery/translations',
+    $app_root . '/modules/custom/language_switcher/translations',
+    $app_root . '/modules/custom/openai_provider/translations',
+    $app_root . '/modules/custom/simple_metatag/translations',
+    $app_root . '/modules/custom/simple_sitemap_generator/translations',
+    // Theme translations.
+    $app_root . '/themes/custom/constructor_theme/translations',
+  ];
+
+  $locale_storage = \Drupal::service('locale.storage');
+  $imported_count = 0;
+
+  foreach ($langcodes as $langcode) {
+    foreach ($translation_paths as $path) {
+      // Check for {langcode}.po file.
+      $po_file = $path . '/' . $langcode . '.po';
+      if (!file_exists($po_file)) {
+        continue;
+      }
+
+      try {
+        // Use Gettext file reader.
+        $reader = new \Drupal\Component\Gettext\PoStreamReader();
+        $reader->setURI($po_file);
+        $reader->open();
+
+        $header = $reader->getHeader();
+        if (!$header) {
+          \Drupal::logger('constructor')->warning('Invalid PO file: @file', ['@file' => $po_file]);
+          continue;
+        }
+
+        // Import each translation string.
+        while ($item = $reader->readItem()) {
+          if (empty($item->getSource()) || empty($item->getTranslation())) {
+            continue;
+          }
+
+          // Find or create the source string.
+          $source_string = $locale_storage->findString([
+            'source' => $item->getSource(),
+            'context' => $item->getContext() ?: '',
+          ]);
+
+          if (!$source_string) {
+            $source_string = $locale_storage->createString([
+              'source' => $item->getSource(),
+              'context' => $item->getContext() ?: '',
+            ])->save();
+          }
+
+          // Save the translation.
+          $locale_storage->createTranslation([
+            'lid' => $source_string->lid,
+            'language' => $langcode,
+            'translation' => $item->getTranslation(),
+          ])->save();
+
+          $imported_count++;
+        }
+
+        $reader->close();
+      }
+      catch (\Exception $e) {
+        \Drupal::logger('constructor')->error('Failed to import @file: @message', [
+          '@file' => $po_file,
+          '@message' => $e->getMessage(),
+        ]);
+      }
+    }
+
+    // Clear locale cache for this language.
+    _locale_invalidate_js($langcode);
+    \Drupal::cache()->delete('locale:' . $langcode);
+  }
+
+  \Drupal::logger('constructor')->notice('Imported @count translation strings.', ['@count' => $imported_count]);
 }
 
 /**
@@ -7163,6 +7329,9 @@ function constructor_batch_translate_taxonomy($constructor_settings, $vocabulary
             'name' => $translated_name,
           ]);
           $translation->save();
+
+          // Generate Pathauto alias for the translation.
+          _constructor_generate_pathauto_alias($term, $langcode);
 
           \Drupal::logger('constructor')->notice('Translated term "@name" to @lang: "@translated"', [
             '@name' => $original_name,

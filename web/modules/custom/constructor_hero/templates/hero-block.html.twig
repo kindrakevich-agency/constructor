@@ -19,11 +19,16 @@
           </p>
         {% endif %}
 
-        {# Email Input + CTA #}
+        {# Input + CTA #}
         {% if show_email_form %}
           <div class="flex flex-col sm:flex-row gap-3 mb-12">
             <div class="flex-1 relative">
-              <input type="email" placeholder="{{ email_placeholder }}" class="w-full px-4 py-3.5 3xl:px-6 3xl:py-4 3xl:text-lg border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-gray-400">
+              <input
+                type="{{ input_fill_type == 'phone' ? 'tel' : 'email' }}"
+                id="hero-input"
+                data-fill-type="{{ input_fill_type }}"
+                placeholder="{{ input_placeholder }}"
+                class="hero-input w-full px-4 py-3.5 3xl:px-6 3xl:py-4 3xl:text-lg border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white dark:bg-slate-800 dark:text-white dark:placeholder-gray-400">
             </div>
             <button class="open-booking-modal px-6 py-3.5 3xl:px-8 3xl:py-4 3xl:text-lg bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap cursor-pointer">
               {{ button_text }}

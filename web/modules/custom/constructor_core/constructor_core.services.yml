@@ -8,3 +8,9 @@ services:
     arguments: ['@constructor_core.responsive_image', '@file_url_generator']
     tags:
       - { name: twig.extension }
+
+  constructor_core.twig.url:
+    class: Drupal\constructor_core\TwigExtension\UrlExtension
+    arguments: ['@language_manager']
+    tags:
+      - { name: twig.extension }

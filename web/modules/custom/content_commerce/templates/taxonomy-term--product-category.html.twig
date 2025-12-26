@@ -22,7 +22,7 @@
 
     <!-- Filter Tabs -->
     <div class="flex flex-wrap items-center justify-center gap-2 mb-12">
-      <a href="/products" class="product-filter-link px-4 py-2 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">{{ 'All'|t }}</a>
+      <a href="{{ lang_path('/products') }}" class="product-filter-link px-4 py-2 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">{{ 'All'|t }}</a>
       {% for category in categories %}
         <a href="{{ category.url }}" class="product-filter-link px-4 py-2 rounded-full text-sm font-medium {{ current_category == category.name ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700' }} transition-colors">{{ category.name }}</a>
       {% endfor %}

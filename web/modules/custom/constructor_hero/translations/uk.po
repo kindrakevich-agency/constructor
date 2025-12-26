@@ -57,6 +57,27 @@ msgstr "Плейсхолдер електронної пошти"
 msgid "Button text"
 msgstr "Текст кнопки"
 
+msgid "Show button in header"
+msgstr "Показати кнопку в шапці"
+
+msgid "Display the button in the site header (desktop and mobile). The button will use the \"Button text\" value above."
+msgstr "Відображати кнопку в шапці сайту (для десктопу та мобільних). Кнопка використовуватиме значення \"Текст кнопки\" вище."
+
+msgid "Input placeholder"
+msgstr "Плейсхолдер поля введення"
+
+msgid "Fill field in popup"
+msgstr "Заповнити поле у спливаючому вікні"
+
+msgid "Fill email"
+msgstr "Заповнити email"
+
+msgid "Fill phone"
+msgstr "Заповнити телефон"
+
+msgid "When the user enters a value and clicks the button, this field will be pre-filled in the booking popup."
+msgstr "Коли користувач введе значення та натисне кнопку, це поле буде попередньо заповнене у спливаючому вікні бронювання."
+
 msgid "Statistics"
 msgstr "Статистика"
 
