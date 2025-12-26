@@ -490,7 +490,11 @@
   }
 
   .language-option.selected {
-    background: rgba(34, 197, 94, 0.1);
+    @apply bg-blue-50;
+  }
+
+  html.dark .language-option.selected {
+    background-color: #0c4a6e; /* sky-900 */
   }
 
   .language-option.selected .language-check {

@@ -9,7 +9,8 @@
   Drupal.behaviors.constructorDarkMode = {
     attach: function (context) {
       once('dark-mode-init', 'body', context).forEach(function () {
-        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggleDesktop = document.getElementById('theme-toggle');
+        const themeToggleMobile = document.getElementById('theme-toggle-mobile');
         const html = document.documentElement;
 
         // Check for saved theme preference or default to system preference
@@ -33,16 +34,24 @@
           localStorage.setItem('theme', theme);
         }
 
+        // Toggle theme handler
+        function toggleTheme() {
+          const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          applyTheme(newTheme);
+        }
+
         // Initialize theme on page load
         applyTheme(getThemePreference());
 
-        // Toggle theme on button click
-        if (themeToggle) {
-          themeToggle.addEventListener('click', function () {
-            const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            applyTheme(newTheme);
-          });
+        // Toggle theme on desktop button click
+        if (themeToggleDesktop) {
+          themeToggleDesktop.addEventListener('click', toggleTheme);
+        }
+
+        // Toggle theme on mobile button click
+        if (themeToggleMobile) {
+          themeToggleMobile.addEventListener('click', toggleTheme);
         }
 
         // Listen for system theme changes

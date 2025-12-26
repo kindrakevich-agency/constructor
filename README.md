@@ -358,6 +358,25 @@ All Drupal templates are overridden for clean HTML output:
 Toggle dark mode by adding/removing the `dark` class on the `<html>` element.
 Theme toggle button included in header.
 
+### Theme Settings
+Configure the theme at `/admin/appearance/settings/constructor_theme`:
+
+**Dark Mode Settings**
+- Enable/disable dark mode toggle button in the header
+
+**Contact Information**
+- Phone number (displayed in mobile menu and footer)
+- Email address (displayed in mobile menu and footer)
+- Footer tagline (description text under logo in footer)
+
+**Social Links**
+- Twitter/X URL
+- GitHub URL
+- LinkedIn URL
+- Instagram URL
+
+All social links are optional - leave empty to hide.
+
 ## Translations
 
 Ukrainian translations are included for:

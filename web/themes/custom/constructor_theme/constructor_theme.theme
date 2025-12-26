@@ -5,7 +5,119 @@
  * Constructor theme functions.
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Template\Attribute;
+
+/**
+ * Implements hook_form_system_theme_settings_alter().
+ */
+function constructor_theme_form_system_theme_settings_alter(&$form, FormStateInterface $form_state) {
+  // Get current settings.
+  $config = \Drupal::config('constructor_theme.settings');
+
+  // Dark mode settings.
+  $form['dark_mode'] = [
+    '#type' => 'details',
+    '#title' => t('Dark Mode Settings'),
+    '#open' => TRUE,
+    '#weight' => -10,
+  ];
+
+  $form['dark_mode']['enable_dark_mode'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Enable dark mode'),
+    '#description' => t('Allow visitors to switch between light and dark themes. If unchecked, the dark/light mode switcher will be hidden from the header.'),
+    '#default_value' => $config->get('enable_dark_mode') ?? TRUE,
+  ];
+
+  // Contact information settings.
+  $form['contact_info'] = [
+    '#type' => 'details',
+    '#title' => t('Contact Information'),
+    '#open' => TRUE,
+    '#weight' => -5,
+  ];
+
+  $form['contact_info']['phone'] = [
+    '#type' => 'textfield',
+    '#title' => t('Phone number'),
+    '#description' => t('Phone number displayed in mobile menu and footer.'),
+    '#default_value' => $config->get('phone') ?? '+1 (234) 567-890',
+  ];
+
+  $form['contact_info']['email'] = [
+    '#type' => 'email',
+    '#title' => t('Email address'),
+    '#description' => t('Email address displayed in mobile menu and footer.'),
+    '#default_value' => $config->get('email') ?? 'hello@example.com',
+  ];
+
+  $form['contact_info']['footer_tagline'] = [
+    '#type' => 'textfield',
+    '#title' => t('Footer tagline'),
+    '#description' => t('Short description displayed under the logo in the footer.'),
+    '#default_value' => $config->get('footer_tagline') ?? 'Build your digital experience with our powerful tools.',
+  ];
+
+  // Social links settings.
+  $form['social_links'] = [
+    '#type' => 'details',
+    '#title' => t('Social Links'),
+    '#description' => t('Leave empty to hide a social link.'),
+    '#open' => TRUE,
+    '#weight' => 0,
+  ];
+
+  $form['social_links']['twitter_url'] = [
+    '#type' => 'url',
+    '#title' => t('Twitter/X URL'),
+    '#default_value' => $config->get('twitter_url') ?? 'https://twitter.com',
+  ];
+
+  $form['social_links']['github_url'] = [
+    '#type' => 'url',
+    '#title' => t('GitHub URL'),
+    '#default_value' => $config->get('github_url') ?? 'https://github.com',
+  ];
+
+  $form['social_links']['linkedin_url'] = [
+    '#type' => 'url',
+    '#title' => t('LinkedIn URL'),
+    '#default_value' => $config->get('linkedin_url') ?? 'https://linkedin.com',
+  ];
+
+  $form['social_links']['instagram_url'] = [
+    '#type' => 'url',
+    '#title' => t('Instagram URL'),
+    '#default_value' => $config->get('instagram_url') ?? 'https://instagram.com',
+  ];
+
+  // Add custom submit handler.
+  $form['#submit'][] = 'constructor_theme_settings_submit';
+}
+
+/**
+ * Custom submit handler for theme settings.
+ */
+function constructor_theme_settings_submit(&$form, FormStateInterface $form_state) {
+  $config = \Drupal::configFactory()->getEditable('constructor_theme.settings');
+
+  // Dark mode.
+  $config->set('enable_dark_mode', $form_state->getValue('enable_dark_mode'));
+
+  // Contact info.
+  $config->set('phone', $form_state->getValue('phone'));
+  $config->set('email', $form_state->getValue('email'));
+  $config->set('footer_tagline', $form_state->getValue('footer_tagline'));
+
+  // Social links.
+  $config->set('twitter_url', $form_state->getValue('twitter_url'));
+  $config->set('github_url', $form_state->getValue('github_url'));
+  $config->set('linkedin_url', $form_state->getValue('linkedin_url'));
+  $config->set('instagram_url', $form_state->getValue('instagram_url'));
+
+  $config->save();
+}
 
 /**
  * Implements hook_preprocess_block__system_branding_block().
@@ -39,8 +151,17 @@ function constructor_theme_preprocess_page(&$variables) {
   // Get theme settings from constructor_theme config.
   $theme_settings_config = \Drupal::config('constructor_theme.settings');
   $variables['theme_settings'] = [
-    'enable_dark_mode' => $theme_settings_config->get('enable_dark_mode') ?? FALSE,
+    'enable_dark_mode' => $theme_settings_config->get('enable_dark_mode') ?? TRUE,
     'color_scheme' => $theme_settings_config->get('color_scheme') ?? 'blue',
+    // Contact info.
+    'phone' => $theme_settings_config->get('phone') ?? '+1 (234) 567-890',
+    'email' => $theme_settings_config->get('email') ?? 'hello@example.com',
+    'footer_tagline' => $theme_settings_config->get('footer_tagline') ?? 'Build your digital experience with our powerful tools.',
+    // Social links.
+    'twitter_url' => $theme_settings_config->get('twitter_url') ?? 'https://twitter.com',
+    'github_url' => $theme_settings_config->get('github_url') ?? 'https://github.com',
+    'linkedin_url' => $theme_settings_config->get('linkedin_url') ?? 'https://linkedin.com',
+    'instagram_url' => $theme_settings_config->get('instagram_url') ?? 'https://instagram.com',
   ];
 
   // Attach dark mode library if enabled.

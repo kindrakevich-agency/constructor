@@ -154,7 +154,7 @@
       const lang = languages[langcode];
       const isSelected = lang.is_current;
       languageOptionsHtml += `
-        <a href="${lang.url}" class="language-option w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors ${isSelected ? 'selected bg-blue-50 dark:bg-blue-900/20' : ''}" data-lang="${langcode}">
+        <a href="${lang.url}" class="language-option w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors ${isSelected ? 'selected' : ''}" data-lang="${langcode}">
           <span class="text-2xl">${lang.flag}</span>
           <div class="flex-1 text-left">
             <div class="font-medium text-gray-900 dark:text-white">${lang.native_name}</div>
