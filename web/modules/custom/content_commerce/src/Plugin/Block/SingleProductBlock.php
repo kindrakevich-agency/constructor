@@ -167,8 +167,10 @@ class SingleProductBlock extends BlockBase implements ContainerFactoryPluginInte
     foreach ($field_values as $delta => $item) {
       $file = $item->entity;
       if ($file) {
+        $uri = $file->getFileUri();
         $images[] = [
-          'url' => \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri()),
+          'url' => \Drupal::service('file_url_generator')->generateAbsoluteString($uri),
+          'uri' => $uri,
           'alt' => $item->alt ?: $node->getTitle(),
         ];
       }

@@ -31,6 +31,8 @@
                     </svg>
                   </div>
                 </div>
+              {% elseif article.image_uri %}
+                {{ responsive_image(article.image_uri, 'article', article.image_alt ?: article.title, 'w-full h-full object-cover transition-transform duration-500 group-hover:scale-105') }}
               {% elseif article.image_url %}
                 <img src="{{ article.image_url }}" alt="{{ article.image_alt ?: article.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
               {% else %}

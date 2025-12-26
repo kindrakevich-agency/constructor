@@ -12,3 +12,9 @@ effects:
       width: 1200
       height: 800
       anchor: center-center
+  article-featured-convert-webp:
+    uuid: article-featured-convert-webp-1200
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

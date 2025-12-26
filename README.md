@@ -327,16 +327,17 @@ Pricing plans module with:
   - FAQ
   - Service
   - Product (e-commerce)
+  - Gallery
+  - Pricing Plans
 
-### Step 6: Design & Layout
-- Dark mode toggle
-- Front page configuration
-- Block placement
-
-### Step 7: AI Integration
-- OpenAI API configuration
-- Model selection (GPT-4o, GPT-4, etc.)
+### Step 6: AI Integration
+- OpenAI API key configuration
+- Text generation model selection (GPT-4o, GPT-4, etc.)
+- Image generation toggle (generate AI images for content, enabled by default)
+- Image model and quality settings
 - Automatic content generation for all enabled content types
+
+**Note:** Dark mode is enabled by default in theme settings. You can change it at `/admin/appearance/settings/constructor_theme`.
 
 ## Theme Features
 

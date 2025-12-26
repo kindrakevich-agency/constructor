@@ -56,6 +56,16 @@ function gallery_get_images() {
     return ($b['created'] ?? 0) - ($a['created'] ?? 0);
   });
 
+  // Add file URIs for responsive images.
+  foreach ($images as &$image) {
+    if (!empty($image['fid']) && empty($image['uri'])) {
+      $file = \Drupal\file\Entity\File::load($image['fid']);
+      if ($file) {
+        $image['uri'] = $file->getFileUri();
+      }
+    }
+  }
+
   return $images;
 }
 

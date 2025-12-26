@@ -12,3 +12,9 @@ effects:
       width: 640
       height: 360
       anchor: center-center
+  hero-sm-convert-webp:
+    uuid: hero-sm-convert-webp-640
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

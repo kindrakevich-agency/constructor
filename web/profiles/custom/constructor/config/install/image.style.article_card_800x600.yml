@@ -12,3 +12,9 @@ effects:
       width: 800
       height: 600
       anchor: center-center
+  article-card-lg-convert-webp:
+    uuid: article-card-lg-convert-webp-800
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

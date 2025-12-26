@@ -29,7 +29,11 @@
         <!-- Main Image -->
         <div class="rounded-2xl overflow-hidden mb-4 aspect-square flex items-center justify-center bg-white dark:bg-slate-900">
           {% if images|length > 0 %}
-            <img id="product-main-image-{{ product_id }}" src="{{ images[0].url }}" alt="{{ images[0].alt }}" class="max-w-full max-h-full object-contain">
+            {% if images[0].uri %}
+              {{ responsive_image(images[0].uri, 'product_main', images[0].alt, 'w-full h-full object-contain') }}
+            {% else %}
+              <img id="product-main-image-{{ product_id }}" src="{{ images[0].url }}" alt="{{ images[0].alt }}" class="w-full h-full object-contain">
+            {% endif %}
           {% else %}
             <svg class="w-24 h-24 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -42,7 +46,11 @@
             <div class="flex gap-2 sm:gap-3 overflow-x-auto flex-1 pb-2 -mb-2">
               {% for image in images %}
                 <button class="product-thumbnail flex-shrink-0 w-14 h-14 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden {{ loop.first ? 'opacity-100 ring-2 ring-blue-500' : 'opacity-60 hover:opacity-100' }} transition-opacity" data-image="{{ image.url }}" data-product-id="{{ product_id }}">
-                  <img src="{{ image.url }}" alt="{{ image.alt }}" class="w-full h-full object-cover">
+                  {% if image.uri %}
+                    {{ responsive_image(image.uri, 'thumbnail', image.alt, 'w-full h-full object-cover') }}
+                  {% else %}
+                    <img src="{{ image.url }}" alt="{{ image.alt }}" class="w-full h-full object-cover">
+                  {% endif %}
                 </button>
               {% endfor %}
             </div>
@@ -185,27 +193,15 @@
           </div>
         {% endif %}
 
-        <!-- Quantity and Buy -->
+        <!-- View Product Button -->
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div class="flex items-center justify-between sm:justify-start">
-            <span class="text-sm text-gray-600 dark:text-gray-400 mr-3">{{ 'Quantity'|t }}</span>
-            <div class="flex items-center border border-gray-300 dark:border-slate-600 rounded-lg">
-              <button class="qty-minus w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors rounded-l-lg" data-product-id="{{ product_id }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                </svg>
-              </button>
-              <input type="number" class="qty-input w-12 h-10 text-center border-x border-gray-300 dark:border-slate-600 bg-transparent dark:text-white focus:outline-none" value="1" min="1" data-product-id="{{ product_id }}">
-              <button class="qty-plus w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors rounded-r-lg" data-product-id="{{ product_id }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <button class="buy-btn w-full sm:flex-1 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors" data-product-id="{{ product_id }}" data-product-title="{{ product_title }}" data-product-price="{{ product_price }}">
-            {{ 'Buy'|t }}
-          </button>
+          <a href="{{ product_url }}" class="view-product-btn w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-center flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            {{ 'View product'|t }}
+          </a>
         </div>
       </div>
     </div>
@@ -213,82 +209,3 @@
 
 </section>
 
-{# Buy Drawer Overlay #}
-<div id="buy-drawer-overlay-{{ product_id }}" class="buy-drawer-overlay fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] hidden"></div>
-
-{# Buy Drawer/Popup - Drawer on mobile, centered popup on desktop #}
-<div id="buy-drawer-{{ product_id }}" class="buy-drawer fixed inset-0 z-[70] hidden" role="dialog" aria-modal="true" data-product-id="{{ product_id }}">
-  <div class="buy-drawer-content bg-white dark:bg-slate-900 rounded-t-[20px] lg:rounded-[20px] shadow-2xl max-h-[90vh] flex flex-col absolute inset-x-0 bottom-0 lg:relative lg:inset-auto overflow-hidden">
-    {# Drag Handle - Only visible on mobile #}
-    <div class="buy-drawer-handle flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing lg:hidden">
-      <div class="w-12 h-1.5 bg-gray-300 dark:bg-slate-600 rounded-full"></div>
-    </div>
-
-    {# Drawer/Popup Header #}
-    <div class="px-6 pb-4 lg:pt-6 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ 'Complete Your Order'|t }}</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ 'Fill in your details below'|t }}</p>
-      </div>
-      <button class="buy-drawer-close w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors" data-product-id="{{ product_id }}">
-        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-    </div>
-
-    {# Product Summary #}
-    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-      <div class="flex items-center gap-4">
-        {% if images|length > 0 %}
-          <img src="{{ images[0].url }}" alt="{{ product_title }}" class="w-16 h-16 object-cover rounded-xl">
-        {% else %}
-          <div class="w-16 h-16 bg-gray-200 dark:bg-slate-700 rounded-xl flex items-center justify-center">
-            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-          </div>
-        {% endif %}
-        <div class="flex-1 min-w-0">
-          <h4 class="font-medium text-gray-900 dark:text-white truncate">{{ product_title }}</h4>
-          <p class="text-lg font-bold text-gray-900 dark:text-white">{{ product_price }}</p>
-        </div>
-      </div>
-    </div>
-
-    {# Form - Scrollable area #}
-    <div class="flex-1 overflow-y-auto">
-      <form class="buy-form p-6 space-y-4" data-product-id="{{ product_id }}">
-        <div>
-          <label for="buy-name-{{ product_id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ 'Your Name'|t }} <span class="text-red-500">*</span></label>
-          <input type="text" id="buy-name-{{ product_id }}" name="name" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400" placeholder="{{ 'Enter your full name'|t }}">
-        </div>
-
-        <div>
-          <label for="buy-phone-{{ product_id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ 'Phone Number'|t }} <span class="text-red-500">*</span></label>
-          <input type="tel" id="buy-phone-{{ product_id }}" name="phone" required class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400" placeholder="{{ '+380 XX XXX XX XX'|t }}">
-        </div>
-
-        <div>
-          <label for="buy-address-{{ product_id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ 'Delivery Address'|t }} <span class="text-red-500">*</span></label>
-          <textarea id="buy-address-{{ product_id }}" name="address" required rows="3" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400 resize-none" placeholder="{{ 'City, street, building, apartment'|t }}"></textarea>
-        </div>
-
-        {# Submit Button #}
-        <button type="submit" class="w-full py-3.5 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition-colors">
-          {{ 'Confirm Order'|t }}
-        </button>
-      </form>
-    </div>
-
-    {# Footer - Always visible #}
-    <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-900">
-      <p class="text-xs text-center text-gray-500 dark:text-gray-400">
-        {{ 'By placing an order, you agree to our terms of service'|t }}
-      </p>
-    </div>
-
-    {# Safe area padding for iOS #}
-    <div class="h-6 bg-white dark:bg-slate-900 lg:hidden"></div>
-  </div>
-</div>

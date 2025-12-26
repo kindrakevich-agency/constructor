@@ -4,6 +4,7 @@ namespace Drupal\constructor_hero\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
 
 /**
  * Provides a Hero Block.
@@ -36,7 +37,7 @@ class HeroBlock extends BlockBase {
       'show_rating' => TRUE,
       'rating_value' => '4.5',
       'rating_text' => 'Average user rating',
-      'image_url' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop&q=80',
+      'image_fid' => NULL,
       'image_alt' => 'Team collaboration',
       'show_floating_card' => TRUE,
       'floating_card_value' => '2,500+',
@@ -217,11 +218,16 @@ class HeroBlock extends BlockBase {
       '#open' => FALSE,
     ];
 
-    $form['image_section']['image_url'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Image URL'),
-      '#default_value' => $this->configuration['image_url'],
-      '#description' => $this->t('URL of the hero image.'),
+    $form['image_section']['image_fid'] = [
+      '#type' => 'managed_file',
+      '#title' => $this->t('Hero Image'),
+      '#upload_location' => 'public://hero-images/',
+      '#upload_validators' => [
+        'FileExtension' => ['extensions' => 'png jpg jpeg gif webp'],
+        'FileSizeLimit' => ['fileLimit' => 10 * 1024 * 1024],
+      ],
+      '#default_value' => $this->configuration['image_fid'] ? [$this->configuration['image_fid']] : [],
+      '#description' => $this->t('Upload an image for the hero section. Leave empty to show a placeholder.'),
     ];
 
     $form['image_section']['image_alt'] = [
@@ -301,7 +307,15 @@ class HeroBlock extends BlockBase {
 
     // Image Section.
     $image_section = $form_state->getValue('image_section');
-    $this->configuration['image_url'] = $image_section['image_url'];
+    $image_fid = !empty($image_section['image_fid']) ? reset($image_section['image_fid']) : NULL;
+    if ($image_fid) {
+      $file = File::load($image_fid);
+      if ($file) {
+        $file->setPermanent();
+        $file->save();
+      }
+    }
+    $this->configuration['image_fid'] = $image_fid;
     $this->configuration['image_alt'] = $image_section['image_alt'];
 
     // Floating Card Section.
@@ -331,6 +345,17 @@ class HeroBlock extends BlockBase {
       }
     }
 
+    // Get image URL and URI.
+    $image_url = NULL;
+    $image_uri = NULL;
+    if (!empty($this->configuration['image_fid'])) {
+      $file = File::load($this->configuration['image_fid']);
+      if ($file) {
+        $image_uri = $file->getFileUri();
+        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
+      }
+    }
+
     return [
       '#theme' => 'hero_block',
       '#title' => $this->configuration['title'],
@@ -345,7 +370,8 @@ class HeroBlock extends BlockBase {
       '#show_rating' => $this->configuration['show_rating'],
       '#rating_value' => $this->configuration['rating_value'],
       '#rating_text' => $this->configuration['rating_text'],
-      '#image_url' => $this->configuration['image_url'],
+      '#image_url' => $image_url,
+      '#image_uri' => $image_uri,
       '#image_alt' => $this->configuration['image_alt'],
       '#show_floating_card' => $this->configuration['show_floating_card'],
       '#floating_card_value' => $this->configuration['floating_card_value'],

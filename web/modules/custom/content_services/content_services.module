@@ -33,6 +33,7 @@ function content_services_theme($existing, $type, $theme, $path) {
         'title' => NULL,
         'subtitle' => NULL,
         'image_url' => NULL,
+        'image_uri' => NULL,
         'methods' => [],
       ],
       'template' => 'service-methods-block',

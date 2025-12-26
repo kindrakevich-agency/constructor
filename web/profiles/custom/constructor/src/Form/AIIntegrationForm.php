@@ -53,7 +53,7 @@ class AIIntegrationForm extends InstallerFormBase {
    * {@inheritdoc}
    */
   protected function getStepNumber(): int {
-    return 5;
+    return 4;
   }
 
   /**
@@ -161,9 +161,26 @@ class AIIntegrationForm extends InstallerFormBase {
       ''
     );
 
+    $form['enable_image_generation_wrapper'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['p-4', 'border', 'border-gray-200', 'rounded-lg', 'bg-white', 'mb-6']],
+    ];
+
+    $form['enable_image_generation_wrapper']['enable_image_generation'] = [
+      '#type' => 'checkbox',
+      '#title' => '<span class="font-medium text-gray-900">' . $this->t('Generate AI images') . '</span>',
+      '#default_value' => $saved_values['enable_image_generation'] ?? TRUE,
+      '#description' => $this->t('Generate images using DALL-E for content. If unchecked, only text content will be generated.'),
+    ];
+
     $form['image_grid'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-6', 'mb-8']],
+      '#states' => [
+        'visible' => [
+          ':input[name="enable_image_generation"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     $form['image_grid']['image_size'] = $this->createSelectField(
@@ -282,11 +299,14 @@ class AIIntegrationForm extends InstallerFormBase {
    */
   protected function submitStepForm(array &$form, FormStateInterface $form_state): void {
     $values = [
+      // AI settings.
       'api_key' => $form_state->getValue('api_key'),
       'text_model' => $form_state->getValue('text_model'),
       'image_model' => $form_state->getValue('image_model'),
       'temperature' => $form_state->getValue('temperature'),
       'max_tokens' => $form_state->getValue('max_tokens'),
+      // Image generation settings.
+      'enable_image_generation' => (bool) $form_state->getValue('enable_image_generation'),
       'image_size' => $form_state->getValue('image_size'),
       'image_quality' => $form_state->getValue('image_quality'),
     ];

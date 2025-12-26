@@ -120,6 +120,14 @@ class ResponsiveImageHelper {
         ],
         'sizes' => '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw',
       ],
+      'product_main' => [
+        'styles' => [
+          'medium_640x640' => 640,
+          'large_1024x1024' => 1024,
+          'xlarge_1920x1920' => 1920,
+        ],
+        'sizes' => '(min-width: 1024px) 50vw, 100vw',
+      ],
       'article' => [
         'styles' => [
           'article_card_400x300' => 400,

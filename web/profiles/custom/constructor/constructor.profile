@@ -28,8 +28,8 @@ function constructor_preprocess_install_page(&$variables) {
   $install_state = $GLOBALS['install_state'] ?? [];
   $active_task = $install_state['active_task'] ?? '';
 
-  // Map Drupal install tasks to our 9-step wizard.
-  // Steps: 1-Language, 2-Database, 3-Site Basics, 4-Languages, 5-Content Types, 6-Modules, 7-Design, 8-AI, 9-Finalize
+  // Map Drupal install tasks to our 7-step wizard.
+  // Steps: 1-Language, 2-Database, 3-Site Basics, 4-Languages, 5-Content Types, 6-AI, 7-Finalize
   $step_mapping = [
     // Step 1: Language selection.
     'install_select_language' => 1,
@@ -46,16 +46,14 @@ function constructor_preprocess_install_page(&$variables) {
     'install_profile_themes' => 2,
     'install_install_profile' => 2,
     'install_configure_form' => 2,
-    // Constructor custom wizard steps (steps 3-9).
+    // Constructor custom wizard steps (steps 3-7).
     'constructor_install_site_basics' => 3,
     'constructor_install_languages' => 4,
     'constructor_install_content_types' => 5,
-    'constructor_install_modules' => 6,
-    'constructor_install_design_layout' => 7,
-    'constructor_install_ai_integration' => 8,
-    'constructor_finalize_installation' => 9,
-    'constructor_update_translations' => 9,
-    'install_finished' => 9,
+    'constructor_install_ai_integration' => 6,
+    'constructor_finalize_installation' => 7,
+    'constructor_update_translations' => 7,
+    'install_finished' => 7,
   ];
 
   $variables['current_step'] = $step_mapping[$active_task] ?? 1;
@@ -105,15 +103,7 @@ function constructor_install_tasks(&$install_state) {
       'function' => 'Drupal\constructor\Form\ContentTypesForm',
     ];
 
-    // Step 8: Design & Layout.
-    $tasks['constructor_install_design_layout'] = [
-      'display_name' => t('Design & Layout'),
-      'display' => TRUE,
-      'type' => 'form',
-      'function' => 'Drupal\constructor\Form\DesignLayoutForm',
-    ];
-
-    // Step 10: AI Integration.
+    // Step 7: AI Integration.
     $tasks['constructor_install_ai_integration'] = [
       'display_name' => t('AI Integration'),
       'display' => TRUE,
@@ -544,6 +534,8 @@ function constructor_translate_content_batch(&$install_state) {
     }
     if (in_array('content_commerce', $content_type_modules)) {
       $operations[] = ['constructor_batch_translate_products', [$constructor_settings]];
+      // Also translate product_category taxonomy terms.
+      $operations[] = ['constructor_batch_translate_taxonomy', [$constructor_settings, 'product_category']];
     }
     if (in_array('pricing_plans', $content_type_modules)) {
       $operations[] = ['constructor_batch_translate_pricing_plans', [$constructor_settings]];
@@ -1258,8 +1250,6 @@ function _constructor_generate_articles_with_ai($site_name, $site_description, $
   // Default YouTube video IDs for articles with video.
   $youtube_videos = [
     'bTqVqk7FSmY',
-    'dQw4w9WgXcQ',
-    'jNQXAC9IVRw',
   ];
 
   // Default Unsplash images for articles.
@@ -2084,18 +2074,21 @@ function constructor_batch_set_default_theme(&$context) {
 function constructor_batch_configure_theme_settings($constructor_settings, &$context) {
   $context['message'] = t('Configuring theme settings...');
 
-  $layout = $constructor_settings['layout'] ?? [];
+  // Dark mode is always enabled by default.
+  // Can be changed later in theme settings at /admin/appearance/settings/constructor_theme.
+  $enable_dark_mode = TRUE;
+  $color_scheme = 'blue';
 
   try {
     // Save theme settings to constructor_theme.settings config.
     $config = \Drupal::configFactory()->getEditable('constructor_theme.settings');
-    $config->set('enable_dark_mode', !empty($layout['enable_dark_mode']));
-    $config->set('color_scheme', $layout['color_scheme'] ?? 'blue');
+    $config->set('enable_dark_mode', $enable_dark_mode);
+    $config->set('color_scheme', $color_scheme);
     $config->save();
 
     \Drupal::logger('constructor')->notice('Theme settings saved: dark_mode=@dark, color=@color', [
-      '@dark' => !empty($layout['enable_dark_mode']) ? 'yes' : 'no',
-      '@color' => $layout['color_scheme'] ?? 'blue',
+      '@dark' => $enable_dark_mode ? 'yes' : 'no',
+      '@color' => $color_scheme,
     ]);
   }
   catch (\Exception $e) {
@@ -3403,6 +3396,7 @@ function constructor_batch_generate_services($constructor_settings, &$context) {
       $context['sandbox']['main_language'] = $main_language;
       $context['sandbox']['site_description'] = $site_description;
       $context['sandbox']['api_key'] = $ai_settings['api_key'];
+      $context['sandbox']['enable_image_generation'] = $ai_settings['enable_image_generation'] ?? TRUE;
       $context['sandbox']['progress'] = 0;
       $context['sandbox']['max'] = count($context['sandbox']['services']);
       $context['sandbox']['initialized'] = TRUE;
@@ -3452,10 +3446,11 @@ function constructor_batch_generate_services($constructor_settings, &$context) {
         'uid' => $content_editor_uid,
       ];
 
-      // Generate AI image for service.
+      // Generate AI image for service (only if image generation is enabled).
       $api_key = $context['sandbox']['api_key'] ?? '';
       $site_description = $context['sandbox']['site_description'] ?? '';
-      if (!empty($api_key)) {
+      $enable_image_generation = $context['sandbox']['enable_image_generation'] ?? TRUE;
+      if (!empty($api_key) && $enable_image_generation) {
         $image = _constructor_generate_service_image_with_ai(
           $service['name'],
           $service['description'] ?? '',
@@ -3594,6 +3589,7 @@ function constructor_batch_generate_articles($constructor_settings, &$context) {
       $context['sandbox']['main_language'] = $main_language;
       $context['sandbox']['site_description'] = $site_description;
       $context['sandbox']['api_key'] = $ai_settings['api_key'];
+      $context['sandbox']['enable_image_generation'] = $ai_settings['enable_image_generation'] ?? TRUE;
       $context['sandbox']['progress'] = 0;
       $context['sandbox']['max'] = count($context['sandbox']['articles']);
       $context['sandbox']['initialized'] = TRUE;
@@ -3643,10 +3639,11 @@ function constructor_batch_generate_articles($constructor_settings, &$context) {
         'uid' => $content_editor_uid,
       ];
 
-      // Generate AI image for articles without video.
+      // Generate AI image for articles without video (only if image generation is enabled).
       $api_key = $context['sandbox']['api_key'] ?? '';
       $site_description = $context['sandbox']['site_description'] ?? '';
-      if (!empty($api_key) && empty($article['video_url'])) {
+      $enable_image_generation = $context['sandbox']['enable_image_generation'] ?? TRUE;
+      if (!empty($api_key) && empty($article['video_url']) && $enable_image_generation) {
         $image = _constructor_generate_article_image_with_ai(
           $article['title'],
           $site_description,
@@ -3712,9 +3709,7 @@ function _constructor_get_articles_data_from_ai($site_name, $site_description, $
 
   // Sample YouTube video URLs for variety.
   $video_urls = [
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    'https://www.youtube.com/watch?v=jNQXAC9IVRw',
-    'https://www.youtube.com/watch?v=9bZkp7q19f0',
+    'https://www.youtube.com/watch?v=bTqVqk7FSmY',
   ];
 
   $prompt = "Generate 4 blog articles for a company called \"$site_name\" with description: \"$site_description\".
@@ -3791,6 +3786,7 @@ function constructor_batch_generate_products($constructor_settings, &$context) {
       $context['sandbox']['products'] = $products ?: [];
       $context['sandbox']['main_language'] = $main_language;
       $context['sandbox']['api_key'] = $ai_settings['api_key'];
+      $context['sandbox']['enable_image_generation'] = $ai_settings['enable_image_generation'] ?? TRUE;
       $context['sandbox']['progress'] = 0;
       $context['sandbox']['max'] = count($context['sandbox']['products']);
       $context['sandbox']['initialized'] = TRUE;
@@ -3840,13 +3836,17 @@ function constructor_batch_generate_products($constructor_settings, &$context) {
         $category_tid = reset($terms)->id();
       }
 
-      // Generate product image with AI.
-      $product_image = _constructor_generate_product_image_with_ai(
-        $product['name'],
-        $product['category'] ?? 'Product',
-        $api_key,
-        $index
-      );
+      // Generate product image with AI (only if image generation is enabled).
+      $product_image = NULL;
+      $enable_image_generation = $context['sandbox']['enable_image_generation'] ?? TRUE;
+      if ($enable_image_generation) {
+        $product_image = _constructor_generate_product_image_with_ai(
+          $product['name'],
+          $product['category'] ?? 'Product',
+          $api_key,
+          $index
+        );
+      }
 
       // Default colors and sizes.
       $default_colors = 'Black:#1f2937,Green:#059669,Gold:#fcd34d,Pink:#f9a8d4,Gray:#9ca3af';
@@ -3992,6 +3992,16 @@ function constructor_batch_generate_gallery($constructor_settings, &$context) {
   // Check if gallery module is installed.
   if (!\Drupal::moduleHandler()->moduleExists('gallery')) {
     $context['results'][] = 'gallery_skipped_no_module';
+    $context['finished'] = 1;
+    return;
+  }
+
+  // Check if image generation is enabled.
+  $enable_image_generation = $ai_settings['enable_image_generation'] ?? TRUE;
+  if (!$enable_image_generation) {
+    $context['message'] = t('Image generation disabled, using fallback gallery images...');
+    _constructor_generate_gallery_fallback();
+    $context['results'][] = 'gallery_fallback_disabled';
     $context['finished'] = 1;
     return;
   }
@@ -6523,4 +6533,259 @@ function _constructor_apply_block_placements($layout) {
       }
     }
   }
+}
+
+/**
+ * Enable translation for a taxonomy vocabulary.
+ *
+ * @param string $vocabulary_id
+ *   The vocabulary machine name.
+ *
+ * @return bool
+ *   TRUE if successful, FALSE otherwise.
+ */
+function _constructor_enable_taxonomy_translation(string $vocabulary_id): bool {
+  // Check if content_translation module is enabled.
+  if (!\Drupal::moduleHandler()->moduleExists('content_translation')) {
+    \Drupal::logger('constructor')->notice('Content translation module not enabled, skipping @vocab translation setup.', ['@vocab' => $vocabulary_id]);
+    return FALSE;
+  }
+
+  try {
+    $config = \Drupal::configFactory()->getEditable("language.content_settings.taxonomy_term.$vocabulary_id");
+    $config->set('id', "taxonomy_term.$vocabulary_id");
+    $config->set('langcode', 'en');
+    $config->set('status', TRUE);
+    $config->set('target_entity_type_id', 'taxonomy_term');
+    $config->set('target_bundle', $vocabulary_id);
+    $config->set('default_langcode', 'site_default');
+    $config->set('language_alterable', TRUE);
+    $config->set('third_party_settings.content_translation.enabled', TRUE);
+    $config->save();
+
+    // Clear entity and field definition caches.
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+    \Drupal::cache('config')->deleteAll();
+
+    \Drupal::logger('constructor')->notice('Enabled translation for taxonomy vocabulary @vocab.', ['@vocab' => $vocabulary_id]);
+    return TRUE;
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('Failed to enable translation for taxonomy @vocab: @message', [
+      '@vocab' => $vocabulary_id,
+      '@message' => $e->getMessage(),
+    ]);
+    return FALSE;
+  }
+}
+
+/**
+ * Batch operation: Translate taxonomy terms.
+ *
+ * @param array $constructor_settings
+ *   Constructor settings array.
+ * @param string $vocabulary_id
+ *   The vocabulary machine name.
+ * @param array $context
+ *   Batch context.
+ */
+function constructor_batch_translate_taxonomy($constructor_settings, $vocabulary_id, &$context) {
+  $ai_settings = $constructor_settings['ai_settings'] ?? [];
+  $languages = $constructor_settings['languages'] ?? [];
+
+  $default_language = $languages['default_language'] ?? 'en';
+  $additional_languages = $languages['additional_languages'] ?? [];
+  $additional_languages = array_filter($additional_languages, function ($langcode) use ($default_language) {
+    return !empty($langcode) && $langcode !== $default_language;
+  });
+
+  if (empty($additional_languages) || empty($ai_settings['api_key'])) {
+    $context['results'][] = $vocabulary_id . '_taxonomy_translation_skipped';
+    $context['finished'] = 1;
+    return;
+  }
+
+  // Initialize on first call.
+  if (!isset($context['sandbox']['initialized'])) {
+    // Enable taxonomy translation for this vocabulary.
+    _constructor_enable_taxonomy_translation($vocabulary_id);
+
+    $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $tids = $term_storage->getQuery()
+      ->condition('vid', $vocabulary_id)
+      ->accessCheck(FALSE)
+      ->execute();
+
+    $context['sandbox']['tids'] = array_values($tids);
+    $context['sandbox']['languages'] = array_values($additional_languages);
+    $context['sandbox']['ai_settings'] = $ai_settings;
+    $context['sandbox']['vocabulary_id'] = $vocabulary_id;
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($tids) * count($additional_languages);
+    $context['sandbox']['current_term'] = 0;
+    $context['sandbox']['current_lang'] = 0;
+    $context['sandbox']['initialized'] = TRUE;
+
+    if ($context['sandbox']['max'] == 0) {
+      $context['finished'] = 1;
+      $context['results'][] = $vocabulary_id . '_taxonomy_translation_skipped';
+      return;
+    }
+
+    $context['finished'] = 0;
+    return;
+  }
+
+  // Process one term+language combination per call.
+  $tids = $context['sandbox']['tids'];
+  $langs = $context['sandbox']['languages'];
+  $term_index = $context['sandbox']['current_term'];
+  $lang_index = $context['sandbox']['current_lang'];
+
+  if ($term_index < count($tids)) {
+    $tid = $tids[$term_index];
+    $langcode = $langs[$lang_index];
+
+    $context['message'] = t('Translating @vocab term @term to @lang...', [
+      '@vocab' => $context['sandbox']['vocabulary_id'],
+      '@term' => $term_index + 1,
+      '@lang' => $langcode,
+    ]);
+
+    try {
+      $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+      $term = $term_storage->load($tid);
+
+      if ($term && !$term->hasTranslation($langcode)) {
+        // Get the term name to translate.
+        $original_name = $term->getName();
+
+        // Translate the term name using AI.
+        $translated_name = _constructor_translate_taxonomy_term_with_ai(
+          $original_name,
+          $langcode,
+          $context['sandbox']['ai_settings']
+        );
+
+        if ($translated_name) {
+          // Create the translation.
+          $translation = $term->addTranslation($langcode, [
+            'name' => $translated_name,
+          ]);
+          $translation->save();
+
+          \Drupal::logger('constructor')->notice('Translated term "@name" to @lang: "@translated"', [
+            '@name' => $original_name,
+            '@lang' => $langcode,
+            '@translated' => $translated_name,
+          ]);
+        }
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('constructor')->error('Failed to translate taxonomy term: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+    }
+
+    // Move to next language or next term.
+    $context['sandbox']['current_lang']++;
+    if ($context['sandbox']['current_lang'] >= count($langs)) {
+      $context['sandbox']['current_lang'] = 0;
+      $context['sandbox']['current_term']++;
+    }
+    $context['sandbox']['progress']++;
+  }
+
+  // Calculate progress.
+  if ($context['sandbox']['max'] > 0) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+  else {
+    $context['finished'] = 1;
+  }
+
+  if ($context['finished'] >= 1) {
+    $context['results'][] = $context['sandbox']['vocabulary_id'] . '_taxonomy_translated';
+    \Drupal::logger('constructor')->notice('Completed taxonomy translation for @vocab: @count terms.', [
+      '@vocab' => $context['sandbox']['vocabulary_id'],
+      '@count' => $context['sandbox']['current_term'],
+    ]);
+  }
+}
+
+/**
+ * Translate a taxonomy term name using AI.
+ *
+ * @param string $term_name
+ *   The original term name.
+ * @param string $langcode
+ *   The target language code.
+ * @param array $ai_settings
+ *   AI settings including api_key and text_model.
+ *
+ * @return string|null
+ *   The translated term name or NULL on failure.
+ */
+function _constructor_translate_taxonomy_term_with_ai(string $term_name, string $langcode, array $ai_settings): ?string {
+  $api_key = $ai_settings['api_key'] ?? '';
+  if (empty($api_key)) {
+    return NULL;
+  }
+
+  $language_names = [
+    'en' => 'English',
+    'uk' => 'Ukrainian',
+    'de' => 'German',
+    'fr' => 'French',
+    'es' => 'Spanish',
+    'it' => 'Italian',
+    'pl' => 'Polish',
+    'pt' => 'Portuguese',
+    'nl' => 'Dutch',
+    'ja' => 'Japanese',
+    'zh' => 'Chinese',
+    'ko' => 'Korean',
+    'ar' => 'Arabic',
+    'ru' => 'Russian',
+  ];
+  $language_name = $language_names[$langcode] ?? $langcode;
+
+  $prompt = "Translate the following product category name to $language_name. Only return the translated text, nothing else:\n\n\"$term_name\"";
+
+  try {
+    $client = \Drupal::httpClient();
+    $response = $client->post('https://api.openai.com/v1/chat/completions', [
+      'headers' => [
+        'Authorization' => 'Bearer ' . $api_key,
+        'Content-Type' => 'application/json',
+      ],
+      'json' => [
+        'model' => $ai_settings['text_model'] ?? 'gpt-4o-mini',
+        'messages' => [
+          ['role' => 'user', 'content' => $prompt],
+        ],
+        'temperature' => 0.3,
+        'max_tokens' => 100,
+      ],
+      'timeout' => 30,
+    ]);
+
+    $data = json_decode($response->getBody()->getContents(), TRUE);
+    $translated = $data['choices'][0]['message']['content'] ?? '';
+    $translated = trim($translated, " \t\n\r\0\x0B\"'");
+
+    if (!empty($translated)) {
+      return $translated;
+    }
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('constructor')->error('AI translation error for term "@name": @message', [
+      '@name' => $term_name,
+      '@message' => $e->getMessage(),
+    ]);
+  }
+
+  return NULL;
 }

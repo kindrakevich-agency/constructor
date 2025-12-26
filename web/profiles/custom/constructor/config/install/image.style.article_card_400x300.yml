@@ -12,3 +12,9 @@ effects:
       width: 400
       height: 300
       anchor: center-center
+  article-card-convert-webp:
+    uuid: article-card-convert-webp-400
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

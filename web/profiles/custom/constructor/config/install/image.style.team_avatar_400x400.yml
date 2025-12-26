@@ -12,3 +12,9 @@ effects:
       width: 400
       height: 400
       anchor: center-center
+  team-avatar-lg-convert-webp:
+    uuid: team-avatar-lg-convert-webp-400
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

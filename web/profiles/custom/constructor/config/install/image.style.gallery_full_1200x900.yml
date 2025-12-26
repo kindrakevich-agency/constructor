@@ -12,3 +12,9 @@ effects:
       width: 1200
       height: 900
       anchor: center-center
+  gallery-full-convert-webp:
+    uuid: gallery-full-convert-webp-1200
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

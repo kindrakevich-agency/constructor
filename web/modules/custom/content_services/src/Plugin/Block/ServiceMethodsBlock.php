@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -65,7 +66,7 @@ class ServiceMethodsBlock extends BlockBase implements ContainerFactoryPluginInt
     return [
       'title' => 'Our Services',
       'subtitle' => 'We blend tradition with innovation to create sustainable practices that work for today\'s world',
-      'image_url' => 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=600&h=500&fit=crop&q=80',
+      'image_fid' => NULL,
       'limit' => 6,
     ] + parent::defaultConfiguration();
   }
@@ -87,11 +88,16 @@ class ServiceMethodsBlock extends BlockBase implements ContainerFactoryPluginInt
       '#rows' => 2,
     ];
 
-    $form['image_url'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Image URL'),
-      '#default_value' => $this->configuration['image_url'],
-      '#description' => $this->t('URL for the left side image.'),
+    $form['image_fid'] = [
+      '#type' => 'managed_file',
+      '#title' => $this->t('Image'),
+      '#upload_location' => 'public://service-methods/',
+      '#upload_validators' => [
+        'FileExtension' => ['extensions' => 'png jpg jpeg gif webp'],
+        'FileSizeLimit' => ['fileLimit' => 10 * 1024 * 1024],
+      ],
+      '#default_value' => $this->configuration['image_fid'] ? [$this->configuration['image_fid']] : [],
+      '#description' => $this->t('Upload an image for the left side. Leave empty to show a placeholder.'),
     ];
 
     $form['limit'] = [
@@ -111,7 +117,18 @@ class ServiceMethodsBlock extends BlockBase implements ContainerFactoryPluginInt
   public function blockSubmit($form, FormStateInterface $form_state) {
     $this->configuration['title'] = $form_state->getValue('title');
     $this->configuration['subtitle'] = $form_state->getValue('subtitle');
-    $this->configuration['image_url'] = $form_state->getValue('image_url');
+
+    // Handle file upload.
+    $image_fid = $form_state->getValue('image_fid');
+    $fid = !empty($image_fid) ? reset($image_fid) : NULL;
+    if ($fid) {
+      $file = File::load($fid);
+      if ($file) {
+        $file->setPermanent();
+        $file->save();
+      }
+    }
+    $this->configuration['image_fid'] = $fid;
     $this->configuration['limit'] = $form_state->getValue('limit');
   }
 
@@ -149,11 +166,23 @@ class ServiceMethodsBlock extends BlockBase implements ContainerFactoryPluginInt
       }
     }
 
+    // Get image URL and URI.
+    $image_url = NULL;
+    $image_uri = NULL;
+    if (!empty($this->configuration['image_fid'])) {
+      $file = File::load($this->configuration['image_fid']);
+      if ($file) {
+        $image_uri = $file->getFileUri();
+        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
+      }
+    }
+
     return [
       '#theme' => 'service_methods_block',
       '#title' => $this->configuration['title'],
       '#subtitle' => $this->configuration['subtitle'],
-      '#image_url' => $this->configuration['image_url'],
+      '#image_url' => $image_url,
+      '#image_uri' => $image_uri,
       '#methods' => $methods,
       '#attached' => [
         'library' => [

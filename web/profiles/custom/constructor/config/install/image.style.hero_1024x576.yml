@@ -12,3 +12,9 @@ effects:
       width: 1024
       height: 576
       anchor: center-center
+  hero-md-convert-webp:
+    uuid: hero-md-convert-webp-1024
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

@@ -25,6 +25,7 @@ function constructor_hero_theme($existing, $type, $theme, $path) {
         'rating_value' => NULL,
         'rating_text' => NULL,
         'image_url' => NULL,
+        'image_uri' => NULL,
         'image_alt' => NULL,
         'show_floating_card' => TRUE,
         'floating_card_value' => NULL,

@@ -59,7 +59,9 @@
           <div class="swiper-slide">
             <a href="{{ product.url }}" class="product-card block">
               <div class="product-image rounded-xl mb-4 aspect-[4/5] overflow-hidden bg-gray-100 dark:bg-slate-800">
-                {% if product.image_url %}
+                {% if product.image_uri %}
+                  {{ responsive_image(product.image_uri, 'product', product.title, 'w-full h-full object-cover') }}
+                {% elseif product.image_url %}
                   <img src="{{ product.image_url }}" alt="{{ product.title }}" class="w-full h-full object-cover">
                 {% else %}
                   <div class="w-full h-full flex items-center justify-center">

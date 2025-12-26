@@ -12,3 +12,9 @@ effects:
       width: 1920
       height: 1080
       anchor: center-center
+  hero-lg-convert-webp:
+    uuid: hero-lg-convert-webp-1920
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

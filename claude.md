@@ -30,19 +30,16 @@ Enable or disable optional modules (e.g., Contact, SEO tools, custom modules).
 
 Allow installation of custom modules provided by the user.
 
-Step 5: Design & Layout
+Step 5: AI Integration & Theme Settings
 
-Show preconfigured pages and blocks from the custom theme.
+Theme Settings:
+- Dark mode toggle (enabled by default)
+- Color scheme selection
 
-Allow assigning content types to specific pages/blocks.
-
-Provide drag-and-drop functionality to move blocks up/down (especially for front page).
-
-Step 6: AI Content Integration
-
-Enable OpenAI module provider (openai_provider) for generating content for created node types.
-
-Allow connecting API keys, configuring default settings for AI-generated content.
+OpenAI Configuration:
+- Enable OpenAI module provider (openai_provider) for generating content for created node types.
+- Allow connecting API keys, configuring default settings for AI-generated content.
+- Image generation toggle (checked by default). If unchecked, only text content is generated, no AI images.
 
 Drupal Configuration:
 

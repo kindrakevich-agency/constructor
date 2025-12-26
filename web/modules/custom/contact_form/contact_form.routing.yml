@@ -1,3 +1,11 @@
+contact_form.page:
+  path: '/contact'
+  defaults:
+    _controller: '\Drupal\contact_form\Controller\ContactPageController::page'
+    _title: 'Contact Us'
+  requirements:
+    _permission: 'access content'
+
 contact_form.submit:
   path: '/api/contact-form/submit'
   defaults:

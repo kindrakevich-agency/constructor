@@ -27,8 +27,20 @@ msgstr "Мови"
 msgid "Content Types"
 msgstr "Типи контенту"
 
-msgid "Design & Layout"
-msgstr "Дизайн та макет"
+msgid "Modules"
+msgstr "Модулі"
+
+msgid "Enable optional features"
+msgstr "Увімкнути додаткові функції"
+
+msgid "Set up AI content generation"
+msgstr "Налаштування генерації ШІ-контенту"
+
+msgid "Finalize"
+msgstr "Завершення"
+
+msgid "Complete installation"
+msgstr "Завершити встановлення"
 
 msgid "AI Integration"
 msgstr "Інтеграція ШІ"

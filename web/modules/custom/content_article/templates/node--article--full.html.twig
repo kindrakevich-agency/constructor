@@ -46,7 +46,7 @@
     {% elseif node.field_article_image.entity %}
       <!-- Featured Image -->
       <div class="mb-12 rounded-2xl overflow-hidden shadow-lg">
-        <img src="{{ file_url(node.field_article_image.entity.fileuri) }}" alt="{{ node.field_article_image.alt ?: node.label }}" class="w-full h-auto">
+        {{ responsive_image(node.field_article_image.entity.fileuri, 'article', node.field_article_image.alt ?: node.label, 'w-full h-auto') }}
       </div>
     {% endif %}
 

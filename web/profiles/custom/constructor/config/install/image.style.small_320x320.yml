@@ -12,3 +12,9 @@ effects:
       width: 320
       height: 320
       anchor: center-center
+  small-convert-webp:
+    uuid: small-convert-webp-320
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

@@ -12,3 +12,9 @@ effects:
       width: 640
       height: 640
       anchor: center-center
+  medium-convert-webp:
+    uuid: medium-convert-webp-640
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp

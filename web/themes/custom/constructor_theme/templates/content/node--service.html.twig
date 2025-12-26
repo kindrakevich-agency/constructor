@@ -12,9 +12,9 @@
     </h1>
 
     {# Image #}
-    {% if content.field_service_image|render|trim %}
+    {% if node.field_service_image.entity %}
       <div class="mb-8 rounded-2xl overflow-hidden">
-        {{ content.field_service_image }}
+        {{ responsive_image(node.field_service_image.entity.fileuri, 'service', node.label, 'w-full h-auto object-cover') }}
       </div>
     {% endif %}
 

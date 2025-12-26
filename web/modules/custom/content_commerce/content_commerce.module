@@ -132,8 +132,10 @@ function content_commerce_preprocess_node(&$variables) {
     $variables['product_images'] = [];
     $images = $node->get('field_product_images')->referencedEntities();
     foreach ($images as $file) {
+      $uri = $file->getFileUri();
       $variables['product_images'][] = [
-        'url' => \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri()),
+        'url' => \Drupal::service('file_url_generator')->generateAbsoluteString($uri),
+        'uri' => $uri,
         'alt' => $node->get('field_product_images')->alt ?? $node->getTitle(),
       ];
     }

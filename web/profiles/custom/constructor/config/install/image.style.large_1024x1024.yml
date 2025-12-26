@@ -12,3 +12,9 @@ effects:
       width: 1024
       height: 1024
       anchor: center-center
+  large-convert-webp:
+    uuid: large-convert-webp-1024
+    id: image_convert
+    weight: 2
+    data:
+      extension: webp
