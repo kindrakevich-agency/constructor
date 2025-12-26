@@ -6,7 +6,6 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Controller for products listing page.
@@ -28,19 +27,11 @@ class ProductsPageController extends ControllerBase {
   protected $languageManager;
 
   /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
    * Constructs a ProductsPageController object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager, RequestStack $request_stack) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
     $this->entityTypeManager = $entity_type_manager;
     $this->languageManager = $language_manager;
-    $this->requestStack = $request_stack;
   }
 
   /**
@@ -49,8 +40,7 @@ class ProductsPageController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('language_manager'),
-      $container->get('request_stack')
+      $container->get('language_manager')
     );
   }
 
@@ -59,30 +49,16 @@ class ProductsPageController extends ControllerBase {
    */
   public function page() {
     $current_langcode = $this->languageManager->getCurrentLanguage()->getId();
-    $request = $this->requestStack->getCurrentRequest();
-    $category_filter = $request->query->get('category');
 
     // Get all categories.
     $categories = $this->getCategories($current_langcode);
 
-    // Build product query.
+    // Build product query - show all products on main /products page.
     $query = $this->entityTypeManager->getStorage('node')->getQuery()
       ->condition('type', 'product')
       ->condition('status', 1)
       ->sort('created', 'DESC')
       ->accessCheck(TRUE);
-
-    // Filter by category if specified.
-    if ($category_filter && $category_filter !== 'all') {
-      $term = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties([
-        'vid' => 'product_category',
-        'name' => $category_filter,
-      ]);
-      if ($term) {
-        $term = reset($term);
-        $query->condition('field_product_category', $term->id());
-      }
-    }
 
     $nids = $query->execute();
     $products = $this->loadProducts($nids, $current_langcode);
@@ -95,7 +71,7 @@ class ProductsPageController extends ControllerBase {
       '#theme' => 'products_page',
       '#products' => $products,
       '#categories' => $categories,
-      '#current_category' => $category_filter ?: 'all',
+      '#current_category' => 'all',
       '#currency_symbol' => $currency_symbol,
       '#attached' => [
         'library' => [
@@ -104,7 +80,7 @@ class ProductsPageController extends ControllerBase {
       ],
       '#cache' => [
         'tags' => ['node_list:product'],
-        'contexts' => ['url.query_args:category', 'languages:language_content'],
+        'contexts' => ['languages:language_content'],
       ],
     ];
   }
@@ -125,6 +101,7 @@ class ProductsPageController extends ControllerBase {
         'tid' => $term->tid,
         'name' => $term_entity ? $term_entity->getName() : $term->name,
         'slug' => $term->name,
+        'url' => $term_entity ? $term_entity->toUrl()->toString() : '/products',
       ];
     }
 

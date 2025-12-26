@@ -192,6 +192,7 @@ All elements are configurable via block settings in the admin UI.
 - **Single Product Block**: Product detail with gallery, color swatches, size selector
 - **Products List Block**: Category filters, feature cards, product grid
 - Products listing page at `/products`
+- Product category pages at `/products/{category-name}` (e.g., `/products/accessories`)
 
 ### Content FAQ
 - FAQ content type with question/answer fields

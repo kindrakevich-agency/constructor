@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - taxonomy
+id: product_category
+label: 'Product Category'
+type: 'canonical_entities:taxonomy_term'
+pattern: 'products/[term:name]'
+selection_criteria:
+  c01d47e5-0700-4a93-80db-6a45fe4b13c3:
+    id: entity_bundle:taxonomy_term
+    bundles:
+      product_category: product_category
+    negate: false
+    context_mapping:
+      taxonomy_term: taxonomy_term
+selection_logic: and
+weight: -10

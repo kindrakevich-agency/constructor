@@ -96,6 +96,11 @@ function content_commerce_theme($existing, $type, $theme, $path) {
       'template' => 'node--product--full',
       'path' => $path . '/templates',
     ],
+    'taxonomy_term__product_category' => [
+      'base hook' => 'taxonomy_term',
+      'template' => 'taxonomy-term--product-category',
+      'path' => $path . '/templates',
+    ],
   ];
 }
 
@@ -108,6 +113,133 @@ function content_commerce_theme_suggestions_node_alter(array &$suggestions, arra
     $view_mode = $variables['elements']['#view_mode'] ?? 'full';
     $suggestions[] = 'node__product__' . $view_mode;
   }
+}
+
+/**
+ * Implements hook_theme_suggestions_taxonomy_term_alter().
+ */
+function content_commerce_theme_suggestions_taxonomy_term_alter(array &$suggestions, array $variables) {
+  $term = $variables['elements']['#taxonomy_term'] ?? NULL;
+  if ($term && $term->bundle() === 'product_category') {
+    $suggestions[] = 'taxonomy_term__product_category';
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Hide the default taxonomy term view for product_category vocabulary.
+ */
+function content_commerce_views_pre_render($view) {
+  if ($view->id() === 'taxonomy_term') {
+    $route_match = \Drupal::routeMatch();
+    $term = $route_match->getParameter('taxonomy_term');
+    if ($term && $term->bundle() === 'product_category') {
+      // Clear all results to prevent rendering.
+      $view->result = [];
+      $view->total_rows = 0;
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_taxonomy_term().
+ */
+function content_commerce_preprocess_taxonomy_term(&$variables) {
+  $term = $variables['term'] ?? NULL;
+  if (!$term || $term->bundle() !== 'product_category') {
+    return;
+  }
+
+  $current_langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // Get products in this category.
+  $query = $entity_type_manager->getStorage('node')->getQuery()
+    ->condition('type', 'product')
+    ->condition('status', 1)
+    ->condition('field_product_category', $term->id())
+    ->sort('created', 'DESC')
+    ->accessCheck(TRUE);
+
+  $nids = $query->execute();
+
+  // Load products.
+  $products = [];
+  $config = \Drupal::config('content_commerce.settings');
+  $currency_symbol = $config->get('currency_symbol') ?: '$';
+
+  $nodes = $entity_type_manager->getStorage('node')->loadMultiple($nids);
+
+  foreach ($nodes as $node) {
+    if ($node->hasTranslation($current_langcode)) {
+      $node = $node->getTranslation($current_langcode);
+    }
+
+    // Get first image.
+    $image_url = NULL;
+    $image_uri = NULL;
+    $images = $node->get('field_product_images')->referencedEntities();
+    if (!empty($images)) {
+      $image_uri = $images[0]->getFileUri();
+      $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
+    }
+
+    // Get category name.
+    $category = NULL;
+    $category_ref = $node->get('field_product_category')->referencedEntities();
+    if (!empty($category_ref)) {
+      $cat = reset($category_ref);
+      if ($cat->hasTranslation($current_langcode)) {
+        $cat = $cat->getTranslation($current_langcode);
+      }
+      $category = $cat->getName();
+    }
+
+    $price = $node->get('field_product_price')->value ?? 0;
+    $sale_price = $node->get('field_product_sale_price')->value;
+
+    $products[] = [
+      'id' => $node->id(),
+      'title' => $node->getTitle(),
+      'url' => $node->toUrl()->toString(),
+      'image_url' => $image_url,
+      'image_uri' => $image_uri,
+      'price' => $price,
+      'sale_price' => $sale_price,
+      'formatted_price' => $currency_symbol . number_format((float) $price, 2),
+      'formatted_sale_price' => $sale_price ? $currency_symbol . number_format((float) $sale_price, 2) : NULL,
+      'category' => $category,
+      'in_stock' => (bool) ($node->get('field_product_in_stock')->value ?? TRUE),
+      'featured' => (bool) ($node->get('field_product_featured')->value ?? FALSE),
+    ];
+  }
+
+  $variables['products'] = $products;
+  $variables['currency_symbol'] = $currency_symbol;
+  $variables['current_category'] = $term->getName();
+
+  // Get all categories for filter tabs.
+  $categories = [];
+  $terms = $entity_type_manager->getStorage('taxonomy_term')->loadTree('product_category');
+
+  foreach ($terms as $t) {
+    $term_entity = $entity_type_manager->getStorage('taxonomy_term')->load($t->tid);
+    if ($term_entity && $term_entity->hasTranslation($current_langcode)) {
+      $term_entity = $term_entity->getTranslation($current_langcode);
+    }
+    $categories[] = [
+      'tid' => $t->tid,
+      'name' => $term_entity ? $term_entity->getName() : $t->name,
+      'slug' => $t->name,
+      'url' => $term_entity ? $term_entity->toUrl()->toString() : '/products',
+    ];
+  }
+
+  $variables['categories'] = $categories;
+
+  // Attach library.
+  $variables['#attached']['library'][] = 'content_commerce/product';
 }
 
 /**
