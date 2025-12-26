@@ -3980,7 +3980,8 @@ function constructor_apply_modules(&$context, array $constructor_settings = []) 
     'simple_metatag',
     'simple_sitemap_generator',
     'constructor_hero',
-    'gallery',
+    'form_sender',
+    'contact_form',
   ];
 
   /** @var \Drupal\Core\Extension\ModuleInstallerInterface $module_installer */

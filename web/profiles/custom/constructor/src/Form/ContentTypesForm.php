@@ -67,6 +67,18 @@ class ContentTypesForm extends InstallerFormBase {
         'default' => TRUE,
         'module' => 'content_commerce',
       ],
+      'gallery' => [
+        'name' => 'Gallery',
+        'description' => 'Image gallery with admin interface and PhotoSwipe lightbox. Includes Gallery block and page.',
+        'default' => TRUE,
+        'module' => 'gallery',
+      ],
+      'pricing_plan' => [
+        'name' => 'Pricing Plans',
+        'description' => 'Pricing plans with configurable block. Includes Pricing block with Form Sender integration.',
+        'default' => TRUE,
+        'module' => 'pricing_plans',
+      ],
     ];
 
     // Content Types Section Header
@@ -179,6 +191,16 @@ class ContentTypesForm extends InstallerFormBase {
         'name' => 'Product',
         'description' => 'E-commerce products with images and pricing.',
         'module' => 'content_commerce',
+      ],
+      'gallery' => [
+        'name' => 'Gallery',
+        'description' => 'Image gallery with admin interface.',
+        'module' => 'gallery',
+      ],
+      'pricing_plan' => [
+        'name' => 'Pricing Plans',
+        'description' => 'Pricing plans with configurable block.',
+        'module' => 'pricing_plans',
       ],
     ];
 
