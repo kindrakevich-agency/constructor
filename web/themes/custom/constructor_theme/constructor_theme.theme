@@ -288,3 +288,60 @@ function constructor_theme_page_attachments_alter(array &$attachments) {
     }
   }
 }
+
+/**
+ * Implements hook_preprocess_menu().
+ *
+ * Add active trail for content type pages.
+ */
+function constructor_theme_preprocess_menu(&$variables) {
+  // Only process main menu.
+  if ($variables['menu_name'] !== 'main') {
+    return;
+  }
+
+  // Get current route and node.
+  $route_match = \Drupal::routeMatch();
+  $node = $route_match->getParameter('node');
+
+  if (!$node || !is_object($node)) {
+    return;
+  }
+
+  $bundle = $node->bundle();
+
+  // Map content types to their parent menu paths.
+  $content_type_paths = [
+    'article' => '/articles',
+    'service' => '/services',
+    'product' => '/products',
+    'team_member' => '/team',
+  ];
+
+  if (!isset($content_type_paths[$bundle])) {
+    return;
+  }
+
+  $target_path = $content_type_paths[$bundle];
+
+  // Set active trail for matching menu items.
+  _constructor_theme_set_menu_active_trail($variables['items'], $target_path);
+}
+
+/**
+ * Recursively set active trail for menu items.
+ */
+function _constructor_theme_set_menu_active_trail(&$items, $target_path) {
+  foreach ($items as &$item) {
+    $url = $item['url']->toString();
+
+    if ($url === $target_path) {
+      $item['in_active_trail'] = TRUE;
+      $item['attributes']->addClass('active');
+    }
+
+    if (!empty($item['below'])) {
+      _constructor_theme_set_menu_active_trail($item['below'], $target_path);
+    }
+  }
+}
