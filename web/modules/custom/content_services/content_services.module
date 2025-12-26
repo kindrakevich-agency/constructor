@@ -46,3 +46,89 @@ function content_services_theme($existing, $type, $theme, $path) {
     ],
   ];
 }
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function content_services_preprocess_node(&$variables) {
+  $node = $variables['node'] ?? NULL;
+  if ($node && $node->bundle() === 'service') {
+    $view_mode = $variables['elements']['#view_mode'] ?? 'full';
+    if ($view_mode === 'full') {
+      $variables['other_services'] = _content_services_load_other_services($node->id());
+    }
+  }
+}
+
+/**
+ * Load other services excluding the current one.
+ *
+ * @param int $current_nid
+ *   The current service node ID to exclude.
+ * @param int $limit
+ *   Maximum number of services to load.
+ *
+ * @return array
+ *   Array of service data.
+ */
+function _content_services_load_other_services($current_nid, $limit = 3) {
+  $services = [];
+  $current_langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // Query for other services.
+  $query = $entity_type_manager->getStorage('node')->getQuery()
+    ->condition('type', 'service')
+    ->condition('status', 1)
+    ->condition('nid', $current_nid, '<>')
+    ->sort('created', 'DESC')
+    ->range(0, $limit)
+    ->accessCheck(TRUE);
+
+  $nids = $query->execute();
+
+  if (empty($nids)) {
+    return $services;
+  }
+
+  $nodes = $entity_type_manager->getStorage('node')->loadMultiple($nids);
+
+  foreach ($nodes as $service_node) {
+    // Get translation if available.
+    if ($service_node->hasTranslation($current_langcode)) {
+      $service_node = $service_node->getTranslation($current_langcode);
+    }
+
+    // Get image data.
+    $image_url = NULL;
+    $image_uri = NULL;
+    $image_alt = '';
+    if ($service_node->hasField('field_service_image') && !$service_node->get('field_service_image')->isEmpty()) {
+      $image_field = $service_node->get('field_service_image')->first();
+      if ($image_field && $image_field->entity) {
+        $image_uri = $image_field->entity->getFileUri();
+        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
+        $image_alt = $image_field->alt ?? '';
+      }
+    }
+
+    // Get description.
+    $description = '';
+    if ($service_node->hasField('field_service_description') && !$service_node->get('field_service_description')->isEmpty()) {
+      $description = $service_node->get('field_service_description')->value ?? '';
+    }
+
+    $services[] = [
+      'id' => $service_node->id(),
+      'title' => $service_node->getTitle(),
+      'description' => $description,
+      'url' => $service_node->toUrl()->toString(),
+      'image_url' => $image_url,
+      'image_uri' => $image_uri,
+      'image_alt' => $image_alt,
+      'created' => $service_node->getCreatedTime(),
+    ];
+  }
+
+  return $services;
+}

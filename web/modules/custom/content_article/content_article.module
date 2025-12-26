@@ -110,5 +110,90 @@ function content_article_preprocess_node(&$variables) {
     if ($youtube_id) {
       $variables['#attached']['library'][] = 'constructor_theme/video';
     }
+
+    // Load other articles for full view mode (excluding current article).
+    $view_mode = $variables['elements']['#view_mode'] ?? 'full';
+    if ($view_mode === 'full') {
+      $variables['other_articles'] = _content_article_load_other_articles($node->id());
+    }
   }
+}
+
+/**
+ * Load other articles excluding the current one.
+ *
+ * @param int $current_nid
+ *   The current article node ID to exclude.
+ * @param int $limit
+ *   Maximum number of articles to load.
+ *
+ * @return array
+ *   Array of article data.
+ */
+function _content_article_load_other_articles($current_nid, $limit = 3) {
+  $articles = [];
+  $current_langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // Query for other articles.
+  $query = $entity_type_manager->getStorage('node')->getQuery()
+    ->condition('type', 'article')
+    ->condition('status', 1)
+    ->condition('nid', $current_nid, '<>')
+    ->sort('created', 'DESC')
+    ->range(0, $limit)
+    ->accessCheck(TRUE);
+
+  $nids = $query->execute();
+
+  if (empty($nids)) {
+    return $articles;
+  }
+
+  $nodes = $entity_type_manager->getStorage('node')->loadMultiple($nids);
+
+  foreach ($nodes as $article_node) {
+    // Get translation if available.
+    if ($article_node->hasTranslation($current_langcode)) {
+      $article_node = $article_node->getTranslation($current_langcode);
+    }
+
+    // Get image data.
+    $image_url = NULL;
+    $image_uri = NULL;
+    $image_alt = '';
+    if ($article_node->hasField('field_article_image') && !$article_node->get('field_article_image')->isEmpty()) {
+      $image_field = $article_node->get('field_article_image')->first();
+      if ($image_field && $image_field->entity) {
+        $image_uri = $image_field->entity->getFileUri();
+        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($image_uri);
+        $image_alt = $image_field->alt ?? '';
+      }
+    }
+
+    // Get YouTube video ID.
+    $video_url = $article_node->get('field_article_video_url')->value ?? '';
+    $youtube_id = content_article_extract_youtube_id($video_url);
+
+    // Get body.
+    $body = '';
+    if ($article_node->hasField('field_article_body') && !$article_node->get('field_article_body')->isEmpty()) {
+      $body = $article_node->get('field_article_body')->value ?? '';
+    }
+
+    $articles[] = [
+      'id' => $article_node->id(),
+      'title' => $article_node->getTitle(),
+      'body' => $body,
+      'url' => $article_node->toUrl()->toString(),
+      'image_url' => $image_url,
+      'image_uri' => $image_uri,
+      'image_alt' => $image_alt,
+      'youtube_id' => $youtube_id,
+      'has_video' => !empty($youtube_id),
+      'created' => $article_node->getCreatedTime(),
+    ];
+  }
+
+  return $articles;
 }
