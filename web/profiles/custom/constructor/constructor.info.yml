@@ -11,6 +11,7 @@ install:
   - breakpoint
   - ckeditor5
   - config
+  - constructor_core
   - datetime
   - dblog
   - dynamic_page_cache
